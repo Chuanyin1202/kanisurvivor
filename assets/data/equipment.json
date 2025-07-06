@@ -1,0 +1,53 @@
+{
+  "weapons": {
+    "basic_wand": {
+      "name": "基礎法杖",
+      "type": "weapon",
+      "rarity": "common",
+      "stats": {
+        "attack": 5,
+        "magicPower": 10
+      },
+      "price": 50,
+      "description": "一把簡單的法杖，適合新手使用"
+    },
+    "fire_wand": {
+      "name": "火焰法杖",
+      "type": "weapon",
+      "rarity": "uncommon",
+      "stats": {
+        "attack": 8,
+        "magicPower": 15,
+        "fireBonus": 20
+      },
+      "price": 150,
+      "description": "增強火系法術威力"
+    }
+  },
+  "armor": {
+    "cloth_robe": {
+      "name": "布袍",
+      "type": "armor",
+      "rarity": "common",
+      "stats": {
+        "defense": 3,
+        "maxHealth": 20
+      },
+      "price": 40,
+      "description": "基本的法師袍"
+    }
+  },
+  "accessories": {
+    "health_ring": {
+      "name": "生命戒指",
+      "type": "accessory",
+      "rarity": "common",
+      "stats": {
+        "maxHealth": 50,
+        "healthRegen": 1
+      },
+      "price": 80,
+      "description": "增加生命值和恢復能力"
+    }
+  }
+}

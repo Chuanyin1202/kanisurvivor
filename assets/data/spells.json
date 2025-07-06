@@ -1,0 +1,44 @@
+{
+  "fireball": {
+    "name": "火球術",
+    "damage": 25,
+    "speed": 300,
+    "cooldown": 0.5,
+    "manaCost": 10,
+    "range": 400,
+    "element": "fire",
+    "description": "發射一個火球攻擊敵人"
+  },
+  "frostbolt": {
+    "name": "冰霜箭",
+    "damage": 20,
+    "speed": 250,
+    "cooldown": 0.6,
+    "manaCost": 12,
+    "range": 450,
+    "element": "ice",
+    "effect": "slow",
+    "description": "發射冰霜箭並減緩敵人速度"
+  },
+  "lightning": {
+    "name": "閃電術",
+    "damage": 30,
+    "speed": 500,
+    "cooldown": 0.8,
+    "manaCost": 15,
+    "range": 350,
+    "element": "lightning",
+    "effect": "chain",
+    "description": "快速的閃電攻擊，可以連鎖傷害"
+  },
+  "arcane_missile": {
+    "name": "奧術飛彈",
+    "damage": 22,
+    "speed": 350,
+    "cooldown": 0.4,
+    "manaCost": 8,
+    "range": 400,
+    "element": "arcane",
+    "description": "基礎的奧術攻擊"
+  }
+}

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kani 遊戲測試</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #1a1a2e;
+            color: white;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background: #27ae60;
+        }
+        .error {
+            background: #e74c3c;
+        }
+        .warning {
+            background: #f39c12;
+        }
+        #gameCanvas {
+            border: 2px solid #4a90e2;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 Kani: Pixel Mage Survivor - 遊戲測試</h1>
+    <div id="testResults"></div>
+    
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    
+    <div>
+        <button onclick="runTests()">執行測試</button>
+        <button onclick="testGame()">測試遊戲</button>
+    </div>
+    
+    <!-- 載入所有必要的腳本 -->
+    <script src="js/utils/vector2.js"></script>
+    <script src="js/utils/objectPool.js"></script>
+    <script src="js/utils/storage.js"></script>
+    <script src="js/core/gameState.js"></script>
+    <script src="js/core/assetLoader.js"></script>
+    <script src="js/core/renderer.js"></script>
+    <script src="js/config/gameBalance.js"></script>
+    <script src="js/config/settings.js"></script>
+    <script src="js/entities/player.js"></script>
+    <script src="js/entities/enemy.js"></script>
+    <script src="js/entities/projectile.js"></script>
+    <script src="js/managers/waveManager.js"></script>
+    
+    <script>
+        function addTestResult(message, type = 'success') {
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${type}`;
+            resultDiv.textContent = message;
+            document.getElementById('testResults').appendChild(resultDiv);
+        }
+        
+        function runTests() {
+            // 清除之前的測試結果
+            document.getElementById('testResults').innerHTML = '';
+            
+            try {
+                // 測試 Vector2 類別
+                const v1 = new Vector2(3, 4);
+                const v2 = new Vector2(1, 1);
+                const v3 = Vector2.add(v1, v2);
+                
+                if (v3.x === 4 && v3.y === 5) {
+                    addTestResult('✅ Vector2 類別測試通過');
+                } else {
+                    addTestResult('❌ Vector2 類別測試失敗', 'error');
+                }
+                
+                // 測試 ObjectPool
+                const pool = new ObjectPool(() => ({ value: 0 }), obj => obj.value = 0, 5);
+                const obj = pool.acquire();
+                if (obj && pool.getActiveCount() === 1) {
+                    addTestResult('✅ ObjectPool 測試通過');
+                } else {
+                    addTestResult('❌ ObjectPool 測試失敗', 'error');
+                }
+                
+                // 測試 GameBalance
+                const playerHealth = gameBalance.getValue('player', 'baseHealth');
+                if (playerHealth === 100) {
+                    addTestResult('✅ GameBalance 配置測試通過');
+                } else {
+                    addTestResult('❌ GameBalance 配置測試失敗', 'error');
+                }
+                
+                // 測試 Renderer
+                const canvas = document.getElementById('gameCanvas');
+                const renderer = new Renderer(canvas);
+                if (renderer && renderer.ctx) {
+                    addTestResult('✅ Renderer 初始化測試通過');
+                } else {
+                    addTestResult('❌ Renderer 初始化測試失敗', 'error');
+                }
+                
+                // 測試 Player 創建
+                const player = new Player(400, 300);
+                if (player && player.position.x === 400 && player.position.y === 300) {
+                    addTestResult('✅ Player 創建測試通過');
+                } else {
+                    addTestResult('❌ Player 創建測試失敗', 'error');
+                }
+                
+                // 測試 Enemy 創建
+                const enemy = new Enemy(100, 100, 'slime');
+                if (enemy && enemy.type === 'slime') {
+                    addTestResult('✅ Enemy 創建測試通過');
+                } else {
+                    addTestResult('❌ Enemy 創建測試失敗', 'error');
+                }
+                
+                // 測試管理器
+                if (typeof waveManager !== 'undefined' && typeof enemyManager !== 'undefined') {
+                    addTestResult('✅ 遊戲管理器載入測試通過');
+                } else {
+                    addTestResult('❌ 遊戲管理器載入測試失敗', 'error');
+                }
+                
+                addTestResult('🎉 所有測試完成！', 'success');
+                
+            } catch (error) {
+                addTestResult(`❌ 測試過程中發生錯誤: ${error.message}`, 'error');
+                console.error('測試錯誤:', error);
+            }
+        }
+        
+        function testGame() {
+            try {
+                const canvas = document.getElementById('gameCanvas');
+                const renderer = new Renderer(canvas);
+                
+                // 創建測試玩家
+                const player = new Player(400, 300);
+                
+                // 創建測試敵人
+                enemyManager.spawnEnemy('slime', 200, 200);
+                enemyManager.spawnEnemy('goblin', 600, 400);
+                
+                // 基本渲染測試
+                let frame = 0;
+                function testRender() {
+                    renderer.clear('#1a1a2e');
+                    renderer.beginFrame();
+                    
+                    // 渲染敵人
+                    enemyManager.render(renderer);
+                    
+                    // 渲染玩家
+                    player.render(renderer);
+                    
+                    // 顯示幀數
+                    renderer.drawText(`測試幀: ${frame}`, 10, 10, '#ffffff');
+                    renderer.drawText('移動: WASD 鍵', 10, 30, '#ffffff');
+                    renderer.drawText('法術: 滑鼠左鍵', 10, 50, '#ffffff');
+                    renderer.drawText('衝刺: 空白鍵', 10, 70, '#ffffff');
+                    
+                    renderer.endFrame();
+                    
+                    frame++;
+                    if (frame < 60) { // 只渲染 60 幀測試
+                        requestAnimationFrame(testRender);
+                    }
+                }
+                
+                testRender();
+                addTestResult('🎮 遊戲渲染測試啟動', 'success');
+                
+            } catch (error) {
+                addTestResult(`❌ 遊戲測試失敗: ${error.message}`, 'error');
+                console.error('遊戲測試錯誤:', error);
+            }
+        }
+        
+        // 頁面載入時自動執行測試
+        window.addEventListener('load', () => {
+            setTimeout(runTests, 1000);
+        });
+    </script>
+</body>
+</html>

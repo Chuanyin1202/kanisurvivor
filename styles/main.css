@@ -1,0 +1,590 @@
+/* Kani: Pixel Mage Survivor - 主要樣式 */
+
+/* 全域設定 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Orbitron', monospace, sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: #ffffff;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+}
+
+/* 遊戲容器 */
+#game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 遊戲畫布 */
+#gameCanvas {
+    border: 2px solid #4a90e2;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(74, 144, 226, 0.3);
+    background: #000;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}
+
+/* 遊戲 Canvas 樣式 */
+#gameCanvas {
+    display: block;
+    margin: 0 auto;
+    border: 2px solid #444;
+    border-radius: 8px;
+    background: #1a1a2e;
+    width: 800px;
+    height: 600px;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-crisp-edges;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+/* 螢幕覆蓋層基礎樣式 */
+.screen-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    z-index: 100;
+    transition: opacity 0.3s ease;
+}
+
+.screen-overlay.hidden {
+    display: none;
+}
+
+/* 主選單樣式 */
+#mainMenu {
+    background: linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(22, 33, 62, 0.95) 100%);
+}
+
+.menu-content {
+    text-align: center;
+    padding: 2rem;
+    border-radius: 15px;
+    border: 2px solid #4a90e2;
+    background: rgba(0, 0, 0, 0.7);
+    box-shadow: 0 0 30px rgba(74, 144, 226, 0.5);
+    max-width: 500px;
+    width: 90%;
+}
+
+.game-title {
+    font-size: 3rem;
+    font-weight: 900;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(45deg, #4a90e2, #50c9c3);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 20px rgba(74, 144, 226, 0.3);
+}
+
+.game-subtitle {
+    font-size: 1.2rem;
+    color: #b8b8b8;
+    margin-bottom: 2rem;
+    font-weight: 400;
+}
+
+.menu-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+/* 按鈕樣式 */
+.btn {
+    padding: 0.8rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Orbitron', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #4a90e2, #50c9c3);
+    color: white;
+    box-shadow: 0 5px 15px rgba(74, 144, 226, 0.4);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(74, 144, 226, 0.6);
+}
+
+.btn-secondary {
+    background: linear-gradient(45deg, #6c5ce7, #a29bfe);
+    color: white;
+    box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(108, 92, 231, 0.6);
+}
+
+.btn-pause {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+.btn-pause:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* 統計顯示 */
+.stats-display {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.stat-item {
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.stat-label {
+    color: #b8b8b8;
+    font-size: 0.9rem;
+}
+
+/* 遊戲中 UI */
+#gameUI {
+    background: transparent;
+    pointer-events: none;
+}
+
+.hud {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.hud-top {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.hud-side {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    text-align: right;
+}
+
+/* 血量和魔法條 */
+.health-bar, .exp-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.bar-container {
+    width: 200px;
+    height: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.bar {
+    height: 100%;
+    transition: width 0.3s ease;
+    border-radius: 8px;
+}
+
+.bar.health {
+    background: linear-gradient(90deg, #e74c3c, #c0392b);
+    box-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+}
+
+.bar.exp {
+    background: linear-gradient(90deg, #f39c12, #e67e22);
+    box-shadow: 0 0 10px rgba(243, 156, 18, 0.5);
+}
+
+/* 計時器和分數 */
+.timer, .score {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.timer {
+    font-size: 1.5rem;
+    color: #50c9c3;
+}
+
+.score {
+    font-size: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+/* 模態對話框 */
+.modal {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    padding: 2rem;
+    border-radius: 15px;
+    border: 2px solid #4a90e2;
+    box-shadow: 0 0 40px rgba(74, 144, 226, 0.6);
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    text-align: center;
+}
+
+.modal-content h2 {
+    margin-bottom: 1.5rem;
+    color: #4a90e2;
+    font-size: 2rem;
+}
+
+/* 商店樣式 */
+.shop-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.tab-btn {
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Orbitron', monospace;
+}
+
+.tab-btn.active {
+    background: #4a90e2;
+    border-color: #4a90e2;
+}
+
+.shop-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    min-height: 200px;
+}
+
+.shop-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.gold-display {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #f1c40f;
+}
+
+/* 成就樣式 */
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    min-height: 300px;
+}
+
+/* 遊戲結束統計 */
+.game-over-stats {
+    margin-bottom: 1.5rem;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+}
+
+.achievements-earned {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: rgba(241, 196, 15, 0.1);
+    border: 2px solid #f1c40f;
+    border-radius: 8px;
+    display: none; /* 只在有新成就時顯示 */
+}
+
+/* 傷害數字容器 */
+.damage-numbers-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 50;
+}
+
+/* 載入畫面 */
+#loadingScreen {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+}
+
+.loading-content {
+    text-align: center;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(74, 144, 226, 0.3);
+    border-top: 3px solid #4a90e2;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .game-title {
+        font-size: 2rem;
+    }
+    
+    .game-subtitle {
+        font-size: 1rem;
+    }
+    
+    .menu-content {
+        padding: 1.5rem;
+    }
+    
+    .modal-content {
+        padding: 1.5rem;
+        margin: 1rem;
+    }
+    
+    .hud-top, .hud-side {
+        top: 10px;
+        left: 10px;
+        right: 10px;
+    }
+    
+    .bar-container {
+        width: 150px;
+        height: 15px;
+    }
+    
+    .timer {
+        font-size: 1.2rem;
+    }
+    
+    .stats-display {
+        grid-template-columns: 1fr;
+    }
+    
+    .shop-items {
+        grid-template-columns: 1fr;
+    }
+    
+    .achievements-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .game-title {
+        font-size: 1.5rem;
+    }
+    
+    .btn {
+        padding: 0.6rem 1.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .modal-content h2 {
+        font-size: 1.5rem;
+    }
+}
+
+/* 字體大小設定 */
+[data-font-size="small"] {
+    font-size: 0.9em;
+}
+
+[data-font-size="large"] {
+    font-size: 1.1em;
+}
+
+/* 畫質等級設定 */
+[data-quality="low"] #gameCanvas {
+    image-rendering: pixelated;
+}
+
+[data-quality="high"] #gameCanvas {
+    image-rendering: auto;
+    filter: contrast(1.1) saturate(1.2);
+}
+
+/* 高對比模式 */
+.high-contrast {
+    filter: contrast(2) saturate(0);
+}
+
+.high-contrast .btn-primary {
+    background: #ffffff;
+    color: #000000;
+}
+
+.high-contrast .btn-secondary {
+    background: #000000;
+    color: #ffffff;
+    border: 2px solid #ffffff;
+}
+
+/* 減少動畫模式 */
+.reduced-motion * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+}
+
+/* 動畫效果 */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.menu-content {
+    animation: fadeIn 0.6s ease-out;
+}
+
+.modal-content {
+    animation: fadeIn 0.4s ease-out;
+}
+
+.btn:active {
+    animation: pulse 0.1s ease-out;
+}
+
+/* 色盲友好設計 */
+[data-colorblind="deuteranopia"] .bar.health {
+    background: linear-gradient(90deg, #3498db, #2980b9);
+}
+
+[data-colorblind="protanopia"] .bar.health {
+    background: linear-gradient(90deg, #f39c12, #e67e22);
+}
+
+[data-colorblind="tritanopia"] .bar.health {
+    background: linear-gradient(90deg, #e74c3c, #c0392b);
+}
+
+/* 滾動條樣式 */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #4a90e2;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #357abd;
+}

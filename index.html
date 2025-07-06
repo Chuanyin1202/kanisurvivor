@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kani: Pixel Mage Survivor</title>
+    <meta name="description" content="快節奏像素藝術彈幕生存遊戲，扮演魔法貓咪 Kani 在彈幕地獄中生存">
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game-container">
+        <!-- 遊戲畫布 -->
+        <canvas id="gameCanvas"></canvas>
+        
+        <!-- 主選單畫面 -->
+        <div id="mainMenu" class="screen-overlay">
+            <div class="menu-content">
+                <h1 class="game-title">Kani: Pixel Mage Survivor</h1>
+                <p class="game-subtitle">像素魔法貓咪的彈幕生存冒險</p>
+                
+                <div class="menu-buttons">
+                    <button id="startBtn" class="btn btn-primary">開始遊戲</button>
+                    <button id="shopBtn" class="btn btn-secondary">商店</button>
+                    <button id="achievementsBtn" class="btn btn-secondary">成就</button>
+                    <button id="settingsBtn" class="btn btn-secondary">設定</button>
+                </div>
+                
+                <div class="stats-display">
+                    <div class="stat-item">
+                        <span class="stat-label">金幣:</span>
+                        <span id="goldDisplay">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">最佳時間:</span>
+                        <span id="bestTimeDisplay">0:00</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">總擊殺數:</span>
+                        <span id="totalKillsDisplay">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 遊戲中 UI -->
+        <div id="gameUI" class="screen-overlay hidden">
+            <div class="hud">
+                <div class="hud-top">
+                    <div class="health-bar">
+                        <div class="bar-container">
+                            <div id="healthBar" class="bar health"></div>
+                        </div>
+                        <span id="healthText">100/100</span>
+                    </div>
+                    <div class="exp-bar">
+                        <div class="bar-container">
+                            <div id="expBar" class="bar exp"></div>
+                        </div>
+                        <span id="levelText">Lv.1</span>
+                    </div>
+                </div>
+                
+                <div class="hud-side">
+                    <div class="timer">
+                        <span id="gameTimer">0:00</span>
+                    </div>
+                    <div class="score">
+                        <span id="killCount">擊殺: 0</span>
+                        <span id="combo">連擊: 0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="pauseBtn" class="btn btn-pause">暫停</button>
+        </div>
+        
+        <!-- 暫停選單 -->
+        <div id="pauseMenu" class="screen-overlay modal hidden">
+            <div class="modal-content">
+                <h2>遊戲暫停</h2>
+                <div class="menu-buttons">
+                    <button id="resumeBtn" class="btn btn-primary">繼續</button>
+                    <button id="restartBtn" class="btn btn-secondary">重新開始</button>
+                    <button id="mainMenuBtn" class="btn btn-secondary">主選單</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 商店 -->
+        <div id="shopMenu" class="screen-overlay modal hidden">
+            <div class="modal-content">
+                <h2>魔法商店</h2>
+                <div class="shop-tabs">
+                    <button class="tab-btn active" data-tab="weapons">武器</button>
+                    <button class="tab-btn" data-tab="armor">護甲</button>
+                    <button class="tab-btn" data-tab="accessories">飾品</button>
+                </div>
+                
+                <div class="shop-content">
+                    <div id="shopItems" class="shop-items"></div>
+                </div>
+                
+                <div class="shop-footer">
+                    <span class="gold-display">金幣: <span id="shopGold">0</span></span>
+                    <button id="closeShopBtn" class="btn btn-secondary">關閉</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 成就選單 -->
+        <div id="achievementsMenu" class="screen-overlay modal hidden">
+            <div class="modal-content">
+                <h2>成就系統</h2>
+                <div class="achievements-grid" id="achievementsList"></div>
+                <button id="closeAchievementsBtn" class="btn btn-secondary">關閉</button>
+            </div>
+        </div>
+        
+        <!-- 遊戲結束畫面 -->
+        <div id="gameOverMenu" class="screen-overlay modal hidden">
+            <div class="modal-content">
+                <h2>遊戲結束</h2>
+                <div class="game-over-stats">
+                    <div class="stat-row">
+                        <span>生存時間:</span>
+                        <span id="finalTime">0:00</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>擊殺數:</span>
+                        <span id="finalKills">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>最大連擊:</span>
+                        <span id="finalCombo">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>獲得金幣:</span>
+                        <span id="goldEarned">0</span>
+                    </div>
+                </div>
+                
+                <div class="achievements-earned" id="newAchievements"></div>
+                
+                <div class="menu-buttons">
+                    <button id="playAgainBtn" class="btn btn-primary">再次挑戰</button>
+                    <button id="backToMenuBtn" class="btn btn-secondary">返回主選單</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 傷害數字容器 -->
+        <div id="damageNumbers" class="damage-numbers-container"></div>
+        
+        <!-- 載入畫面 -->
+        <div id="loadingScreen" class="screen-overlay">
+            <div class="loading-content">
+                <div class="loading-spinner"></div>
+                <p>載入中...</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 遊戲腳本 -->
+    <!-- 基礎工具 -->
+    <script src="js/utils/vector2.js"></script>
+    <script src="js/utils/objectPool.js"></script>
+    <script src="js/utils/storage.js"></script>
+    
+    <!-- 核心系統 -->
+    <script src="js/core/gameState.js"></script>
+    <script src="js/core/assetLoader.js"></script>
+    <script src="js/core/renderer.js"></script>
+    
+    <!-- 配置系統 -->
+    <script src="js/config/gameBalance.js"></script>
+    <script src="js/config/settings.js"></script>
+    
+    <!-- 遊戲實體 -->
+    <script src="js/entities/player.js"></script>
+    <script src="js/entities/enemy.js"></script>
+    <script src="js/entities/projectile.js"></script>
+    <script src="js/entities/drone.js"></script>
+    <script src="js/entities/loot.js"></script>
+    
+    <!-- 管理器 -->
+    <script src="js/managers/waveManager.js"></script>
+    <script src="js/managers/inputManager.js"></script>
+    <script src="js/managers/uiManager.js"></script>
+    <script src="js/managers/audioManager.js"></script>
+    <script src="js/managers/effectsManager.js"></script>
+    
+    <!-- 遊戲系統 -->
+    <script src="js/systems/achievementSystem.js"></script>
+    <script src="js/systems/equipmentSystem.js"></script>
+    <script src="js/systems/shopSystem.js"></script>
+    
+    <!-- 主遊戲檔案 -->
+    <script src="js/main.js"></script>
+</body>
+</html>

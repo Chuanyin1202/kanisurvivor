@@ -1,0 +1,50 @@
+{
+  "first_kill": {
+    "name": "初次擊殺",
+    "description": "擊殺第一個敵人",
+    "type": "kills",
+    "target": 1,
+    "reward": { "gold": 10 },
+    "icon": "⚔️"
+  },
+  "killer": {
+    "name": "殺手",
+    "description": "累計擊殺50個敵人",
+    "type": "kills",
+    "target": 50,
+    "reward": { "gold": 50 },
+    "icon": "💀"
+  },
+  "survivor": {
+    "name": "生存者",
+    "description": "生存1分鐘",
+    "type": "survival",
+    "target": 60,
+    "reward": { "gold": 25 },
+    "icon": "🛡️"
+  },
+  "combo_10": {
+    "name": "連擊新手",
+    "description": "達成10連擊",
+    "type": "combo",
+    "target": 10,
+    "reward": { "gold": 20 },
+    "icon": "🔥"
+  },
+  "collector": {
+    "name": "收集者",
+    "description": "收集100金幣",
+    "type": "gold",
+    "target": 100,
+    "reward": { "gold": 25 },
+    "icon": "💰"
+  },
+  "platinum": {
+    "name": "白金獎杯",
+    "description": "解鎖所有其他成就",
+    "type": "platinum",
+    "target": 0,
+    "reward": { "gold": 1000 },
+    "icon": "🏆"
+  }
+}

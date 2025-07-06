@@ -1,0 +1,42 @@
+{
+  "slime": {
+    "name": "史萊姆",
+    "health": 30,
+    "speed": 50,
+    "damage": 10,
+    "goldReward": 5,
+    "expReward": 10,
+    "minWave": 1,
+    "spawnWeight": 1.0
+  },
+  "goblin": {
+    "name": "哥布林",
+    "health": 50,
+    "speed": 70,
+    "damage": 15,
+    "goldReward": 8,
+    "expReward": 15,
+    "minWave": 3,
+    "spawnWeight": 0.8
+  },
+  "orc": {
+    "name": "獸人",
+    "health": 80,
+    "speed": 60,
+    "damage": 25,
+    "goldReward": 15,
+    "expReward": 25,
+    "minWave": 5,
+    "spawnWeight": 0.6
+  },
+  "boss": {
+    "name": "頭目",
+    "health": 200,
+    "speed": 40,
+    "damage": 50,
+    "goldReward": 50,
+    "expReward": 100,
+    "minWave": 10,
+    "spawnWeight": 0.1
+  }
+}
