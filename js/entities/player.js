@@ -89,90 +89,6 @@ class Player {
             spellPressed: false,
             dashPressed: false
         };
-        
-        this.setupEventListeners();
-    }
-
-    // 設定事件監聽
-    setupEventListeners() {
-        // 滑鼠移動
-        document.addEventListener('mousemove', (event) => {
-            const canvas = document.getElementById('gameCanvas');
-            const rect = canvas.getBoundingClientRect();
-            this.input.mouseX = event.clientX - rect.left;
-            this.input.mouseY = event.clientY - rect.top;
-        });
-
-        // 滑鼠點擊（施放法術）
-        document.addEventListener('mousedown', (event) => {
-            if (event.button === 0) { // 左鍵
-                this.input.spellPressed = true;
-            }
-        });
-
-        document.addEventListener('mouseup', (event) => {
-            if (event.button === 0) {
-                this.input.spellPressed = false;
-            }
-        });
-
-        // 鍵盤控制
-        document.addEventListener('keydown', (event) => {
-            switch (event.code) {
-                case 'KeyW':
-                case 'ArrowUp':
-                    this.input.moveY = -1;
-                    break;
-                case 'KeyS':
-                case 'ArrowDown':
-                    this.input.moveY = 1;
-                    break;
-                case 'KeyA':
-                case 'ArrowLeft':
-                    this.input.moveX = -1;
-                    break;
-                case 'KeyD':
-                case 'ArrowRight':
-                    this.input.moveX = 1;
-                    break;
-                case 'Space':
-                    this.input.dashPressed = true;
-                    event.preventDefault();
-                    break;
-                case 'Digit1':
-                    this.selectedSpell = 'fireball';
-                    break;
-                case 'Digit2':
-                    this.selectedSpell = 'frostbolt';
-                    break;
-                case 'Digit3':
-                    this.selectedSpell = 'lightning';
-                    break;
-                case 'Digit4':
-                    this.selectedSpell = 'arcane';
-                    break;
-            }
-        });
-
-        document.addEventListener('keyup', (event) => {
-            switch (event.code) {
-                case 'KeyW':
-                case 'ArrowUp':
-                case 'KeyS':
-                case 'ArrowDown':
-                    this.input.moveY = 0;
-                    break;
-                case 'KeyA':
-                case 'ArrowLeft':
-                case 'KeyD':
-                case 'ArrowRight':
-                    this.input.moveX = 0;
-                    break;
-                case 'Space':
-                    this.input.dashPressed = false;
-                    break;
-            }
-        });
     }
 
     // 更新玩家
@@ -195,28 +111,37 @@ class Player {
             return;
         }
 
-        // 設定移動方向
-        this.moveDirection.set(this.input.moveX, this.input.moveY);
-        
-        // 正規化對角線移動
-        if (this.moveDirection.length() > 0) {
-            this.moveDirection.normalize();
-            this.isMoving = true;
-        } else {
-            this.isMoving = false;
-        }
-
-        // 計算速度
-        const currentSpeed = this.getEffectiveSpeed();
-        this.velocity.copyFrom(this.moveDirection).multiply(currentSpeed);
-
-        // 更新位置
-        this.position.add(this.velocity.copy().multiply(deltaTime));
-
-        // 更新面向角度（朝向滑鼠）
+        // 計算滑鼠位置和移動方向
         const canvas = document.getElementById('gameCanvas');
         if (canvas && window.renderer) {
             const worldMouse = renderer.screenToWorld(this.input.mouseX, this.input.mouseY);
+            
+            // 計算到滑鼠的距離和方向
+            const mouseDirection = Vector2.subtract(worldMouse, this.position);
+            const distanceToMouse = mouseDirection.length();
+            
+            // 設定移動閾值，避免角色在滑鼠附近抖動
+            const moveThreshold = 20;
+            
+            if (distanceToMouse > moveThreshold) {
+                // 朝滑鼠方向移動
+                this.moveDirection = mouseDirection.normalize();
+                this.isMoving = true;
+                
+                // 使用固定移動速度
+                const currentSpeed = this.getEffectiveSpeed();
+                this.velocity.copyFrom(this.moveDirection).multiply(currentSpeed);
+                
+                // 更新位置
+                this.position.add(this.velocity.copy().multiply(deltaTime));
+            } else {
+                // 距離很近時停止移動
+                this.moveDirection.set(0, 0);
+                this.velocity.set(0, 0);
+                this.isMoving = false;
+            }
+            
+            // 更新面向角度（朝向滑鼠）
             this.facing = this.position.angleTo(worldMouse);
         }
 
@@ -614,11 +539,10 @@ class Player {
     // 限制在遊戲邊界內
     clampToGameBounds() {
         const margin = this.radius;
-        const canvas = document.getElementById('gameCanvas');
-        
-        if (canvas) {
-            this.position.x = Math.max(margin, Math.min(canvas.width - margin, this.position.x));
-            this.position.y = Math.max(margin, Math.min(canvas.height - margin, this.position.y));
+        // 使用渲染器的邏輯尺寸，而不是Canvas的實際尺寸
+        if (window.renderer) {
+            this.position.x = Math.max(margin, Math.min(window.renderer.width - margin, this.position.x));
+            this.position.y = Math.max(margin, Math.min(window.renderer.height - margin, this.position.y));
         }
     }
 

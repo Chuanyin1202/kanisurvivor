@@ -103,7 +103,25 @@ class Enemy {
             return;
         }
         
+        // 檢查目標位置是否有效
+        if (!this.target.position || isNaN(this.target.position.x) || isNaN(this.target.position.y)) {
+            console.warn('目標位置無效:', this.target.position);
+            this.target = null;
+            this.aiState = 'idle';
+            return;
+        }
+        
         const distanceToTarget = this.position.distanceTo(this.target.position);
+        
+        // 檢查距離計算結果
+        if (isNaN(distanceToTarget)) {
+            console.warn('距離計算結果為NaN:', {
+                enemyPos: this.position,
+                targetPos: this.target.position
+            });
+            this.aiState = 'idle';
+            return;
+        }
         
         switch (this.aiState) {
             case 'chase':
@@ -161,14 +179,15 @@ class Enemy {
         }
     }
 
-    // 逃跑 AI（低血量時）
+    // 逃跑 AI（特殊情況下才觸發）
     updateFleeAI(deltaTime, distanceToTarget) {
-        if (this.health > this.maxHealth * 0.3) {
+        // 只有在特定條件下才逃跑，一般情況下切換回追擊
+        if (this.health > this.maxHealth * 0.1) {
             this.aiState = 'chase';
             return;
         }
         
-        // 遠離目標
+        // 遠離目標（只在極低血量時）
         this.moveDirection = Vector2.subtract(this.position, this.target.position).normalize();
     }
 
@@ -426,8 +445,14 @@ class Enemy {
     takeDamage(damage, showEffect = true) {
         if (!this.isAlive) return false;
         
+        const oldHealth = this.health;
         this.health -= damage;
         this.flashTime = 0.2; // 受傷閃爍
+        
+        // 調試信息：血量變化
+        if (Math.random() < 0.1) {
+            console.log(`${this.type} 血量: ${oldHealth.toFixed(1)} -> ${this.health.toFixed(1)} (${showEffect ? '攻擊' : '持續效果'})`);
+        }
         
         if (showEffect) {
             // 顯示傷害數字
@@ -446,9 +471,9 @@ class Enemy {
             return true;
         }
         
-        // 低血量時切換到逃跑狀態
-        if (this.health < this.maxHealth * 0.3 && this.type !== 'boss') {
-            this.aiState = 'flee';
+        // 受傷後保持或切換到追擊狀態
+        if (this.aiState === 'idle' || this.aiState === 'flee') {
+            this.aiState = 'chase';
         }
         
         return true;
@@ -477,7 +502,8 @@ class Enemy {
         if (!this.isAlive) return;
         
         this.isAlive = false;
-        this.isActive = false; // 立即從管理器移除
+        this.deathTime = 0; // 初始化死亡動畫時間
+        // 不立即設定 isActive = false，讓死亡動畫播放完畢
         
         // 給玩家經驗值和擊殺數
         if (this.target && this.target.addExperience) {
@@ -522,9 +548,9 @@ class Enemy {
 
     // 更新死亡動畫
     updateDeathAnimation(deltaTime) {
-        this.deathTime -= deltaTime;
+        this.deathTime += deltaTime; // 修正：應該是增加而不是減少
         
-        if (this.deathTime <= 0) {
+        if (this.deathTime >= 1.0) { // 死亡動畫持續1秒後移除
             this.isActive = false; // 標記為可移除
         }
     }

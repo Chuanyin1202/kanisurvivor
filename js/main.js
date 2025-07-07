@@ -93,63 +93,239 @@ class Game {
 
     // 設定 UI 事件監聽
     setupUIEventListeners() {
-        // 主選單按鈕
-        document.getElementById('startBtn')?.addEventListener('click', () => {
-            this.startNewGame();
-        });
+        // 主選單按鈕 - 同時添加 click 和 touchend 事件
+        const startBtn = document.getElementById('startBtn');
+        if (startBtn) {
+            startBtn.addEventListener('click', () => {
+                console.log('🎮 開始按鈕被點擊');
+                this.startNewGame();
+            });
+            startBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                console.log('🎮 開始按鈕被觸控');
+                this.startNewGame();
+            });
+        }
         
-        document.getElementById('shopBtn')?.addEventListener('click', () => {
-            this.showShop();
-        });
+        const shopBtn = document.getElementById('shopBtn');
+        if (shopBtn) {
+            shopBtn.addEventListener('click', () => {
+                this.showShop();
+            });
+            shopBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                this.showShop();
+            });
+        }
         
-        document.getElementById('achievementsBtn')?.addEventListener('click', () => {
-            this.showAchievements();
-        });
+        const achievementsBtn = document.getElementById('achievementsBtn');
+        if (achievementsBtn) {
+            achievementsBtn.addEventListener('click', () => {
+                this.showAchievements();
+            });
+            achievementsBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                this.showAchievements();
+            });
+        }
         
-        document.getElementById('settingsBtn')?.addEventListener('click', () => {
-            this.showSettings();
-        });
+        const settingsBtn = document.getElementById('settingsBtn');
+        if (settingsBtn) {
+            settingsBtn.addEventListener('click', () => {
+                this.showSettings();
+            });
+            settingsBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                this.showSettings();
+            });
+        }
 
         // 遊戲中按鈕
-        document.getElementById('pauseBtn')?.addEventListener('click', () => {
-            this.pauseGame();
-        });
+        const pauseBtn = document.getElementById('pauseBtn');
+        if (pauseBtn) {
+            pauseBtn.addEventListener('click', () => {
+                this.pauseGame();
+            });
+            pauseBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                this.pauseGame();
+            });
+        }
 
         // 暫停選單按鈕
-        document.getElementById('resumeBtn')?.addEventListener('click', () => {
-            this.resumeGame();
-        });
+        const resumeBtn = document.getElementById('resumeBtn');
+        if (resumeBtn) {
+            resumeBtn.addEventListener('click', () => {
+                this.resumeGame();
+            });
+            resumeBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                this.resumeGame();
+            });
+        }
         
-        document.getElementById('restartBtn')?.addEventListener('click', () => {
-            this.restartGame();
-        });
+        const restartBtn = document.getElementById('restartBtn');
+        if (restartBtn) {
+            restartBtn.addEventListener('click', () => {
+                this.restartGame();
+            });
+            restartBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                this.restartGame();
+            });
+        }
         
-        document.getElementById('mainMenuBtn')?.addEventListener('click', () => {
-            this.returnToMainMenu();
-        });
+        const mainMenuBtn = document.getElementById('mainMenuBtn');
+        if (mainMenuBtn) {
+            mainMenuBtn.addEventListener('click', () => {
+                this.returnToMainMenu();
+            });
+            mainMenuBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                this.returnToMainMenu();
+            });
+        }
 
         // 遊戲結束按鈕
-        document.getElementById('playAgainBtn')?.addEventListener('click', () => {
-            this.startNewGame();
-        });
+        const playAgainBtn = document.getElementById('playAgainBtn');
+        if (playAgainBtn) {
+            playAgainBtn.addEventListener('click', () => {
+                this.startNewGame();
+            });
+            playAgainBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                this.startNewGame();
+            });
+        }
         
-        document.getElementById('backToMenuBtn')?.addEventListener('click', () => {
-            this.returnToMainMenu();
-        });
+        const backToMenuBtn = document.getElementById('backToMenuBtn');
+        if (backToMenuBtn) {
+            backToMenuBtn.addEventListener('click', () => {
+                this.returnToMainMenu();
+            });
+            backToMenuBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                this.returnToMainMenu();
+            });
+        }
 
         // 商店按鈕
-        document.getElementById('closeShopBtn')?.addEventListener('click', () => {
-            this.hideShop();
-        });
+        const closeShopBtn = document.getElementById('closeShopBtn');
+        if (closeShopBtn) {
+            closeShopBtn.addEventListener('click', () => {
+                this.hideShop();
+            });
+            closeShopBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                this.hideShop();
+            });
+        }
 
         // 成就按鈕
-        document.getElementById('closeAchievementsBtn')?.addEventListener('click', () => {
-            this.hideAchievements();
+        const closeAchievementsBtn = document.getElementById('closeAchievementsBtn');
+        if (closeAchievementsBtn) {
+            closeAchievementsBtn.addEventListener('click', () => {
+                this.hideAchievements();
+            });
+            closeAchievementsBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                this.hideAchievements();
+            });
+        }
+
+        // 玩家輸入事件（全域只註冊一次，直接操作 window.player）
+        document.addEventListener('mousemove', (event) => {
+            const canvas = document.getElementById('gameCanvas');
+            if (!canvas || !window.player) return;
+            const rect = canvas.getBoundingClientRect();
+            window.player.input.mouseX = event.clientX - rect.left;
+            window.player.input.mouseY = event.clientY - rect.top;
         });
 
-        // 鍵盤事件
+        document.addEventListener('mousedown', (event) => {
+            if (!window.player) return;
+            if (event.button === 0) {
+                window.player.input.spellPressed = true;
+            }
+        });
+        document.addEventListener('mouseup', (event) => {
+            if (!window.player) return;
+            if (event.button === 0) {
+                window.player.input.spellPressed = false;
+            }
+        });
+
+        // 觸控事件支援（只在 Canvas 上）
+        const canvas = document.getElementById('gameCanvas');
+        if (canvas) {
+            canvas.addEventListener('touchstart', (event) => {
+                if (!window.player) return;
+                event.preventDefault(); // 防止頁面滾動
+                
+                const touch = event.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                window.player.input.mouseX = touch.clientX - rect.left;
+                window.player.input.mouseY = touch.clientY - rect.top;
+                window.player.input.spellPressed = true;
+            });
+
+            canvas.addEventListener('touchmove', (event) => {
+                if (!window.player) return;
+                event.preventDefault(); // 防止頁面滾動
+                
+                const touch = event.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                window.player.input.mouseX = touch.clientX - rect.left;
+                window.player.input.mouseY = touch.clientY - rect.top;
+            });
+
+            canvas.addEventListener('touchend', (event) => {
+                if (!window.player) return;
+                event.preventDefault(); // 防止頁面滾動
+                window.player.input.spellPressed = false;
+            });
+        }
+
         document.addEventListener('keydown', (event) => {
-            this.handleKeyDown(event);
+            switch (event.code) {
+                case 'Escape':
+                    // ESC 鍵切換暫停狀態
+                    if (gameStateManager.isCurrentState('gamePlay')) {
+                        this.pauseGame();
+                    } else if (gameStateManager.isCurrentState('pause')) {
+                        this.resumeGame();
+                    }
+                    event.preventDefault();
+                    break;
+            }
+            
+            if (!window.player) return;
+            switch (event.code) {
+                case 'Space':
+                    window.player.input.dashPressed = true;
+                    event.preventDefault();
+                    break;
+                case 'Digit1':
+                    window.player.selectedSpell = 'fireball';
+                    break;
+                case 'Digit2':
+                    window.player.selectedSpell = 'frostbolt';
+                    break;
+                case 'Digit3':
+                    window.player.selectedSpell = 'lightning';
+                    break;
+                case 'Digit4':
+                    window.player.selectedSpell = 'arcane';
+                    break;
+            }
+        });
+        document.addEventListener('keyup', (event) => {
+            if (!window.player) return;
+            switch (event.code) {
+                case 'Space':
+                    window.player.input.dashPressed = false;
+                    break;
+            }
         });
 
         // 視窗失焦暫停
@@ -205,6 +381,14 @@ class Game {
 
     // 創建玩家
     createPlayer() {
+        // 清理舊的玩家實例
+        if (this.player) {
+            this.player = null;
+        }
+        if (window.player) {
+            window.player = null;
+        }
+        
         const centerX = this.canvas.width / 2;
         const centerY = this.canvas.height / 2;
         this.player = new Player(centerX, centerY);
@@ -286,6 +470,14 @@ class Game {
         
         if (!window.enemyManager) {
             console.error('❌ EnemyManager 未初始化');
+        }
+
+        // 確保全域可用
+        if (typeof waveManager !== 'undefined') {
+            window.waveManager = waveManager;
+        }
+        if (typeof enemyManager !== 'undefined') {
+            window.enemyManager = enemyManager;
         }
 
         console.log('🎮 管理器初始化完成');
@@ -438,37 +630,75 @@ class Game {
     startNewGame() {
         console.log('🎯 開始新遊戲');
         
-        // 重置玩家
-        if (this.player) {
-            this.createPlayer();
-        }
+        // 重置遊戲狀態
+        this.isPaused = false;
         
-        // 重置遊戲管理器
+        // 重建玩家實例
+        this.createPlayer();
+        
+        // 重設所有管理器 (使用 window 確保正確引用)
         if (window.enemyManager) {
-            enemyManager.reset();
+            window.enemyManager.reset();
         }
         
         if (window.projectileManager) {
-            projectileManager.reset();
+            window.projectileManager.reset();
         }
         
         if (window.waveManager) {
-            waveManager.reset();
+            window.waveManager.reset();
         }
         
         // 清除所有物件池
-        poolManager.releaseAll();
+        if (typeof poolManager !== 'undefined') {
+            poolManager.releaseAll();
+        }
         
         // 切換到遊戲狀態
+        console.log('🔄 切換到遊戲狀態');
         gameStateManager.changeState('gamePlay');
+        console.log('✅ 狀態已切換到 gamePlay');
+        
+        // 隱藏主選單和暫停選單，顯示遊戲UI
+        const mainMenu = document.getElementById('mainMenu');
+        const gameUI = document.getElementById('gameUI');
+        const pauseMenu = document.getElementById('pauseMenu');
+        
+        if (mainMenu) {
+            mainMenu.style.display = 'none';
+            mainMenu.classList.add('hidden');
+            console.log('🙈 主選單已隱藏');
+        }
+        
+        if (gameUI) {
+            gameUI.style.display = 'block';
+            gameUI.classList.remove('hidden');
+            console.log('👁️ 遊戲UI已顯示');
+        }
+        
+        if (pauseMenu) {
+            pauseMenu.style.display = 'none';
+            pauseMenu.classList.add('hidden');
+            console.log('⏸️ 暫停選單已重置');
+        }
         
         // 開始第一波
         if (window.waveManager) {
-            waveManager.startWave(1);
+            console.log('🌊 開始第一波');
+            window.waveManager.startWave(1);
         }
         
         // 更新 UI
+        console.log('🔄 更新遊戲UI');
         this.updateGameUI();
+        
+        // 確保遊戲運行
+        if (!this.isRunning) {
+            console.log('▶️ 啟動遊戲主循環');
+            this.start();
+        } else {
+            console.log('✅ 遊戲主循環已在運行');
+        }
     }
 
     // 暫停遊戲
@@ -476,6 +706,17 @@ class Game {
         if (gameStateManager.isCurrentState('gamePlay')) {
             gameStateManager.pushState('pause');
             this.isPaused = true;
+            
+            // 確保暫停選單顯示
+            const pauseMenu = document.getElementById('pauseMenu');
+            if (pauseMenu) {
+                pauseMenu.style.display = 'flex';
+                pauseMenu.classList.remove('hidden');
+                console.log('⏸️ 暫停選單已顯示');
+            } else {
+                console.error('❌ 找不到暫停選單元素');
+            }
+            
             console.log('⏸️ 遊戲暫停');
         }
     }
@@ -485,9 +726,38 @@ class Game {
         if (gameStateManager.isCurrentState('pause')) {
             gameStateManager.popState();
             this.isPaused = false;
+            
+            // 隱藏暫停選單
+            const pauseMenu = document.getElementById('pauseMenu');
+            if (pauseMenu) {
+                pauseMenu.style.display = 'none';
+                pauseMenu.classList.add('hidden');
+                console.log('⏸️ 暫停選單已隱藏');
+            }
+            
+            // 確保 Canvas 顯示
+            const canvas = document.getElementById('gameCanvas');
+            if (canvas) canvas.style.display = 'block';
+            // 確保 UI 顯示正確
+            document.getElementById('gameUI')?.classList.remove('hidden');
+            
+            // 調試玩家狀態
+            if (window.player) {
+                console.log('玩家位置:', window.player.position);
+                console.log('玩家生命值:', window.player.health);
+                
+                // 如果玩家位置異常，重置到中心
+                if (isNaN(window.player.position.x) || isNaN(window.player.position.y)) {
+                    console.warn('玩家位置異常，重置到中心');
+                    window.player.position.x = window.renderer.width / 2;
+                    window.player.position.y = window.renderer.height / 2;
+                }
+            }
+            
             console.log('▶️ 遊戲恢復');
         }
     }
+
 
     // 重新開始遊戲
     restartGame() {
@@ -500,6 +770,30 @@ class Game {
         console.log('🏠 返回主選單');
         this.isPaused = false;
         gameStateManager.changeState('mainMenu');
+        
+        // 顯示主選單UI
+        const mainMenu = document.getElementById('mainMenu');
+        const gameUI = document.getElementById('gameUI');
+        const pauseMenu = document.getElementById('pauseMenu');
+        
+        if (mainMenu) {
+            mainMenu.style.display = 'flex';
+            mainMenu.classList.remove('hidden');
+            console.log('🎮 主選單已顯示');
+        }
+        
+        if (gameUI) {
+            gameUI.style.display = 'none';
+            gameUI.classList.add('hidden');
+            console.log('🙈 遊戲UI已隱藏');
+        }
+        
+        if (pauseMenu) {
+            pauseMenu.style.display = 'none';
+            pauseMenu.classList.add('hidden');
+            console.log('⏸️ 暫停選單已隱藏');
+        }
+        
         this.updateMainMenuUI();
     }
 

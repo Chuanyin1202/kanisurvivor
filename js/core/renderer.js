@@ -39,6 +39,15 @@ class Renderer {
         this.ctx.webkitImageSmoothingEnabled = false;
         this.ctx.mozImageSmoothingEnabled = false;
         this.ctx.msImageSmoothingEnabled = false;
+        
+        // 調試輸出
+        console.log('Canvas 設定:', {
+            canvasWidth: this.canvas.width,
+            canvasHeight: this.canvas.height,
+            cssWidth: this.canvas.style.width,
+            cssHeight: this.canvas.style.height,
+            pixelRatio: this.pixelRatio
+        });
     }
 
     // 設定預設渲染設定
@@ -53,7 +62,7 @@ class Renderer {
         this.ctx.save();
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
         this.ctx.fillStyle = color;
-        this.ctx.fillRect(0, 0, this.width, this.height);
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.restore();
     }
 

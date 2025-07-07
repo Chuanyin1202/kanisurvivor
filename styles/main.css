@@ -29,27 +29,19 @@ body {
 
 /* 遊戲畫布 */
 #gameCanvas {
+    display: block;
+    margin: 0 auto;
     border: 2px solid #4a90e2;
     border-radius: 8px;
     box-shadow: 0 0 20px rgba(74, 144, 226, 0.3);
-    background: #000;
-    image-rendering: pixelated;
-    image-rendering: -moz-crisp-edges;
-    image-rendering: crisp-edges;
-}
-
-/* 遊戲 Canvas 樣式 */
-#gameCanvas {
-    display: block;
-    margin: 0 auto;
-    border: 2px solid #444;
-    border-radius: 8px;
     background: #1a1a2e;
+    max-width: 100%;
+    max-height: 100%;
     width: 800px;
     height: 600px;
+    image-rendering: pixelated;
     image-rendering: -moz-crisp-edges;
     image-rendering: -webkit-crisp-edges;
-    image-rendering: pixelated;
     image-rendering: crisp-edges;
 }
 
@@ -64,7 +56,6 @@ body {
     justify-content: center;
     align-items: center;
     background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(5px);
     z-index: 100;
     transition: opacity 0.3s ease;
 }
@@ -427,6 +418,17 @@ body {
 
 /* 響應式設計 */
 @media (max-width: 768px) {
+    #game-container {
+        padding: 10px;
+    }
+    
+    #gameCanvas {
+        max-width: calc(100vw - 20px);
+        max-height: calc(100vh - 20px);
+        width: auto;
+        height: auto;
+    }
+    
     .game-title {
         font-size: 2rem;
     }
@@ -569,6 +571,7 @@ body {
 [data-colorblind="tritanopia"] .bar.health {
     background: linear-gradient(90deg, #e74c3c, #c0392b);
 }
+
 
 /* 滾動條樣式 */
 ::-webkit-scrollbar {

@@ -49,9 +49,10 @@ class InputManager {
     // 檢測觸控設備
     detectTouchDevice() {
         this.isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-        if (this.isTouchDevice) {
-            this.setupVirtualControls();
-        }
+        // 暫時禁用虛擬控制自動創建
+        // if (this.isTouchDevice) {
+        //     this.setupVirtualControls();
+        // }
     }
 
     // 設定事件監聽器
@@ -285,8 +286,8 @@ class InputManager {
             });
         }
         
-        // 顯示虛擬控制器
-        this.showVirtualControls(true);
+        // 暫時禁用虛擬控制顯示
+        // this.showVirtualControls(true);
         
         // 處理虛擬搖桿
         this.updateVirtualJoystick(event);
@@ -313,7 +314,7 @@ class InputManager {
         }
         
         if (this.touches.size === 0) {
-            this.showVirtualControls(false);
+            // this.showVirtualControls(false);
             this.resetVirtualJoystick();
         }
     }
