@@ -54,10 +54,11 @@ class EffectsManager {
             fadeOut: true
         };
         
-        // 暴擊傷害特殊樣式
+        // 暴擊傷害特殊樣式 - 更加醒目的紅色和更大字體
         if (damageNumber.isCrit) {
-            damageNumber.fontSize = 18;
-            damageNumber.color = '#ffff00';
+            damageNumber.fontSize = 24; // 更大的字體（原18px）
+            damageNumber.color = '#ff0000'; // 鮮紅色
+            damageNumber.velocity.y *= 0.8; // 稍微減緩上升速度，讓效果更明顯
         }
         
         this.damageNumbers.push(damageNumber);

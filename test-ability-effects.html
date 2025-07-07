@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>測試能力效果</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        button { padding: 10px; margin: 5px; }
+        .log { background: #f0f0f0; padding: 10px; margin: 10px 0; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>能力效果測試</h1>
+    
+    <button onclick="testInitialization()">測試初始化</button>
+    <button onclick="testAbilityGeneration()">測試能力生成</button>
+    <button onclick="testAbilitySelection()">測試能力選擇</button>
+    <button onclick="testPlayerStats()">測試玩家屬性</button>
+    <button onclick="clearLog()">清除日誌</button>
+    
+    <div id="log" class="log">等待測試...</div>
+
+    <script src="js/utils/vector2.js"></script>
+    <script src="js/config/gameBalance.js"></script>
+    <script src="js/systems/abilityDatabase.js"></script>
+    <script src="js/systems/abilityManager.js"></script>
+    
+    <script>
+        // 模擬玩家對象
+        window.player = {
+            maxHealth: 100,
+            health: 100,
+            maxMana: 50,
+            mana: 50,
+            attack: 15,
+            defense: 5,
+            speed: 100,
+            critChance: 0.1,
+            critDamage: 1.5
+        };
+        
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            logDiv.textContent += new Date().toLocaleTimeString() + ' - ' + message + '\n';
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        function clearLog() {
+            document.getElementById('log').textContent = '';
+        }
+        
+        function testInitialization() {
+            log('=== 測試初始化 ===');
+            log('AbilityDatabase 存在: ' + (typeof AbilityDatabase !== 'undefined'));
+            log('AbilityRarityWeights 存在: ' + (typeof AbilityRarityWeights !== 'undefined'));
+            
+            if (typeof initializeAbilityManager === 'function') {
+                log('正在初始化 AbilityManager...');
+                const result = initializeAbilityManager();
+                log('初始化結果: ' + (result ? '成功' : '失敗'));
+            } else {
+                log('❌ initializeAbilityManager 函數不存在');
+            }
+            
+            log('window.abilityManager 存在: ' + !!window.abilityManager);
+            
+            if (window.abilityManager) {
+                log('能力池大小: ' + (window.abilityManager.abilityPool ? window.abilityManager.abilityPool.length : '未知'));
+            }
+        }
+        
+        function testAbilityGeneration() {
+            log('=== 測試能力生成 ===');
+            
+            if (!window.abilityManager) {
+                log('❌ AbilityManager 未初始化');
+                return;
+            }
+            
+            const choices = window.abilityManager.generateAbilityChoices(3);
+            log('生成的能力選項數量: ' + choices.length);
+            
+            choices.forEach((choice, index) => {
+                log(`選項 ${index + 1}: ${choice.icon} ${choice.name} (${choice.rarity})`);
+                log(`  描述: ${choice.description}`);
+                log('  效果: ' + JSON.stringify(choice.effects));
+            });
+        }
+        
+        function testAbilitySelection() {
+            log('=== 測試能力選擇 ===');
+            
+            if (!window.abilityManager) {
+                log('❌ AbilityManager 未初始化');
+                return;
+            }
+            
+            // 先生成能力選項
+            const choices = window.abilityManager.generateAbilityChoices(3);
+            if (choices.length === 0) {
+                log('❌ 沒有可用的能力選項');
+                return;
+            }
+            
+            // 選擇第一個能力
+            const selectedAbility = choices[0];
+            log('選擇能力: ' + selectedAbility.name);
+            log('選擇前玩家攻擊力: ' + window.player.attack);
+            
+            const success = window.abilityManager.selectAbility(selectedAbility.id);
+            log('選擇結果: ' + (success ? '成功' : '失敗'));
+            
+            log('選擇後玩家攻擊力: ' + window.player.attack);
+            log('當前生效效果: ' + JSON.stringify(window.abilityManager.activeEffects));
+        }
+        
+        function testPlayerStats() {
+            log('=== 測試玩家屬性 ===');
+            
+            if (!window.abilityManager) {
+                log('❌ AbilityManager 未初始化');
+                return;
+            }
+            
+            log('當前玩家屬性:');
+            log('  生命值: ' + window.player.health + '/' + window.player.maxHealth);
+            log('  魔法值: ' + window.player.mana + '/' + window.player.maxMana);
+            log('  攻擊力: ' + window.player.attack);
+            log('  防禦力: ' + window.player.defense);
+            log('  速度: ' + window.player.speed);
+            log('  爆擊率: ' + (window.player.critChance * 100).toFixed(1) + '%');
+            log('  爆擊傷害: ' + window.player.critDamage);
+            
+            log('基礎屬性:');
+            if (window.player.baseStats) {
+                log('  基礎攻擊力: ' + window.player.baseStats.attack);
+                log('  基礎爆擊率: ' + (window.player.baseStats.critChance * 100).toFixed(1) + '%');
+            } else {
+                log('  尚未保存基礎屬性');
+            }
+            
+            log('當前生效的能力效果:');
+            Object.entries(window.abilityManager.activeEffects).forEach(([key, value]) => {
+                log(`  ${key}: ${value}`);
+            });
+        }
+        
+        // 自動初始化
+        setTimeout(() => {
+            log('頁面載入完成，開始自動測試...');
+            testInitialization();
+        }, 500);
+    </script>
+</body>
+</html>

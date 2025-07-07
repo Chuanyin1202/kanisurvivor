@@ -5,7 +5,7 @@
 class EnemyManager {
     constructor() {
         this.enemies = [];
-        this.maxEnemies = 200; // 最大敵人數量
+        this.maxEnemies = 300; // 最大敵人數量 (提升以支持高密度)
         this.enemyTypes = ['slime', 'goblin', 'orc', 'boss'];
         
         // 統計資料
@@ -125,6 +125,11 @@ class EnemyManager {
             enemy.isActive && 
             enemy.position.distanceTo(position) <= range
         );
+    }
+    
+    // 別名函數，保持兼容性
+    getEnemiesInRange(position, range) {
+        return this.findEnemiesInRange(position, range);
     }
 
     // 尋找最近的敵人

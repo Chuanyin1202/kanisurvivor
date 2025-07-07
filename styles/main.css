@@ -17,28 +17,24 @@ body {
     -moz-user-select: none;
 }
 
-/* 遊戲容器 */
+/* 遊戲容器 - 全屏布局 */
 #game-container {
     position: relative;
     width: 100vw;
     height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    overflow: hidden;
 }
 
-/* 遊戲畫布 */
+/* 遊戲畫布 - 全屏設計 */
 #gameCanvas {
     display: block;
-    margin: 0 auto;
-    border: 2px solid #4a90e2;
-    border-radius: 8px;
-    box-shadow: 0 0 20px rgba(74, 144, 226, 0.3);
     background: #1a1a2e;
-    max-width: 100%;
-    max-height: 100%;
-    width: 800px;
-    height: 600px;
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1;
     image-rendering: pixelated;
     image-rendering: -moz-crisp-edges;
     image-rendering: -webkit-crisp-edges;
@@ -158,21 +154,6 @@ body {
     box-shadow: 0 8px 25px rgba(108, 92, 231, 0.6);
 }
 
-.btn-pause {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-}
-
-.btn-pause:hover {
-    background: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.5);
-}
 
 /* 統計顯示 */
 .stats-display {
@@ -210,19 +191,23 @@ body {
 }
 
 .hud-top {
-    position: absolute;
+    position: fixed;
     top: 20px;
     left: 20px;
     display: flex;
     flex-direction: column;
     gap: 10px;
+    z-index: 100;
+    max-width: 40vw; /* 限制最大寬度避免重疊 */
 }
 
 .hud-side {
-    position: absolute;
+    position: fixed;
     top: 20px;
     right: 20px;
     text-align: right;
+    z-index: 100;
+    max-width: 35vw; /* 限制最大寬度避免重疊 */
 }
 
 /* 血量和魔法條 */
@@ -233,7 +218,7 @@ body {
 }
 
 .bar-container {
-    width: 200px;
+    width: min(200px, 25vw); /* 響應式寬度 */
     height: 20px;
     background: rgba(0, 0, 0, 0.7);
     border: 2px solid rgba(255, 255, 255, 0.3);
@@ -421,17 +406,59 @@ body {
     100% { transform: rotate(360deg); }
 }
 
+/* iOS Safe Area 支持 */
+body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+}
+
+#gameCanvas {
+    width: 100vw;
+    height: 100vh;
+    /* 確保畫布填滿整個可視區域，包括Safe Area */
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+/* iPhone 大屏設備優化 (iPhone 12+, 包括 iPhone 15) */
+@media (min-width: 390px) and (max-width: 430px) and (min-height: 844px) {
+    .menu-content {
+        max-width: 380px;
+        padding: 2.5rem;
+    }
+    
+    .game-title {
+        font-size: 3.2rem;
+    }
+    
+    .modal-content {
+        max-width: 85%;
+        margin: 2rem auto;
+    }
+    
+    .hud-top {
+        top: max(20px, env(safe-area-inset-top) + 10px);
+        left: max(20px, env(safe-area-inset-left) + 10px);
+    }
+    
+    .hud-side {
+        top: max(20px, env(safe-area-inset-top) + 10px);
+        right: max(20px, env(safe-area-inset-right) + 10px);
+    }
+}
+
 /* 響應式設計 */
 @media (max-width: 768px) {
     #game-container {
-        padding: 10px;
+        padding: 0; /* 移除padding，使用Safe Area代替 */
     }
     
     #gameCanvas {
-        max-width: calc(100vw - 20px);
-        max-height: calc(100vh - 20px);
-        width: auto;
-        height: auto;
+        width: 100vw;
+        height: 100vh;
     }
     
     .game-title {
@@ -451,14 +478,20 @@ body {
         margin: 1rem;
     }
     
-    .hud-top, .hud-side {
+    .hud-top {
         top: 10px;
         left: 10px;
+        max-width: 50vw;
+    }
+    
+    .hud-side {
+        top: 10px;
         right: 10px;
+        max-width: 45vw;
     }
     
     .bar-container {
-        width: 150px;
+        width: min(150px, 30vw);
         height: 15px;
     }
     
@@ -595,4 +628,697 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
     background: #357abd;
+}
+
+/* 升級能力選擇界面 */
+.level-up-content {
+    max-width: 900px;
+    width: 95%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.level-up-content h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #f1c40f;
+    font-size: 2.5rem;
+    text-shadow: 0 0 20px rgba(241, 196, 15, 0.5);
+}
+
+.ability-choices {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.ability-choice-btn {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, rgba(26, 26, 46, 0.9), rgba(22, 33, 62, 0.9));
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.ability-choice-btn:hover,
+.ability-choice-btn.touched {
+    border-color: #4a90e2;
+    background: linear-gradient(135deg, rgba(74, 144, 226, 0.2), rgba(80, 201, 195, 0.2));
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(74, 144, 226, 0.3);
+}
+
+.ability-choice-btn.touched {
+    transform: scale(0.98); /* 輕微縮放提供觸控反饋 */
+    transition: transform 0.1s ease;
+}
+
+.ability-choice-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s;
+}
+
+.ability-choice-btn:hover::before {
+    left: 100%;
+}
+
+.ability-icon {
+    font-size: 3rem;
+    min-width: 60px;
+    text-align: center;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.ability-info {
+    flex: 1;
+    text-align: left;
+}
+
+.ability-name {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+
+.ability-description {
+    margin: 0 0 0.8rem 0;
+    color: #b8b8b8;
+    font-size: 1rem;
+    line-height: 1.4;
+}
+
+.ability-category {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    color: #4a90e2;
+    border: 1px solid rgba(74, 144, 226, 0.3);
+}
+
+/* 能力稀有度顏色 */
+.rarity-common {
+    color: #ffffff;
+}
+
+.rarity-uncommon {
+    color: #2ecc71;
+    text-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+}
+
+.rarity-rare {
+    color: #3498db;
+    text-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+}
+
+.rarity-epic {
+    color: #9b59b6;
+    text-shadow: 0 0 10px rgba(155, 89, 182, 0.5);
+}
+
+.rarity-legendary {
+    color: #f39c12;
+    text-shadow: 0 0 15px rgba(243, 156, 18, 0.7);
+    animation: legendary-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes legendary-glow {
+    from {
+        text-shadow: 0 0 15px rgba(243, 156, 18, 0.7);
+    }
+    to {
+        text-shadow: 0 0 25px rgba(243, 156, 18, 1.0), 0 0 35px rgba(243, 156, 18, 0.5);
+    }
+}
+
+/* 能力選擇的鍵盤提示 */
+.ability-choice-btn::after {
+    content: attr(data-key);
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: rgba(0, 0, 0, 0.7);
+    color: #ffffff;
+    padding: 0.3rem 0.6rem;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.ability-choice-btn:nth-child(1)::after {
+    content: '1';
+}
+
+.ability-choice-btn:nth-child(2)::after {
+    content: '2';
+}
+
+.ability-choice-btn:nth-child(3)::after {
+    content: '3';
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .level-up-content {
+        margin: 10px;
+        padding: 1rem;
+    }
+    
+    .ability-choice-btn {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+        padding: 1.2rem;
+    }
+    
+    .ability-icon {
+        font-size: 3rem; /* 增大圖標 */
+    }
+    
+    .ability-name {
+        font-size: 1.5rem; /* 增大名稱字體 */
+        font-weight: bold;
+    }
+    
+    .ability-description {
+        font-size: 1.1rem; /* 增大描述字體 */
+        line-height: 1.5;
+    }
+}
+
+/* Debug Panel Styles */
+.debug-panel {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 350px;
+    max-height: 80vh;
+    background: rgba(0, 0, 0, 0.9);
+    border: 2px solid #4a90e2;
+    border-radius: 10px;
+    color: #ffffff;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    z-index: 1000;
+    overflow-y: auto;
+    backdrop-filter: blur(10px);
+}
+
+.debug-panel.hidden {
+    display: none;
+}
+
+.debug-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: linear-gradient(135deg, #4a90e2, #50c9c3);
+    border-radius: 8px 8px 0 0;
+    margin-bottom: 10px;
+}
+
+.debug-header h3 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.debug-close {
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s;
+}
+
+.debug-close:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.debug-content {
+    padding: 0 15px 15px;
+}
+
+.debug-section {
+    margin-bottom: 15px;
+}
+
+.debug-section h4 {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    color: #4a90e2;
+    border-bottom: 1px solid #333;
+    padding-bottom: 3px;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-row:last-child {
+    border-bottom: none;
+}
+
+.stat-row span:first-child {
+    color: #cccccc;
+    font-weight: normal;
+}
+
+.stat-row span:last-child {
+    color: #ffffff;
+    font-weight: bold;
+    text-align: right;
+}
+
+.stat-row .modified {
+    color: #50c9c3;
+    text-shadow: 0 0 5px rgba(80, 201, 195, 0.5);
+}
+
+.stat-row .warning {
+    color: #ff6b6b;
+    text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+}
+
+.abilities-list {
+    margin-bottom: 10px;
+}
+
+.ability-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ability-icon {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+}
+
+.ability-name {
+    font-size: 11px;
+    color: #50c9c3;
+}
+
+.effects-list {
+    border-top: 1px solid #333;
+    padding-top: 8px;
+}
+
+.effect-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 0;
+    font-size: 11px;
+}
+
+.effect-name {
+    color: #cccccc;
+    text-transform: capitalize;
+}
+
+.effect-value {
+    color: #50c9c3;
+    font-weight: bold;
+}
+
+.no-abilities, .no-effects {
+    color: #666;
+    font-style: italic;
+    text-align: center;
+    padding: 10px 0;
+}
+
+.spawn-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+/* Mobile Debug Panel */
+@media (max-width: 768px) {
+    .debug-panel {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        width: auto;
+        max-height: 60vh;
+        font-size: 11px;
+    }
+    
+    .debug-header h3 {
+        font-size: 13px;
+    }
+    
+    .ability-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+}
+
+/* Mobile Controls - Dual DPad System */
+.mobile-dpad {
+    position: fixed;
+    z-index: 500;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    opacity: 0.3; /* 預設半透明 */
+    transition: opacity 0.3s ease;
+}
+
+.mobile-dpad.hidden {
+    display: none;
+}
+
+.mobile-dpad.active {
+    opacity: 0.9; /* 觸碰時變為不透明 */
+}
+
+.mobile-dpad.left {
+    bottom: max(20px, env(safe-area-inset-bottom) + 10px);
+    left: max(20px, env(safe-area-inset-left) + 10px);
+}
+
+.mobile-dpad.right {
+    bottom: max(20px, env(safe-area-inset-bottom) + 10px);
+    right: max(20px, env(safe-area-inset-right) + 10px);
+}
+
+.dpad-label {
+    text-align: center;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+}
+
+/* 360度搖桿容器 */
+.joystick-container {
+    width: 120px;
+    height: 120px;
+    position: relative;
+}
+
+.joystick-container.active {
+    transform: scale(1.05);
+}
+
+.joystick-bg {
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.8) 100%);
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    position: relative;
+    box-shadow: 
+        0 0 20px rgba(74, 144, 226, 0.3),
+        inset 0 0 20px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.joystick-bg:active {
+    border-color: rgba(74, 144, 226, 0.8);
+    box-shadow: 
+        0 0 30px rgba(74, 144, 226, 0.6),
+        inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.joystick-knob {
+    width: 30px;
+    height: 30px;
+    background: linear-gradient(135deg, rgba(74, 144, 226, 0.9), rgba(80, 201, 195, 0.9));
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 
+        0 0 15px rgba(74, 144, 226, 0.6),
+        inset 0 0 10px rgba(255, 255, 255, 0.3);
+    transition: all 0.1s ease;
+    pointer-events: none; /* 防止干擾觸控事件 */
+}
+
+.joystick-container.active .joystick-knob {
+    background: linear-gradient(135deg, rgba(74, 144, 226, 1), rgba(80, 201, 195, 1));
+    box-shadow: 
+        0 0 20px rgba(74, 144, 226, 0.8),
+        inset 0 0 10px rgba(255, 255, 255, 0.4);
+    transform: translate(-50%, -50%) scale(1.1);
+}
+
+/* 手機橫屏優化 */
+@media screen and (orientation: landscape) and (max-height: 500px) {
+    .mobile-dpad {
+        bottom: max(10px, env(safe-area-inset-bottom) + 5px);
+    }
+    
+    .mobile-dpad.left {
+        left: max(10px, env(safe-area-inset-left) + 5px);
+    }
+    
+    .mobile-dpad.right {
+        right: max(10px, env(safe-area-inset-right) + 5px);
+    }
+    
+    .joystick-container {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .joystick-knob {
+        width: 25px;
+        height: 25px;
+    }
+    
+    .dpad-label {
+        font-size: 10px;
+        margin-bottom: 3px;
+    }
+}
+
+/* 防止在觸控設備上的文字選擇和意外操作 */
+.mobile-dpad * {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* 搖桿觸控回饋效果 */
+.joystick-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle, rgba(74, 144, 226, 0.2) 0%, transparent 70%);
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.joystick-container.active .joystick-bg::before {
+    opacity: 1;
+}
+
+/* 手機法術選擇器 */
+.mobile-spell-selector {
+    position: fixed;
+    top: max(20px, env(safe-area-inset-top) + 10px);
+    right: max(20px, env(safe-area-inset-right) + 10px);
+    z-index: 50; /* 降低z-index，避免覆蓋升級界面 */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+.mobile-spell-selector.hidden {
+    display: none;
+}
+
+.spell-selector-container {
+    position: relative;
+}
+
+.current-spell {
+    width: 70px;
+    height: 70px;
+    background: radial-gradient(circle, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.9) 100%);
+    border: 3px solid rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 20px rgba(74, 144, 226, 0.4);
+}
+
+.current-spell:active,
+.current-spell.selecting {
+    transform: scale(1.1);
+    border-color: rgba(74, 144, 226, 0.8);
+    box-shadow: 0 0 30px rgba(74, 144, 226, 0.6);
+}
+
+.current-spell .spell-icon {
+    font-size: 24px;
+    margin-bottom: 2px;
+}
+
+.current-spell .spell-name {
+    font-size: 8px;
+    color: #ffffff;
+    font-weight: bold;
+    text-align: center;
+    line-height: 1;
+}
+
+/* 法術選擇輪盤 */
+.spell-wheel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.7) 100%);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+}
+
+.spell-wheel.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -50%) scale(0.8);
+}
+
+.spell-option {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, rgba(74, 144, 226, 0.3), rgba(80, 201, 195, 0.3));
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(10px);
+}
+
+.spell-option:nth-child(1) { transform: translate(-50%, -50%) translateY(-70px); } /* 上 */
+.spell-option:nth-child(2) { transform: translate(-50%, -50%) translateX(70px); }  /* 右 */
+.spell-option:nth-child(3) { transform: translate(-50%, -50%) translateY(70px); }  /* 下 */
+.spell-option:nth-child(4) { transform: translate(-50%, -50%) translateX(-70px); } /* 左 */
+
+.spell-option.active {
+    background: linear-gradient(135deg, rgba(74, 144, 226, 0.8), rgba(80, 201, 195, 0.8));
+    transform: translate(-50%, -50%) scale(1.1);
+    box-shadow: 0 0 20px rgba(74, 144, 226, 0.6);
+}
+
+.spell-option:active {
+    transform: translate(-50%, -50%) scale(0.95);
+}
+
+.spell-option .spell-icon {
+    font-size: 20px;
+    margin-bottom: 2px;
+}
+
+.spell-option .spell-name {
+    font-size: 7px;
+    color: #ffffff;
+    font-weight: bold;
+    text-align: center;
+    line-height: 1;
+}
+
+/* 法術選擇器橫屏優化 */
+@media screen and (orientation: landscape) and (max-height: 500px) {
+    .mobile-spell-selector {
+        top: max(10px, env(safe-area-inset-top) + 5px);
+        right: max(10px, env(safe-area-inset-right) + 5px);
+    }
+    
+    .current-spell {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .current-spell .spell-icon {
+        font-size: 20px;
+    }
+    
+    .current-spell .spell-name {
+        font-size: 7px;
+    }
+    
+    .spell-wheel {
+        width: 180px;
+        height: 180px;
+    }
+    
+    .spell-option {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .spell-option .spell-icon {
+        font-size: 18px;
+    }
+    
+    .spell-option .spell-name {
+        font-size: 6px;
+    }
 }

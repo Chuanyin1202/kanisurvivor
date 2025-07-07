@@ -141,16 +141,6 @@ class Game {
         }
 
         // 遊戲中按鈕
-        const pauseBtn = document.getElementById('pauseBtn');
-        if (pauseBtn) {
-            pauseBtn.addEventListener('click', () => {
-                this.pauseGame();
-            });
-            pauseBtn.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                this.pauseGame();
-            });
-        }
 
         // 暫停選單按鈕
         const resumeBtn = document.getElementById('resumeBtn');
@@ -335,6 +325,14 @@ class Game {
             }
         });
 
+        // 視窗大小變化監聽
+        window.addEventListener('resize', () => {
+            if (this.renderer) {
+                this.renderer.setupCanvas();
+                console.log('🖥️ 視窗大小已調整:', this.renderer.width, 'x', this.renderer.height);
+            }
+        });
+
         console.log('🎮 UI 事件監聽器設定完成');
     }
 
@@ -389,12 +387,20 @@ class Game {
             window.player = null;
         }
         
-        const centerX = this.canvas.width / 2;
-        const centerY = this.canvas.height / 2;
+        // 使用渲染器的邏輯尺寸而不是Canvas的實際尺寸
+        let centerX, centerY;
+        if (this.renderer) {
+            centerX = this.renderer.width / 2;
+            centerY = this.renderer.height / 2;
+        } else {
+            centerX = this.canvas.width / 2;
+            centerY = this.canvas.height / 2;
+        }
+        
         this.player = new Player(centerX, centerY);
         window.player = this.player; // 全域存取
         
-        console.log('🧙 玩家角色創建完成');
+        console.log(`🧙 玩家角色創建完成，位置: (${centerX}, ${centerY})`);
     }
 
     // 初始化物件池
@@ -479,12 +485,22 @@ class Game {
         if (!window.lootManager) {
             console.error('❌ LootManager 未初始化');
         }
+        
+        if (!window.abilityManager) {
+            console.error('❌ AbilityManager 未初始化');
+            // 嘗試初始化
+            if (typeof initializeAbilityManager === 'function') {
+                console.log('🔄 嘗試初始化 AbilityManager');
+                initializeAbilityManager();
+            }
+        }
 
         console.log('🎮 管理器初始化完成');
         console.log('🌊 WaveManager 已就緒:', !!window.waveManager);
         console.log('👹 EnemyManager 已就緒:', !!window.enemyManager);
         console.log('✨ EffectsManager 已就緒:', !!window.effectsManager);
         console.log('💰 LootManager 已就緒:', !!window.lootManager);
+        console.log('🎯 AbilityManager 已就緒:', !!window.abilityManager);
     }
 
     // 開始遊戲
@@ -533,6 +549,11 @@ class Game {
         // 更新遊戲狀態
         gameStateManager.update(deltaTime);
         
+        // 更新輸入管理器
+        if (window.inputManager) {
+            inputManager.update();
+        }
+        
         // 如果在遊戲進行狀態，更新遊戲物件
         if (gameStateManager.isCurrentState('gamePlay')) {
             if (this.player) {
@@ -570,8 +591,18 @@ class Game {
                 lootManager.update(deltaTime);
             }
             
+            // 更新召喚物管理器
+            if (window.summonManager) {
+                summonManager.update(deltaTime);
+            }
+            
             // 更新 UI
             this.updateGameUI();
+        }
+        
+        // 更新 Debug 管理器（總是更新，不受遊戲狀態影響）
+        if (window.debugManager) {
+            debugManager.update(deltaTime);
         }
         
         // 更新渲染器效果（如螢幕震動）
@@ -606,6 +637,11 @@ class Game {
             // 渲染戰利品
             if (window.lootManager) {
                 lootManager.render(this.renderer);
+            }
+            
+            // 渲染召喚物
+            if (window.summonManager) {
+                summonManager.render(this.renderer);
             }
             
             // 渲染玩家（在最上層）
@@ -679,6 +715,16 @@ class Game {
             window.lootManager.reset();
         }
         
+        // 重設能力管理器
+        if (window.abilityManager) {
+            window.abilityManager.reset();
+        }
+        
+        // 重設召喚物管理器
+        if (window.summonManager) {
+            window.summonManager.reset();
+        }
+        
         // 清除所有物件池
         if (typeof poolManager !== 'undefined') {
             poolManager.releaseAll();
@@ -718,6 +764,11 @@ class Game {
             window.waveManager.startWave(1);
         }
         
+        // 顯示手機控制器法術選擇器（僅在遊戲中）
+        if (window.mobileControls && mobileControls.isEnabled) {
+            mobileControls.showSpellSelector();
+        }
+        
         // 更新 UI
         console.log('🔄 更新遊戲UI');
         this.updateGameUI();
@@ -736,6 +787,11 @@ class Game {
         if (gameStateManager.isCurrentState('gamePlay')) {
             gameStateManager.pushState('pause');
             this.isPaused = true;
+            
+            // 隱藏法術選擇器
+            if (window.mobileControls) {
+                mobileControls.hideSpellSelector();
+            }
             
             // 確保暫停選單顯示
             const pauseMenu = document.getElementById('pauseMenu');
@@ -756,6 +812,11 @@ class Game {
         if (gameStateManager.isCurrentState('pause')) {
             gameStateManager.popState();
             this.isPaused = false;
+            
+            // 顯示法術選擇器
+            if (window.mobileControls && mobileControls.isEnabled) {
+                mobileControls.showSpellSelector();
+            }
             
             // 隱藏暫停選單
             const pauseMenu = document.getElementById('pauseMenu');

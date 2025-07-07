@@ -8,6 +8,7 @@ class Projectile {
         this.position = new Vector2(config.x || 0, config.y || 0);
         this.velocity = new Vector2(config.velX || 0, config.velY || 0);
         this.damage = config.damage || 10;
+        this.isCritical = config.isCritical || false;
         this.radius = config.radius || 5;
         this.range = config.range || 300;
         this.distanceTraveled = 0;
@@ -283,13 +284,21 @@ class Projectile {
         // 計算傷害
         let damage = this.damage;
         
+        // Debug: 追蹤投射物命中時的傷害數據（使用 Debug 面板）
+        // console.log(`💥 投射物命中前 - 投射物傷害: ${this.damage}, 爆擊: ${this.isCritical}`);
+        
         // 閃電鏈式傷害遞減
         if (this.type === 'lightning' && this.pierceCount > 0) {
+            const oldDamage = damage;
             damage *= Math.pow(this.statusData.damageReduction || 0.8, this.pierceCount);
+            // console.log(`⚡ 閃電鏈傷害遞減: ${oldDamage} -> ${damage}`);
         }
         
-        // 造成傷害
-        enemy.takeDamage(Math.round(damage));
+        // Debug: 最終傷害輸出（使用 Debug 面板）
+        // console.log(`💥 最終命中傷害: ${Math.round(damage)}, 爆擊標記: ${this.isCritical}`);
+        
+        // 造成傷害（傳遞爆擊信息）
+        enemy.takeDamage(Math.round(damage), true, this.isCritical);
         
         // 應用狀態效果
         if (this.statusEffect && this.statusDuration > 0) {
@@ -321,7 +330,8 @@ class Projectile {
             const areaDamage = Math.round(this.damage * 0.5 * damageRatio);
             
             if (areaDamage > 0) {
-                enemy.takeDamage(areaDamage);
+                // 區域傷害不會爆擊
+                enemy.takeDamage(areaDamage, true, false);
                 this.hitTargets.add(enemy);
                 
                 // 狀態效果
@@ -658,6 +668,15 @@ class ProjectileManager {
         
         const velocity = Vector2.multiply(direction.normalize(), spellData.speed);
         
+        // 計算傷害和爆擊信息
+        let damageInfo = { damage: spellData.damage, isCritical: false };
+        if (owner && owner.calculateSpellDamage) {
+            damageInfo = owner.calculateSpellDamage(spellData.damage);
+        }
+        
+        // Debug: 投射物創建傷害追蹤（可通過 Debug 面板查看）
+        // console.log(`🚀 創建投射物 ${type}: 基礎傷害=${spellData.damage}, 計算後傷害=${damageInfo.damage}, 爆擊=${damageInfo.isCritical}`);
+        
         const config = {
             x: startPos.x,
             y: startPos.y,
@@ -665,7 +684,8 @@ class ProjectileManager {
             velY: velocity.y,
             type: type,
             owner: owner,
-            damage: owner ? owner.calculateSpellDamage(spellData.damage) : spellData.damage
+            damage: damageInfo.damage,
+            isCritical: damageInfo.isCritical
         };
         
         return this.addProjectile(config);
@@ -729,3 +749,4 @@ class ProjectileManager {
 
 // 全域投射物管理器
 const projectileManager = new ProjectileManager();
+window.projectileManager = projectileManager;

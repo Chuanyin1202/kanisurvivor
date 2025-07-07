@@ -7,9 +7,9 @@ class Renderer {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
         
-        // 設定固定的遊戲尺寸
-        this.width = 800;
-        this.height = 600;
+        // 動態遊戲尺寸（全屏）
+        this.width = window.innerWidth;
+        this.height = window.innerHeight;
         
         this.camera = new Vector2(0, 0);
         this.shake = new Vector2(0, 0);
@@ -23,6 +23,10 @@ class Renderer {
 
     // 設定 Canvas 支援高解析度顯示
     setupCanvas() {
+        // 更新尺寸（支持視窗大小變化）
+        this.width = window.innerWidth;
+        this.height = window.innerHeight;
+        
         // 設定 Canvas 的實際尺寸
         this.canvas.width = this.width * this.pixelRatio;
         this.canvas.height = this.height * this.pixelRatio;

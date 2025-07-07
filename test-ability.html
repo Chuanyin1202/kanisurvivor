@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Ability System</title>
+</head>
+<body>
+    <h1>測試能力系統</h1>
+    <button onclick="testAbilityManager()">測試 AbilityManager</button>
+    <div id="output"></div>
+
+    <script src="js/systems/abilityDatabase.js"></script>
+    <script src="js/systems/abilityManager.js"></script>
+    <script>
+        function testAbilityManager() {
+            const output = document.getElementById('output');
+            output.innerHTML = '';
+            
+            try {
+                output.innerHTML += '<p>AbilityDatabase 存在: ' + (typeof AbilityDatabase !== 'undefined') + '</p>';
+                output.innerHTML += '<p>window.abilityManager 存在: ' + !!window.abilityManager + '</p>';
+                
+                if (window.abilityManager) {
+                    const choices = window.abilityManager.generateAbilityChoices(3);
+                    output.innerHTML += '<p>生成的能力選項數量: ' + choices.length + '</p>';
+                    choices.forEach(choice => {
+                        output.innerHTML += '<p>- ' + choice.icon + ' ' + choice.name + '</p>';
+                    });
+                }
+            } catch (error) {
+                output.innerHTML += '<p style="color: red;">錯誤: ' + error.message + '</p>';
+            }
+        }
+    </script>
+</body>
+</html>

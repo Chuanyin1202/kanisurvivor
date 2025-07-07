@@ -6,12 +6,12 @@ const GameBalance = {
     // 玩家基礎屬性
     player: {
         baseHealth: 100,
-        baseMana: 50,
+        baseMana: 80,
         baseSpeed: 120, // 像素/秒
         baseAttack: 10,
         baseDefense: 5,
-        baseCritChance: 0.05, // 5%
-        baseCritDamage: 1.5, // 150%
+        baseCritChance: 0.10, // 10% (大幅提升爽快感)
+        baseCritDamage: 2.0, // 200% (更高暴擊傷害)
         
         // 等級成長
         levelUp: {
@@ -30,8 +30,8 @@ const GameBalance = {
         dashInvincibilityTime: 0.3, // 秒
         
         // 生命恢復
-        healthRegen: 0.5, // 每秒
-        manaRegen: 2.0, // 每秒
+        healthRegen: 0.0, // 每秒 (移除自然恢復，增加挑戰性)
+        manaRegen: 8.0, // 每秒 (大幅提升以支持連續戰鬥)
         
         // 碰撞
         radius: 16 // 像素
@@ -41,8 +41,8 @@ const GameBalance = {
     spells: {
         // 火球術
         fireball: {
-            damage: 15,
-            manaCost: 8,
+            damage: 20, // +33% 傷害
+            manaCost: 5,
             speed: 200,
             range: 300,
             size: 8,
@@ -55,8 +55,8 @@ const GameBalance = {
         
         // 冰霜箭
         frostbolt: {
-            damage: 12,
-            manaCost: 6,
+            damage: 16, // +33% 傷害
+            manaCost: 4,
             speed: 180,
             range: 250,
             size: 6,
@@ -69,20 +69,20 @@ const GameBalance = {
         
         // 閃電
         lightning: {
-            damage: 20,
-            manaCost: 12,
+            damage: 26, // +30% 傷害
+            manaCost: 8,
             speed: 400,
             range: 200,
             size: 4,
             piercing: true,
-            chainTargets: 3,
-            chainDamageReduction: 0.8
+            chainTargets: 5, // 增加連鎖目標
+            chainDamageReduction: 0.9 // 減少傷害衰減
         },
         
-        // 奧術飛彈
+        // 奧術飛彈  
         arcane: {
-            damage: 8,
-            manaCost: 4,
+            damage: 11, // +37% 傷害
+            manaCost: 2,
             speed: 250,
             range: 280,
             size: 5,
@@ -97,8 +97,8 @@ const GameBalance = {
         // 史萊姆
         slime: {
             health: 20,
-            speed: 40,
-            damage: 8,
+            speed: 50, // +25% 移動速度
+            damage: 12, // +50% 傷害
             experienceReward: 10,
             goldReward: 2,
             size: 16,
@@ -109,8 +109,8 @@ const GameBalance = {
         // 哥布林
         goblin: {
             health: 35,
-            speed: 60,
-            damage: 12,
+            speed: 75, // +25% 移動速度
+            damage: 18, // +50% 傷害
             experienceReward: 15,
             goldReward: 3,
             size: 18,
@@ -121,8 +121,8 @@ const GameBalance = {
         // 獸人
         orc: {
             health: 60,
-            speed: 45,
-            damage: 20,
+            speed: 55, // +22% 移動速度
+            damage: 28, // +40% 傷害
             experienceReward: 25,
             goldReward: 5,
             size: 22,
@@ -133,8 +133,8 @@ const GameBalance = {
         // 首領
         boss: {
             health: 200,
-            speed: 30,
-            damage: 35,
+            speed: 35, // +17% 移動速度
+            damage: 45, // +29% 傷害
             experienceReward: 100,
             goldReward: 25,
             size: 40,
@@ -147,9 +147,9 @@ const GameBalance = {
     // 波次系統
     waves: {
         // 基礎設定
-        baseSpawnRate: 3.0, // 每秒生成敵人數 (增加)
-        spawnRateGrowth: 0.2, // 每波成長 (增加)
-        maxSpawnRate: 12.0, // 最大生成速率 (增加)
+        baseSpawnRate: 5.0, // 每秒生成敵人數 (大幅增加)
+        spawnRateGrowth: 0.3, // 每波成長 (增加)
+        maxSpawnRate: 20.0, // 最大生成速率 (大幅增加)
         
         // 波次時間
         waveDuration: 45, // 秒 (增加)
@@ -157,9 +157,9 @@ const GameBalance = {
         minWaveDuration: 20, // 最小波次時間 (增加)
         
         // 敵人數量
-        baseEnemyCount: 15, // 基礎敵人數量 (增加)
-        enemyCountGrowth: 1.25, // 敵人數量成長率 (增加)
-        maxEnemyCount: 80, // 最大敵人數量 (增加)
+        baseEnemyCount: 25, // 基礎敵人數量 (大幅增加)
+        enemyCountGrowth: 1.3, // 敵人數量成長率 (增加)
+        maxEnemyCount: 120, // 最大敵人數量 (大幅增加)
         
         // 首領波次
         bossWaveInterval: 5, // 每5波出現首領 (更頻繁)
@@ -289,6 +289,56 @@ const GameBalance = {
                     3: { fireDamage: 10, burnDuration: 2, fireResistance: 0.5 }
                 }
             }
+        }
+    },
+
+    // 法術系統
+    spells: {
+        // 火球術
+        fireball: {
+            damage: 15,
+            manaCost: 8,
+            speed: 250,
+            size: 8,
+            range: 400,
+            statusEffect: 'burn',
+            statusDuration: 3.0,
+            statusDamage: 3,
+            areaOfEffect: 25
+        },
+        
+        // 冰霜箭
+        frostbolt: {
+            damage: 12,
+            manaCost: 6,
+            speed: 300,
+            size: 6,
+            range: 450,
+            statusEffect: 'slow',
+            statusDuration: 2.0,
+            slowMultiplier: 0.6
+        },
+        
+        // 閃電箭
+        lightning: {
+            damage: 10,
+            manaCost: 5,
+            speed: 400,
+            size: 4,
+            range: 350,
+            piercing: true,
+            chainTargets: 3,
+            chainDamageReduction: 0.8
+        },
+        
+        // 奧術飛彈
+        arcane: {
+            damage: 18,
+            manaCost: 12,
+            speed: 200,
+            size: 10,
+            range: 500,
+            homingStrength: 0.15
         }
     },
 

@@ -42,7 +42,7 @@ class Enemy {
         this.aiState = 'chase'; // chase, attack, idle, flee
         this.aiTimer = 0;
         this.lastAttackTime = 0;
-        this.attackCooldown = 1.0; // 攻擊冷卻時間（秒）
+        this.attackCooldown = 0.3; // 攻擊冷卻時間（秒） - 大幅減少提高威脅
         this.detectionRange = 300; // 偵測範圍
         this.attackRange = 25; // 攻擊範圍
         
@@ -71,7 +71,7 @@ class Enemy {
         
         // 碰撞相關
         this.lastCollisionTime = 0;
-        this.collisionCooldown = 0.5; // 碰撞冷卻時間
+        this.collisionCooldown = 0.2; // 碰撞冷卻時間 - 減少冷卻提高連續傷害
     }
 
     // 更新敵人
@@ -341,7 +341,12 @@ class Enemy {
     avoidOtherEnemies() {
         if (!window.enemyManager) return;
         
-        const enemies = enemyManager.findEnemiesInRange(this.position, this.radius * 3);
+        const enemies = enemyManager.enemies.filter(enemy => 
+            enemy !== this && 
+            enemy.isAlive && 
+            enemy.isActive && 
+            enemy.position.distanceTo(this.position) <= this.radius * 3
+        );
         const avoidanceForce = new Vector2(0, 0);
         
         enemies.forEach(enemy => {
@@ -442,21 +447,20 @@ class Enemy {
     }
 
     // 受到傷害
-    takeDamage(damage, showEffect = true) {
+    takeDamage(damage, showEffect = true, isCritical = false) {
         if (!this.isAlive) return false;
         
         const oldHealth = this.health;
         this.health -= damage;
         this.flashTime = 0.2; // 受傷閃爍
         
-        // 調試信息：血量變化
-        if (Math.random() < 0.1) {
-            console.log(`${this.type} 血量: ${oldHealth.toFixed(1)} -> ${this.health.toFixed(1)} (${showEffect ? '攻擊' : '持續效果'})`);
-        }
+        // 調試信息：完整傷害追蹤（使用 Debug 面板）
+        // console.log(`🩸 ${this.type} 受到傷害: ${damage}, 爆擊: ${isCritical}, 血量: ${oldHealth.toFixed(1)} -> ${this.health.toFixed(1)}`);
         
         if (showEffect) {
-            // 顯示傷害數字
-            this.showDamageNumber(damage);
+            // 顯示傷害數字 - 現在正確傳遞爆擊信息
+            // console.log(`📊 顯示傷害數字: 傷害=${damage}, 爆擊=${isCritical}`);
+            this.showDamageNumber(damage, isCritical);
             
             // 擊退效果
             if (this.target) {
@@ -480,7 +484,7 @@ class Enemy {
     }
 
     // 顯示傷害數字
-    showDamageNumber(damage) {
+    showDamageNumber(damage, isCritical = false) {
         // 檢查設定（如果設定不存在，預設顯示）
         if (window.gameSettings && !gameSettings.get('graphics', 'showDamageNumbers')) {
             return;
@@ -491,13 +495,14 @@ class Enemy {
             damage: Math.round(damage),
             life: 2.0,
             velocity: new Vector2(Math.random() * 40 - 20, -50),
-            color: '#ffffff',
-            fontSize: 14
+            color: isCritical ? '#ff0000' : '#ffffff', // 爆擊用紅色
+            fontSize: isCritical ? 24 : 14, // 爆擊用更大字體
+            isCrit: isCritical
         };
         
         if (window.effectsManager) {
             effectsManager.addDamageNumber(damageNumber);
-            console.log('💥 顯示傷害數字:', damage);
+            console.log(isCritical ? '🔥 顯示爆擊傷害:' : '💥 顯示傷害數字:', damage);
         } else {
             console.warn('❌ EffectsManager 未就緒，無法顯示傷害數字');
         }

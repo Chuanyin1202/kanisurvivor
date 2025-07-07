@@ -119,38 +119,48 @@ class Player {
             return;
         }
 
-        // 計算滑鼠位置和移動方向
+        // PC控制邏輯：WASD移動 + 滑鼠瞄準
         const canvas = document.getElementById('gameCanvas');
         if (canvas && window.renderer) {
             const worldMouse = renderer.screenToWorld(this.input.mouseX, this.input.mouseY);
             
-            // 計算到滑鼠的距離和方向
-            const mouseDirection = Vector2.subtract(worldMouse, this.position);
-            const distanceToMouse = mouseDirection.length();
+            // 獲取WASD鍵盤輸入（純移動控制）
+            let keyboardDirection = new Vector2(0, 0);
+            if (window.inputManager) {
+                keyboardDirection = inputManager.getMovementInput();
+            }
             
-            // 設定移動閾值，避免角色在滑鼠附近抖動
-            const moveThreshold = 20;
-            
-            if (distanceToMouse > moveThreshold) {
-                // 朝滑鼠方向移動
-                this.moveDirection = mouseDirection.normalize();
+            // 移動邏輯：只使用鍵盤控制
+            if (keyboardDirection.length() > 0) {
+                this.moveDirection = keyboardDirection.normalize();
                 this.isMoving = true;
                 
-                // 使用固定移動速度
                 const currentSpeed = this.getEffectiveSpeed();
                 this.velocity.copyFrom(this.moveDirection).multiply(currentSpeed);
                 
                 // 更新位置
                 this.position.add(this.velocity.copy().multiply(deltaTime));
             } else {
-                // 距離很近時停止移動
+                // 沒有鍵盤輸入時停止移動
+                this.isMoving = false;
                 this.moveDirection.set(0, 0);
                 this.velocity.set(0, 0);
-                this.isMoving = false;
             }
             
-            // 更新面向角度（朝向滑鼠）
-            this.facing = this.position.angleTo(worldMouse);
+            // 瞄準邏輯：滑鼠或手機攻擊方向控制
+            if (window.mobileControls && mobileControls.isEnabled) {
+                const attackDirection = mobileControls.getAttackDirection();
+                if (attackDirection) {
+                    // 使用手機攻擊方向 dpad
+                    this.facing = Math.atan2(attackDirection.y, attackDirection.x);
+                } else {
+                    // 沒有攻擊輸入時保持當前朝向
+                    // this.facing 保持不變
+                }
+            } else {
+                // 桌面端：始終朝向滑鼠（用於射擊方向）
+                this.facing = this.position.angleTo(worldMouse);
+            }
         }
 
         // 限制在遊戲邊界內
@@ -159,12 +169,19 @@ class Player {
 
     // 更新法術施放
     updateSpells(deltaTime) {
-        // 自動攻擊：如果附近有敵人就自動施法
-        if (this.canCastSpell()) {
+        let shouldCast = false;
+        
+        // 手機控制：按住攻擊方向時施法
+        if (window.mobileControls && mobileControls.isEnabled) {
+            shouldCast = mobileControls.isAttacking();
+        } else {
+            // 桌面端：自動攻擊附近敵人
             const nearbyEnemy = this.findNearestEnemy();
-            if (nearbyEnemy) {
-                this.castSpell();
-            }
+            shouldCast = (nearbyEnemy !== null);
+        }
+        
+        if (shouldCast && this.canCastSpell()) {
+            this.castSpell();
         }
     }
 
@@ -264,7 +281,13 @@ class Player {
     // 更新生命和魔法恢復
     updateRegeneration(deltaTime) {
         const healthRegen = gameBalance.getValue('player', 'healthRegen');
-        const manaRegen = gameBalance.getValue('player', 'manaRegen');
+        let manaRegen = gameBalance.getValue('player', 'manaRegen');
+        
+        // 戰鬥中MP回復速度提升50%
+        const inCombat = this.stats.currentCombo > 0;
+        if (inCombat) {
+            manaRegen *= 1.5;
+        }
         
         this.health = Math.min(this.maxHealth, this.health + healthRegen * deltaTime);
         this.mana = Math.min(this.maxMana, this.mana + manaRegen * deltaTime);
@@ -284,18 +307,67 @@ class Player {
     castSpell() {
         const spellData = gameBalance.getValue('spells', this.selectedSpell);
         
-        if (this.mana < spellData.manaCost) {
+        // 應用能力效果修正法術消耗
+        let manaCost = spellData.manaCost;
+        if (window.abilityManager) {
+            const costMultiplier = abilityManager.checkAbilityTrigger('manaCost');
+            manaCost = Math.ceil(manaCost * costMultiplier);
+        }
+        
+        if (this.mana < manaCost) {
             return false;
         }
         
         // 消耗魔法值
-        this.mana -= spellData.manaCost;
+        this.mana -= manaCost;
         
-        // 設定冷卻時間
-        this.spellCooldown = gameBalance.getValue('player', 'spellCooldown');
+        // 應用能力效果修正冷卻時間
+        let cooldownTime = gameBalance.getValue('player', 'spellCooldown');
+        if (window.abilityManager) {
+            const cooldownMultiplier = abilityManager.checkAbilityTrigger('spellCooldown');
+            cooldownTime *= cooldownMultiplier;
+        }
+        this.spellCooldown = cooldownTime;
         
         // 創建法術投射物
         this.createProjectile(spellData);
+        
+        // 檢查是否觸發額外投射物
+        if (window.abilityManager) {
+            const extraProjectiles = abilityManager.checkAbilityTrigger('extraProjectile');
+            extraProjectiles.forEach((_, index) => {
+                // 立即發射額外投射物，但稍微改變角度
+                const spreadAngle = (Math.PI / 12) * (index + 1); // 15度間隔
+                const leftDirection = Vector2.fromAngle(this.facing - spreadAngle);
+                const rightDirection = Vector2.fromAngle(this.facing + spreadAngle);
+                
+                // 創建額外的投射物
+                projectileManager.createSpellProjectile(
+                    this.selectedSpell,
+                    this.position,
+                    leftDirection,
+                    this
+                );
+                projectileManager.createSpellProjectile(
+                    this.selectedSpell,
+                    this.position,
+                    rightDirection,
+                    this
+                );
+                
+                console.log('🎯 額外投射物觸發！');
+            });
+            
+            // 檢查法術回音效果
+            const echoEffects = abilityManager.checkAbilityTrigger('spellEcho');
+            echoEffects.forEach(() => {
+                // 立即發射回音法術（稍微延遲以產生視覺效果）
+                setTimeout(() => {
+                    console.log('✨ 法術回音觸發！');
+                    this.createProjectile(spellData);
+                }, 100);
+            });
+        }
         
         // 更新統計
         this.stats.spellsCast++;
@@ -307,15 +379,24 @@ class Player {
     createProjectile(spellData) {
         if (!window.projectileManager) return;
         
-        // 自動瞄準最近的敵人
-        const nearestEnemy = this.findNearestEnemy();
+        // 檢查是否有自動瞄準能力
+        let hasAutoTargeting = false;
+        if (window.abilityManager && abilityManager.activeEffects.arcaneHoming) {
+            hasAutoTargeting = true;
+        }
+        
         let direction;
         
-        if (nearestEnemy) {
-            // 朝最近的敵人射擊
-            direction = Vector2.subtract(nearestEnemy.position, this.position).normalize();
+        if (hasAutoTargeting) {
+            // 有自動瞄準能力時才追擊敵人
+            const nearestEnemy = this.findNearestEnemy();
+            if (nearestEnemy) {
+                direction = Vector2.subtract(nearestEnemy.position, this.position).normalize();
+            } else {
+                direction = Vector2.fromAngle(this.facing);
+            }
         } else {
-            // 沒有敵人時朝面向方向射擊
+            // 預設朝滑鼠方向射擊
             direction = Vector2.fromAngle(this.facing);
         }
         
@@ -330,16 +411,64 @@ class Player {
     // 計算法術傷害
     calculateSpellDamage(baseDamage) {
         let damage = baseDamage + this.attack;
+        let isCritical = false;
+        
+        // 調試輸出 - 可通過 F12 開啟 Debug 面板查看詳細信息
+        const debugMode = false; // 使用 Debug 面板代替
+        if (debugMode) {
+            console.log(`🎯 傷害計算開始 - 基礎: ${baseDamage}, 攻擊力: ${this.attack}, 初始傷害: ${damage}`);
+            console.log(`⚡ 爆擊設定 - 爆擊率: ${(this.critChance * 100).toFixed(1)}%, 爆擊倍數: ${this.critDamage}x`);
+        }
+        
+        // 應用能力效果修正法術傷害
+        if (window.abilityManager) {
+            const spellDamageMultiplier = abilityManager.checkAbilityTrigger('spellDamage');
+            const oldDamage = damage;
+            damage *= spellDamageMultiplier;
+            
+            if (debugMode && spellDamageMultiplier !== 1) {
+                console.log(`✨ 能力效果: 法術傷害倍數 ${spellDamageMultiplier}x, ${oldDamage} -> ${damage}`);
+            }
+        }
         
         // 暴擊檢查
-        if (Math.random() < this.critChance) {
+        const critRoll = Math.random();
+        if (critRoll < this.critChance) {
+            const oldDamage = damage;
             damage *= this.critDamage;
+            isCritical = true;
+            
+            console.log(`💥 爆擊觸發! 隨機值: ${critRoll.toFixed(3)}, 爆擊率: ${(this.critChance * 100).toFixed(1)}%, 倍數: ${this.critDamage}x`);
+            console.log(`💥 爆擊傷害: ${oldDamage.toFixed(1)} -> ${damage.toFixed(1)} (+${(damage - oldDamage).toFixed(1)})`);
+            
+            // 暴擊時觸發螢幕震動
+            if (window.renderer) {
+                renderer.startShake(8, 0.4); // 強度8，持續0.4秒
+            }
+        } else {
+            if (debugMode) {
+                console.log(`⚪ 未爆擊 - 隨機值: ${critRoll.toFixed(3)}, 需要: <${this.critChance.toFixed(3)}`);
+            }
         }
         
         // 裝備加成
-        damage *= this.getEquipmentDamageMultiplier();
+        const equipmentMultiplier = this.getEquipmentDamageMultiplier();
+        if (equipmentMultiplier !== 1) {
+            const oldDamage = damage;
+            damage *= equipmentMultiplier;
+            if (debugMode) {
+                console.log(`⚔️ 裝備加成: ${equipmentMultiplier}x, ${oldDamage} -> ${damage}`);
+            }
+        }
         
-        return Math.round(damage);
+        if (debugMode) {
+            console.log(`🏆 最終傷害: ${Math.round(damage)} ${isCritical ? '(爆擊)' : ''}`);
+        }
+        
+        return {
+            damage: Math.round(damage),
+            isCritical: isCritical
+        };
     }
 
     // 開始衝刺
@@ -375,6 +504,15 @@ class Player {
     takeDamage(damage, canBlock = true) {
         if (this.isInvincible) {
             return false;
+        }
+        
+        // 檢查閣避能力
+        if (window.abilityManager) {
+            const dodgeResults = abilityManager.checkAbilityTrigger('dodge');
+            if (dodgeResults.length > 0) {
+                console.log('✨ 閣避成功！');
+                return false; // 完全閣避傷害
+            }
         }
         
         let actualDamage = damage;
@@ -427,7 +565,7 @@ class Player {
         }
     }
 
-    // 升級
+    // 升級 - 新的能力選擇系統
     levelUp() {
         this.experience -= this.experienceToNext;
         this.level++;
@@ -437,18 +575,7 @@ class Player {
         const growth = gameBalance.getValue('player', 'levelUp', 'experienceGrowth');
         this.experienceToNext = Math.floor(baseExp * Math.pow(growth, this.level - 1));
         
-        // 屬性成長
-        const healthGrowth = gameBalance.getValue('player', 'levelUp', 'healthGrowth');
-        const manaGrowth = gameBalance.getValue('player', 'levelUp', 'manaGrowth');
-        const attackGrowth = gameBalance.getValue('player', 'levelUp', 'attackGrowth');
-        const defenseGrowth = gameBalance.getValue('player', 'levelUp', 'defenseGrowth');
-        
-        this.maxHealth += healthGrowth;
-        this.maxMana += manaGrowth;
-        this.attack += attackGrowth;
-        this.defense += defenseGrowth;
-        
-        // 完全恢復生命和魔法
+        // 完全恢復生命和魔法（保留這個升級獎勵）
         this.health = this.maxHealth;
         this.mana = this.maxMana;
         
@@ -457,7 +584,190 @@ class Player {
             renderer.startShake(3, 0.8);
         }
         
-        console.log(`等級提升！現在是 ${this.level} 級`);
+        console.log(`🆙 等級提升！現在是 ${this.level} 級`);
+        
+        // 調試輸出
+        console.log('📊 當前環境狀態:', {
+            abilityManager: !!window.abilityManager,
+            AbilityDatabase: typeof AbilityDatabase !== 'undefined',
+            initFunc: typeof initializeAbilityManager === 'function'
+        });
+        
+        // 觸發能力選擇界面
+        this.triggerAbilitySelection();
+    }
+    
+    // 觸發能力選擇界面
+    triggerAbilitySelection() {
+        // 嘗試初始化AbilityManager（如果還沒有的話）
+        if (!window.abilityManager) {
+            if (typeof initializeAbilityManager === 'function') {
+                console.log('🔄 嘗試初始化 AbilityManager');
+                initializeAbilityManager();
+            }
+        }
+        
+        if (!window.abilityManager) {
+            console.error('❌ AbilityManager 未初始化，跳過升級選擇');
+            // 恢復遊戲而不是卡住
+            if (window.game) {
+                game.resumeGame();
+            }
+            return;
+        }
+        
+        // 隱藏法術選擇器
+        if (window.mobileControls) {
+            mobileControls.hideSpellSelector();
+        }
+        
+        // 暫停遊戲
+        if (window.game) {
+            game.pauseGame();
+        }
+        
+        // 生成三選一能力
+        const abilityChoices = abilityManager.generateAbilityChoices(3);
+        
+        if (abilityChoices.length === 0) {
+            console.warn('⚠️ 沒有可用的能力選項，跳過選擇');
+            if (window.game) {
+                game.resumeGame();
+            }
+            return;
+        }
+        
+        // 顯示能力選擇UI
+        this.showAbilitySelectionUI(abilityChoices);
+    }
+    
+    // 顯示能力選擇UI
+    showAbilitySelectionUI(choices) {
+        // 創建或顯示升級選擇界面
+        let levelUpModal = document.getElementById('levelUpModal');
+        
+        if (!levelUpModal) {
+            levelUpModal = this.createLevelUpModal();
+        }
+        
+        // 清空之前的選項
+        const choicesContainer = levelUpModal.querySelector('.ability-choices');
+        choicesContainer.innerHTML = '';
+        
+        // 顯示等級信息
+        const levelInfo = levelUpModal.querySelector('.level-info');
+        levelInfo.textContent = `恭喜升級到 ${this.level} 級！選擇一個新能力：`;
+        
+        // 創建能力選項按鈕
+        choices.forEach((ability, index) => {
+            const choiceButton = this.createAbilityChoiceButton(ability, index);
+            choicesContainer.appendChild(choiceButton);
+        });
+        
+        // 顯示模態框
+        levelUpModal.classList.remove('hidden');
+        levelUpModal.style.display = 'flex';
+        
+        console.log('🎯 顯示能力選擇界面');
+    }
+    
+    // 創建升級模態框
+    createLevelUpModal() {
+        const modal = document.createElement('div');
+        modal.id = 'levelUpModal';
+        modal.className = 'screen-overlay modal';
+        modal.innerHTML = `
+            <div class="modal-content level-up-content">
+                <h2 class="level-info">恭喜升級！</h2>
+                <div class="ability-choices"></div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        return modal;
+    }
+    
+    // 創建能力選擇按鈕
+    createAbilityChoiceButton(ability, index) {
+        const button = document.createElement('div');
+        button.className = 'ability-choice-btn';
+        button.innerHTML = `
+            <div class="ability-icon">${ability.icon}</div>
+            <div class="ability-info">
+                <h3 class="ability-name rarity-${ability.rarity}">${ability.name}</h3>
+                <p class="ability-description">${ability.description}</p>
+                <span class="ability-category">${AbilityCategories[ability.category] || ability.category}</span>
+            </div>
+        `;
+        
+        // 添加點擊事件
+        button.addEventListener('click', () => {
+            this.selectAbility(ability.id);
+        });
+        
+        // 添加觸控事件支援（手機專用）
+        button.addEventListener('touchstart', (event) => {
+            event.preventDefault(); // 防止觸發 click 事件
+            button.classList.add('touched'); // 視覺反饋
+        });
+        
+        button.addEventListener('touchend', (event) => {
+            event.preventDefault(); // 防止觸發 click 事件
+            button.classList.remove('touched');
+            this.selectAbility(ability.id);
+        });
+        
+        button.addEventListener('touchcancel', (event) => {
+            event.preventDefault();
+            button.classList.remove('touched');
+        });
+        
+        // 添加鍵盤事件（1, 2, 3 鍵）
+        if (index < 3) {
+            const handleKeyPress = (event) => {
+                if (event.code === `Digit${index + 1}`) {
+                    this.selectAbility(ability.id);
+                    document.removeEventListener('keydown', handleKeyPress);
+                }
+            };
+            document.addEventListener('keydown', handleKeyPress);
+        }
+        
+        return button;
+    }
+    
+    // 選擇能力
+    selectAbility(abilityId) {
+        if (!window.abilityManager) {
+            console.error('❌ AbilityManager 未初始化');
+            return;
+        }
+        
+        // 激活選中的能力
+        const success = abilityManager.selectAbility(abilityId);
+        
+        if (success) {
+            // 隱藏選擇界面
+            const levelUpModal = document.getElementById('levelUpModal');
+            if (levelUpModal) {
+                levelUpModal.classList.add('hidden');
+                levelUpModal.style.display = 'none';
+            }
+            
+            // 恢復遊戲
+            if (window.game) {
+                game.resumeGame();
+            }
+            
+            // 重新顯示法術選擇器
+            if (window.mobileControls && mobileControls.isEnabled) {
+                mobileControls.showSpellSelector();
+            }
+            
+            console.log('✅ 能力選擇完成，遊戲繼續');
+        } else {
+            console.error('❌ 能力選擇失敗');
+        }
     }
 
     // 增加擊殺數
@@ -465,6 +775,26 @@ class Player {
         this.stats.kills++;
         this.stats.currentCombo++;
         this.stats.comboTimer = 3.0; // 3秒內沒有擊殺就重置連擊
+        
+        // 擊殺回復MP
+        this.restoreMana(5);
+        
+        // 連擊獎勵MP回復 (每10連擊獎勵10MP)
+        if (this.stats.currentCombo % 10 === 0) {
+            this.restoreMana(10);
+            console.log(`🔥 連擊 ${this.stats.currentCombo}！獲得額外MP回復！`);
+        }
+        
+        // 檢查能力效果（吸血等）
+        if (window.abilityManager) {
+            const killEffects = abilityManager.checkAbilityTrigger('onKill');
+            killEffects.forEach(effect => {
+                if (effect.type === 'heal') {
+                    this.heal(effect.amount);
+                    console.log(`🧛 吸血效果：回復 ${effect.amount.toFixed(1)} 生命值`);
+                }
+            });
+        }
         
         if (this.stats.currentCombo > this.stats.maxCombo) {
             this.stats.maxCombo = this.stats.currentCombo;

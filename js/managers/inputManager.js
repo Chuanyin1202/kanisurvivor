@@ -467,10 +467,20 @@ class InputManager {
         let x = 0;
         let y = 0;
         
+        // 鍵盤輸入（WASD + 方向鍵）
         if (this.isKeyDown('KeyA') || this.isKeyDown('ArrowLeft')) x -= 1;
         if (this.isKeyDown('KeyD') || this.isKeyDown('ArrowRight')) x += 1;
         if (this.isKeyDown('KeyW') || this.isKeyDown('ArrowUp')) y -= 1;
         if (this.isKeyDown('KeyS') || this.isKeyDown('ArrowDown')) y += 1;
+        
+        // 手機控制輸入（優先於鍵盤）
+        if (window.mobileControls && mobileControls.isEnabled) {
+            const mobileInput = mobileControls.getMovementInput();
+            if (mobileInput.x !== 0 || mobileInput.y !== 0) {
+                x = mobileInput.x;
+                y = mobileInput.y;
+            }
+        }
         
         return new Vector2(x, y);
     }
@@ -500,3 +510,4 @@ class InputManager {
 
 // 全域輸入管理器
 const inputManager = new InputManager();
+window.inputManager = inputManager;
