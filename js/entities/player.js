@@ -89,10 +89,18 @@ class Player {
             spellPressed: false,
             dashPressed: false
         };
+        
+        // 生命狀態
+        this.isAlive = true;
     }
 
     // 更新玩家
     update(deltaTime) {
+        // 如果玩家已死亡，停止更新
+        if (!this.isAlive) {
+            return;
+        }
+        
         this.updateMovement(deltaTime);
         this.updateSpells(deltaTime);
         this.updateDash(deltaTime);
@@ -465,7 +473,12 @@ class Player {
 
     // 死亡
     die() {
+        if (!this.isAlive) {
+            return; // 避免重複死亡
+        }
+        
         console.log('玩家死亡');
+        this.isAlive = false;
         
         // 觸發遊戲結束
         if (window.gameStateManager) {

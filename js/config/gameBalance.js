@@ -147,23 +147,23 @@ const GameBalance = {
     // 波次系統
     waves: {
         // 基礎設定
-        baseSpawnRate: 2.0, // 每秒生成敵人數
-        spawnRateGrowth: 0.1, // 每波成長
-        maxSpawnRate: 8.0,
+        baseSpawnRate: 3.0, // 每秒生成敵人數 (增加)
+        spawnRateGrowth: 0.2, // 每波成長 (增加)
+        maxSpawnRate: 12.0, // 最大生成速率 (增加)
         
         // 波次時間
-        waveDuration: 30, // 秒
-        waveGrowthRate: 0.95, // 每波時間係數
-        minWaveDuration: 15, // 最小波次時間
+        waveDuration: 45, // 秒 (增加)
+        waveGrowthRate: 1.05, // 每波時間係數 (增加時間而非減少)
+        minWaveDuration: 20, // 最小波次時間 (增加)
         
         // 敵人數量
-        baseEnemyCount: 10,
-        enemyCountGrowth: 1.15,
-        maxEnemyCount: 50,
+        baseEnemyCount: 15, // 基礎敵人數量 (增加)
+        enemyCountGrowth: 1.25, // 敵人數量成長率 (增加)
+        maxEnemyCount: 80, // 最大敵人數量 (增加)
         
         // 首領波次
-        bossWaveInterval: 10, // 每10波出現首領
-        bossWaveMultiplier: 1.5, // 首領波次的敵人數量倍數
+        bossWaveInterval: 5, // 每5波出現首領 (更頻繁)
+        bossWaveMultiplier: 2.0, // 首領波次的敵人數量倍數 (增加)
         
         // 特殊波次
         specialWaves: {

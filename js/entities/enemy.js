@@ -341,7 +341,7 @@ class Enemy {
     avoidOtherEnemies() {
         if (!window.enemyManager) return;
         
-        const enemies = enemyManager.getEnemiesInRange(this.position, this.radius * 3);
+        const enemies = enemyManager.findEnemiesInRange(this.position, this.radius * 3);
         const avoidanceForce = new Vector2(0, 0);
         
         enemies.forEach(enemy => {
@@ -481,7 +481,10 @@ class Enemy {
 
     // 顯示傷害數字
     showDamageNumber(damage) {
-        if (!gameSettings.get('graphics', 'showDamageNumbers')) return;
+        // 檢查設定（如果設定不存在，預設顯示）
+        if (window.gameSettings && !gameSettings.get('graphics', 'showDamageNumbers')) {
+            return;
+        }
         
         const damageNumber = {
             position: Vector2.add(this.position, new Vector2(Math.random() * 20 - 10, -20)),
@@ -494,6 +497,9 @@ class Enemy {
         
         if (window.effectsManager) {
             effectsManager.addDamageNumber(damageNumber);
+            console.log('💥 顯示傷害數字:', damage);
+        } else {
+            console.warn('❌ EffectsManager 未就緒，無法顯示傷害數字');
         }
     }
 
@@ -629,21 +635,15 @@ class Enemy {
                 break;
         }
         
-        // 狀態效果顏色修正
-        if (this.hasStatusEffect('burn')) {
-            color = '#ff4757';
-        } else if (this.hasStatusEffect('freeze')) {
-            color = '#74b9ff';
-        } else if (this.hasStatusEffect('poison')) {
-            color = '#00d2d3';
-        }
-        
         // 繪製敵人主體
         if (alpha < 1.0) {
             renderer.drawCircleWithAlpha(this.position.x, this.position.y, this.radius, color, alpha);
         } else {
             renderer.drawCircle(this.position.x, this.position.y, this.radius, color);
         }
+        
+        // 渲染狀態效果視覺
+        this.renderStatusEffects(renderer);
         
         // 繪製血量條
         if (this.isAlive && this.health < this.maxHealth) {
@@ -678,6 +678,118 @@ class Enemy {
         }
         
         renderer.drawRect(barX, barY, healthWidth, barHeight, healthColor);
+    }
+
+    // 渲染狀態效果
+    renderStatusEffects(renderer) {
+        const time = Date.now() / 1000;
+        
+        // 燃燒效果 - 紅色火焰粒子
+        if (this.hasStatusEffect('burn')) {
+            this.renderBurnEffect(renderer, time);
+        }
+        
+        // 中毒效果 - 綠色毒氣泡泡
+        if (this.hasStatusEffect('poison')) {
+            this.renderPoisonEffect(renderer, time);
+        }
+        
+        // 冰凍效果 - 藍色冰晶
+        if (this.hasStatusEffect('freeze') || this.hasStatusEffect('slow')) {
+            this.renderFreezeEffect(renderer, time);
+        }
+    }
+
+    // 渲染燃燒效果
+    renderBurnEffect(renderer, time) {
+        const fireIntensity = 0.7 + 0.3 * Math.sin(time * 8);
+        
+        // 外圈紅色光暈
+        renderer.drawCircleWithAlpha(
+            this.position.x, 
+            this.position.y, 
+            this.radius + 3, 
+            '#ff4757', 
+            0.3 * fireIntensity
+        );
+        
+        // 內圈橙色光暈
+        renderer.drawCircleWithAlpha(
+            this.position.x, 
+            this.position.y, 
+            this.radius + 1, 
+            '#ffa502', 
+            0.5 * fireIntensity
+        );
+        
+        // 火焰粒子效果
+        for (let i = 0; i < 3; i++) {
+            const angle = time * 2 + i * (Math.PI * 2 / 3);
+            const x = this.position.x + Math.cos(angle) * (this.radius + 2);
+            const y = this.position.y + Math.sin(angle) * (this.radius + 2) - Math.sin(time * 6) * 2;
+            
+            renderer.drawCircleWithAlpha(x, y, 2, '#ff6b35', 0.8);
+        }
+    }
+
+    // 渲染中毒效果
+    renderPoisonEffect(renderer, time) {
+        const bubbleIntensity = 0.6 + 0.4 * Math.sin(time * 5);
+        
+        // 綠色毒氣光暈
+        renderer.drawCircleWithAlpha(
+            this.position.x, 
+            this.position.y, 
+            this.radius + 2, 
+            '#10ac84', 
+            0.4 * bubbleIntensity
+        );
+        
+        // 毒氣泡泡效果
+        for (let i = 0; i < 4; i++) {
+            const bubbleTime = time * 3 + i * 0.8;
+            const angle = i * (Math.PI * 2 / 4);
+            const distance = this.radius + 1 + Math.sin(bubbleTime) * 3;
+            const x = this.position.x + Math.cos(angle) * distance;
+            const y = this.position.y + Math.sin(angle) * distance;
+            const size = 1.5 + Math.sin(bubbleTime * 2) * 0.5;
+            
+            renderer.drawCircleWithAlpha(x, y, size, '#2ed573', 0.7);
+        }
+        
+        // 中心毒霧
+        renderer.drawCircleWithAlpha(
+            this.position.x, 
+            this.position.y, 
+            this.radius - 2, 
+            '#55a3ff', 
+            0.2 * bubbleIntensity
+        );
+    }
+
+    // 渲染冰凍效果
+    renderFreezeEffect(renderer, time) {
+        const crystalIntensity = 0.8 + 0.2 * Math.sin(time * 4);
+        
+        // 藍色冰霜光暈
+        renderer.drawCircleWithAlpha(
+            this.position.x, 
+            this.position.y, 
+            this.radius + 2, 
+            '#74b9ff', 
+            0.4 * crystalIntensity
+        );
+        
+        // 冰晶效果
+        for (let i = 0; i < 6; i++) {
+            const angle = i * (Math.PI / 3) + time * 0.5;
+            const distance = this.radius + 1;
+            const x = this.position.x + Math.cos(angle) * distance;
+            const y = this.position.y + Math.sin(angle) * distance;
+            
+            // 繪製冰晶形狀（簡化為小方塊）
+            renderer.drawRect(x - 1, y - 1, 2, 2, '#a7d8ff');
+        }
     }
 
     // 檢查是否有指定狀態效果

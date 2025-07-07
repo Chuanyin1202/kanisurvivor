@@ -97,7 +97,7 @@ class Drone {
     findTarget() {
         if (!window.enemyManager) return;
         
-        const enemies = enemyManager.getEnemiesInRange(this.position, this.attackRange);
+        const enemies = enemyManager.findEnemiesInRange(this.position, this.attackRange);
         const aliveEnemies = enemies.filter(enemy => enemy.isAlive);
         
         if (aliveEnemies.length > 0) {

@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Kani: Pixel Mage Survivor</title>
     <meta name="description" content="快節奏像素藝術彈幕生存遊戲，扮演魔法貓咪 Kani 在彈幕地獄中生存">
     <link rel="stylesheet" href="styles/main.css">
@@ -55,6 +55,12 @@
                         </div>
                         <span id="healthText">100/100</span>
                     </div>
+                    <div class="mana-bar">
+                        <div class="bar-container">
+                            <div id="manaBar" class="bar mana"></div>
+                        </div>
+                        <span id="manaText">50/50</span>
+                    </div>
                     <div class="exp-bar">
                         <div class="bar-container">
                             <div id="expBar" class="bar exp"></div>
@@ -75,6 +81,7 @@
             </div>
             
             <button id="pauseBtn" class="btn btn-pause">暫停</button>
+            
         </div>
         
         <!-- 暫停選單 -->
@@ -186,6 +193,7 @@
     <script src="js/entities/loot.js"></script>
     
     <!-- 管理器 -->
+    <script src="js/managers/enemyManager.js"></script>
     <script src="js/managers/waveManager.js"></script>
     <script src="js/managers/inputManager.js"></script>
     <script src="js/managers/uiManager.js"></script>

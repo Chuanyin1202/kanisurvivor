@@ -131,9 +131,9 @@ class WaveManager {
             this.enemiesThisWave = Math.floor(this.enemiesThisWave * waveConfig.bossWaveMultiplier);
         }
         
-        // 難度倍數
-        this.difficultyMultiplier = 1.0 + (this.currentWave - 1) * 0.1;
-        this.eliteChance = Math.min(0.3, (this.currentWave - 1) * 0.02);
+        // 難度倍數 (更激進的成長)
+        this.difficultyMultiplier = 1.0 + (this.currentWave - 1) * 0.15;
+        this.eliteChance = Math.min(0.4, (this.currentWave - 1) * 0.03);
     }
 
     // 更新敵人權重
@@ -279,16 +279,26 @@ class WaveManager {
 
     // 應用難度修正
     applyDifficultyModifiers(enemy) {
-        // 血量和傷害隨波次增加
-        enemy.maxHealth = Math.floor(enemy.maxHealth * this.difficultyMultiplier);
+        // 血量和傷害隨波次增加 (更激進)
+        const healthMultiplier = Math.pow(1.2, this.currentWave - 1);
+        const damageMultiplier = Math.pow(1.15, this.currentWave - 1);
+        const speedMultiplier = 1 + (this.currentWave - 1) * 0.05;
+        
+        enemy.maxHealth = Math.floor(enemy.maxHealth * healthMultiplier);
         enemy.health = enemy.maxHealth;
-        enemy.damage = Math.floor(enemy.damage * this.difficultyMultiplier);
-        enemy.speed = enemy.speed * (1 + (this.currentWave - 1) * 0.02);
+        enemy.damage = Math.floor(enemy.damage * damageMultiplier);
+        enemy.speed = enemy.speed * speedMultiplier;
+        
+        // 提升獎勵隨難度增加
+        enemy.experienceReward = Math.floor(enemy.experienceReward * (1 + (this.currentWave - 1) * 0.1));
+        enemy.goldReward = Math.floor(enemy.goldReward * (1 + (this.currentWave - 1) * 0.1));
         
         // 精英敵人
         if (Math.random() < this.eliteChance) {
             this.makeElite(enemy);
         }
+        
+        console.log(`波次 ${this.currentWave} 敵人強化: HP=${enemy.maxHealth}, DMG=${enemy.damage}, SPD=${enemy.speed.toFixed(1)}`);
     }
 
     // 製作精英敵人
@@ -376,10 +386,8 @@ class WaveManager {
         
         console.log(`⏰ 第 ${this.currentWave} 波時間結束`);
         
-        // 清除場上所有敵人
-        if (window.enemyManager) {
-            enemyManager.clearAllEnemies();
-        }
+        // 不清除敵人！讓敵人累積到下一波，增加難度
+        console.log('🔥 敵人將累積到下一波，無法逃避戰鬥！');
         
         this.completeWave();
     }
@@ -514,113 +522,8 @@ class WaveManager {
     }
 }
 
-// 敵人管理器
-class EnemyManager {
-    constructor() {
-        this.enemies = [];
-        this.maxEnemies = 100;
-    }
-
-    // 添加敵人
-    addEnemy(enemy) {
-        if (this.enemies.length < this.maxEnemies) {
-            this.enemies.push(enemy);
-        }
-    }
-
-    // 生成敵人
-    spawnEnemy(type, x, y) {
-        const enemy = new Enemy(x, y, type);
-        this.addEnemy(enemy);
-        return enemy;
-    }
-
-    // 更新所有敵人
-    update(deltaTime) {
-        // 更新敵人
-        this.enemies.forEach(enemy => {
-            enemy.update(deltaTime);
-        });
-        
-        // 移除不活動的敵人
-        this.enemies = this.enemies.filter(enemy => enemy.isActive);
-    }
-
-    // 渲染所有敵人
-    render(renderer) {
-        this.enemies.forEach(enemy => {
-            enemy.render(renderer);
-        });
-    }
-
-    // 獲取指定範圍內的敵人
-    getEnemiesInRange(position, range) {
-        return this.enemies.filter(enemy => {
-            return enemy.isAlive && enemy.position.distanceTo(position) <= range;
-        });
-    }
-
-    // 獲取存活敵人數量
-    getAliveEnemyCount() {
-        return this.enemies.filter(enemy => enemy.isAlive).length;
-    }
-
-    // 獲取最近的敵人
-    getClosestEnemy(position) {
-        let closest = null;
-        let minDistance = Infinity;
-        
-        this.enemies.forEach(enemy => {
-            if (enemy.isAlive) {
-                const distance = enemy.position.distanceTo(position);
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    closest = enemy;
-                }
-            }
-        });
-        
-        return closest;
-    }
-
-    // 清除所有敵人
-    clearAllEnemies() {
-        this.enemies.forEach(enemy => {
-            if (enemy.isAlive) {
-                enemy.die();
-            }
-        });
-    }
-
-    // 清除死亡敵人
-    clearDeadEnemies() {
-        this.enemies = this.enemies.filter(enemy => enemy.isAlive || enemy.isActive);
-    }
-
-    // 獲取所有敵人
-    getAllEnemies() {
-        return [...this.enemies];
-    }
-
-    // 重置敵人管理器
-    reset() {
-        this.enemies = [];
-    }
-
-    // 獲取統計資料
-    getStats() {
-        return {
-            totalEnemies: this.enemies.length,
-            aliveEnemies: this.getAliveEnemyCount(),
-            deadEnemies: this.enemies.filter(enemy => !enemy.isAlive).length
-        };
-    }
-}
-
 // 全域實例
 const waveManager = new WaveManager();
-const enemyManager = new EnemyManager();
 
 // 設為全域變數
 window.waveManager = waveManager;
-window.enemyManager = enemyManager;

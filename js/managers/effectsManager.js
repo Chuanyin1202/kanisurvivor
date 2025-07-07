@@ -367,3 +367,4 @@ class EffectsManager {
 
 // 全域特效管理器
 const effectsManager = new EffectsManager();
+window.effectsManager = effectsManager;

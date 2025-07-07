@@ -172,7 +172,7 @@ class Projectile {
     findHomingTarget() {
         if (!window.enemyManager) return;
         
-        const enemies = enemyManager.getEnemiesInRange(this.position, this.homingRange);
+        const enemies = enemyManager.findEnemiesInRange(this.position, this.homingRange);
         const availableEnemies = enemies.filter(enemy => !this.hitTargets.has(enemy));
         
         if (availableEnemies.length > 0) {
@@ -248,7 +248,7 @@ class Projectile {
     checkCollisions() {
         if (!window.enemyManager) return;
         
-        const enemies = enemyManager.getEnemiesInRange(this.position, this.radius + 20);
+        const enemies = enemyManager.findEnemiesInRange(this.position, this.radius + 20);
         
         for (const enemy of enemies) {
             if (!enemy.isAlive || this.hitTargets.has(enemy)) continue;
@@ -311,7 +311,7 @@ class Projectile {
     dealAreaDamage(center) {
         if (!window.enemyManager) return;
         
-        const enemies = enemyManager.getEnemiesInRange(center, this.areaOfEffect);
+        const enemies = enemyManager.findEnemiesInRange(center, this.areaOfEffect);
         
         enemies.forEach(enemy => {
             if (!enemy.isAlive || this.hitTargets.has(enemy)) return;

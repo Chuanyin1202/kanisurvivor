@@ -315,6 +315,9 @@ class GameOverState extends BaseGameState {
 
     enter(stats) {
         console.log('遊戲結束', stats);
+        
+        // 隱藏遊戲UI，顯示遊戲結束選單
+        document.getElementById('gameUI').classList.add('hidden');
         document.getElementById('gameOverMenu').classList.remove('hidden');
         
         // 更新遊戲結束統計
@@ -339,3 +342,4 @@ class GameOverState extends BaseGameState {
 
 // 全域遊戲狀態管理器
 const gameStateManager = new GameStateManager();
+window.gameStateManager = gameStateManager;

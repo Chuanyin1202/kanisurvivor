@@ -4,7 +4,10 @@
       "Bash(claude mcp add:*)",
       "Bash(claude mcp:*)",
       "Bash(mkdir:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(git push:*)",
+      "Bash(find:*)",
+      "Bash(rg:*)"
     ],
     "deny": []
   }

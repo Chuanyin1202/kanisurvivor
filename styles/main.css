@@ -226,7 +226,7 @@ body {
 }
 
 /* 血量和魔法條 */
-.health-bar, .exp-bar {
+.health-bar, .mana-bar, .exp-bar {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -250,6 +250,11 @@ body {
 .bar.health {
     background: linear-gradient(90deg, #e74c3c, #c0392b);
     box-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+}
+
+.bar.mana {
+    background: linear-gradient(90deg, #3498db, #2980b9);
+    box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
 }
 
 .bar.exp {

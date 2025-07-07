@@ -327,24 +327,24 @@ class Loot {
 
     // 限制在遊戲邊界內
     clampToGameBounds() {
-        const canvas = document.getElementById('gameCanvas');
-        if (!canvas) return;
+        // 使用渲染器的邏輯尺寸，而不是Canvas的實際尺寸
+        if (!window.renderer) return;
         
         const margin = this.size;
         
         if (this.position.x < margin) {
             this.position.x = margin;
             this.velocity.x = Math.abs(this.velocity.x);
-        } else if (this.position.x > canvas.width - margin) {
-            this.position.x = canvas.width - margin;
+        } else if (this.position.x > window.renderer.width - margin) {
+            this.position.x = window.renderer.width - margin;
             this.velocity.x = -Math.abs(this.velocity.x);
         }
         
         if (this.position.y < margin) {
             this.position.y = margin;
             this.velocity.y = Math.abs(this.velocity.y);
-        } else if (this.position.y > canvas.height - margin) {
-            this.position.y = canvas.height - margin;
+        } else if (this.position.y > window.renderer.height - margin) {
+            this.position.y = window.renderer.height - margin;
             this.velocity.y = -Math.abs(this.velocity.y);
         }
     }
@@ -535,3 +535,4 @@ class LootManager {
 
 // 全域戰利品管理器
 const lootManager = new LootManager();
+window.lootManager = lootManager;

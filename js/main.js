@@ -463,7 +463,7 @@ class Game {
             };
         }
 
-        // 確保管理器存在
+        // 檢查管理器是否存在（管理器應該在各自的文件中設定window屬性）
         if (!window.waveManager) {
             console.error('❌ WaveManager 未初始化');
         }
@@ -471,18 +471,20 @@ class Game {
         if (!window.enemyManager) {
             console.error('❌ EnemyManager 未初始化');
         }
-
-        // 確保全域可用
-        if (typeof waveManager !== 'undefined') {
-            window.waveManager = waveManager;
+        
+        if (!window.effectsManager) {
+            console.error('❌ EffectsManager 未初始化');
         }
-        if (typeof enemyManager !== 'undefined') {
-            window.enemyManager = enemyManager;
+        
+        if (!window.lootManager) {
+            console.error('❌ LootManager 未初始化');
         }
 
         console.log('🎮 管理器初始化完成');
         console.log('🌊 WaveManager 已就緒:', !!window.waveManager);
         console.log('👹 EnemyManager 已就緒:', !!window.enemyManager);
+        console.log('✨ EffectsManager 已就緒:', !!window.effectsManager);
+        console.log('💰 LootManager 已就緒:', !!window.lootManager);
     }
 
     // 開始遊戲
@@ -558,6 +560,16 @@ class Game {
                 }
             }
             
+            // 更新特效管理器
+            if (window.effectsManager) {
+                effectsManager.update(deltaTime);
+            }
+            
+            // 更新戰利品管理器
+            if (window.lootManager) {
+                lootManager.update(deltaTime);
+            }
+            
             // 更新 UI
             this.updateGameUI();
         }
@@ -591,9 +603,19 @@ class Game {
                 projectileManager.render(this.renderer);
             }
             
+            // 渲染戰利品
+            if (window.lootManager) {
+                lootManager.render(this.renderer);
+            }
+            
             // 渲染玩家（在最上層）
             if (this.player) {
                 this.player.render(this.renderer);
+            }
+            
+            // 渲染特效（在最頂層）
+            if (window.effectsManager) {
+                effectsManager.render(this.renderer);
             }
         }
         
@@ -647,6 +669,14 @@ class Game {
         
         if (window.waveManager) {
             window.waveManager.reset();
+        }
+        
+        if (window.effectsManager) {
+            window.effectsManager.reset();
+        }
+        
+        if (window.lootManager) {
+            window.lootManager.reset();
         }
         
         // 清除所有物件池
@@ -842,9 +872,11 @@ class Game {
         
         // 更新魔法條
         const manaBar = document.getElementById('manaBar');
-        if (manaBar) {
+        const manaText = document.getElementById('manaText');
+        if (manaBar && manaText) {
             const manaPercent = (playerInfo.mana / playerInfo.maxMana) * 100;
             manaBar.style.width = `${manaPercent}%`;
+            manaText.textContent = `${Math.round(playerInfo.mana)}/${playerInfo.maxMana}`;
         }
         
         // 更新經驗條
