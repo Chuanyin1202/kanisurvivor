@@ -525,7 +525,7 @@ const AbilityDatabase = {
         doubleedgedSword: {
             id: 'doubleedgedSword',
             name: '雙刃劍',
-            description: '爆擊率+25%，但爆擊時也會對自己造成5%傷害',
+            description: '爆擊率+25%，但爆擊時也會對自己造成5%傷害 [開發中]',
             icon: '⚔️💔',
             rarity: 'uncommon',
             category: 'risk',
@@ -539,7 +539,7 @@ const AbilityDatabase = {
         luckyStar: {
             id: 'luckyStar',
             name: '幸運之星',
-            description: '10%機率造成5倍傷害',
+            description: '10%機率造成5倍傷害 [開發中]',
             icon: '⭐',
             rarity: 'rare',
             category: 'gambling',
@@ -552,7 +552,7 @@ const AbilityDatabase = {
         chaosSpell: {
             id: 'chaosSpell',
             name: '混沌法術',
-            description: '每次施法隨機選擇一種法術類型',
+            description: '每次施法隨機選擇一種法術類型 [開發中]',
             icon: '🎲',
             rarity: 'rare',
             category: 'gambling',
@@ -564,7 +564,7 @@ const AbilityDatabase = {
         fortuneWheel: {
             id: 'fortuneWheel',
             name: '命運輪盤',
-            description: '擊殺敵人時隨機獲得：回血、回魔、短暫無敵之一',
+            description: '擊殺敵人時隨機獲得：回血、回魔、短暫無敵之一 [開發中]',
             icon: '🎰',
             rarity: 'uncommon',
             category: 'gambling',
@@ -580,7 +580,7 @@ const AbilityDatabase = {
         timeControl: {
             id: 'timeControl',
             name: '時間操控',
-            description: '可以短暫暫停時間',
+            description: '可以短暫暫停時間 [開發中]',
             icon: '⏱️',
             rarity: 'legendary',
             category: 'ultimate',
@@ -594,7 +594,7 @@ const AbilityDatabase = {
         clone: {
             id: 'clone',
             name: '分身術',
-            description: '創造一個跟隨玩家的分身',
+            description: '創造一個跟隨玩家的分身 [開發中]',
             icon: '👥',
             rarity: 'legendary',
             category: 'ultimate',
@@ -607,7 +607,7 @@ const AbilityDatabase = {
         gravityControl: {
             id: 'gravityControl',
             name: '重力掌控',
-            description: '可以吸引或排斥敵人',
+            description: '可以吸引或排斥敵人 [開發中]',
             icon: '🌌',
             rarity: 'legendary',
             category: 'ultimate',
@@ -621,7 +621,7 @@ const AbilityDatabase = {
         phoenixRebirth: {
             id: 'phoenixRebirth',
             name: '鳳凰重生',
-            description: '死亡時復活並對周圍敵人造成巨額傷害',
+            description: '死亡時復活並對周圍敵人造成巨額傷害 [開發中]',
             icon: '🔥🕊️',
             rarity: 'legendary',
             category: 'ultimate',

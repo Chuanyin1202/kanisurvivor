@@ -54,11 +54,12 @@ class EffectsManager {
             fadeOut: true
         };
         
-        // 暴擊傷害特殊樣式 - 更加醒目的紅色和更大字體
+        // 暴擊傷害特殊樣式 - 更加醒目的效果
         if (damageNumber.isCrit) {
-            damageNumber.fontSize = 24; // 更大的字體（原18px）
+            damageNumber.fontSize = 28; // 更大的字體
             damageNumber.color = '#ff0000'; // 鮮紅色
             damageNumber.velocity.y *= 0.8; // 稍微減緩上升速度，讓效果更明顯
+            damageNumber.life *= 1.2; // 爆擊數字顯示時間更長
         }
         
         this.damageNumbers.push(damageNumber);
@@ -289,26 +290,43 @@ class EffectsManager {
             if (damageNumber.alpha > 0) {
                 const font = `${damageNumber.fontSize}px Arial`;
                 renderer.ctx.save();
+                
+                // 設定文字對齊方式為居中對齊，確保數字正確顯示
+                renderer.ctx.textAlign = 'center';
+                renderer.ctx.textBaseline = 'middle';
+                renderer.ctx.font = font;
                 renderer.ctx.globalAlpha = damageNumber.alpha;
                 
-                // 暴擊特效
+                // 暴擊特效 - 鮮紅色且有描邊
                 if (damageNumber.isCrit) {
-                    renderer.drawTextWithOutline(
+                    // 繪製描邊
+                    renderer.ctx.strokeStyle = '#000000';
+                    renderer.ctx.lineWidth = 3;
+                    renderer.ctx.strokeText(
                         damageNumber.damage.toString(),
                         damageNumber.position.x,
-                        damageNumber.position.y,
-                        damageNumber.color,
-                        '#000000',
-                        font,
-                        2
+                        damageNumber.position.y
                     );
-                } else {
-                    renderer.drawText(
+                    
+                    // 繪製主文字
+                    renderer.ctx.fillStyle = damageNumber.color;
+                    renderer.ctx.fillText(
                         damageNumber.damage.toString(),
                         damageNumber.position.x,
-                        damageNumber.position.y,
-                        damageNumber.color,
-                        font
+                        damageNumber.position.y
+                    );
+                    
+                    // 爆擊調試信息
+                    if (window.debugManager && debugManager.isEnabled) {
+                        console.log(`💥 渲染爆擊傷害: ${damageNumber.damage} at (${damageNumber.position.x.toFixed(0)}, ${damageNumber.position.y.toFixed(0)})`);
+                    }
+                } else {
+                    // 普通傷害 - 白色無描邊
+                    renderer.ctx.fillStyle = damageNumber.color;
+                    renderer.ctx.fillText(
+                        damageNumber.damage.toString(),
+                        damageNumber.position.x,
+                        damageNumber.position.y
                     );
                 }
                 

@@ -317,6 +317,52 @@ class AbilityManager {
                     results.push({ type: 'spellEcho' });
                 }
                 break;
+                
+            case 'onCrit':
+                // 爆擊觸發效果（用於雙刃劍等技能）
+                if (effects.critSelfDamage && data.isCritical) {
+                    const selfDamage = data.damage * effects.critSelfDamage;
+                    results.push({ type: 'selfDamage', damage: selfDamage });
+                }
+                if (effects.critChainExplosion && data.isCritical && Math.random() < effects.critChainExplosion) {
+                    results.push({ type: 'explosion', position: data.position });
+                }
+                break;
+                
+            case 'onHit':
+                // 受擊觸發效果（用於荊棘等技能）
+                if (effects.thornsReflectChance && Math.random() < effects.thornsReflectChance) {
+                    const reflectDamage = data.damage * (effects.thornsReflectMultiplier || 0.3);
+                    results.push({ type: 'reflect', damage: reflectDamage, target: data.attacker });
+                }
+                if (effects.dodgeCounterAttack && Math.random() < effects.dodgeChance) {
+                    results.push({ type: 'counterAttack', target: data.attacker });
+                }
+                break;
+                
+            case 'onCast':
+                // 施法觸發效果（用於混沌法術等技能）
+                if (effects.chaosSpellChance && Math.random() < effects.chaosSpellChance) {
+                    const randomSpells = ['fireball', 'frostbolt', 'lightning', 'arcane'];
+                    const randomSpell = randomSpells[Math.floor(Math.random() * randomSpells.length)];
+                    results.push({ type: 'randomSpell', spellType: randomSpell });
+                }
+                if (effects.fortuneWheelChance && Math.random() < effects.fortuneWheelChance) {
+                    const effects = ['damage', 'heal', 'mana', 'speed', 'curse'];
+                    const randomEffect = effects[Math.floor(Math.random() * effects.length)];
+                    results.push({ type: 'randomEffect', effect: randomEffect });
+                }
+                break;
+                
+            case 'onMove':
+                // 移動觸發效果（用於火焰足跡等技能）
+                if (effects.fireTrailChance && data.isMoving && Math.random() < effects.fireTrailChance) {
+                    results.push({ type: 'fireTrail', position: data.position });
+                }
+                if (effects.shadowCloneChance && data.isDashing && Math.random() < effects.shadowCloneChance) {
+                    results.push({ type: 'shadowClone', position: data.position });
+                }
+                break;
         }
         
         return results;

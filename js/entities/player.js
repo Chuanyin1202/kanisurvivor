@@ -413,8 +413,8 @@ class Player {
         let damage = baseDamage + this.attack;
         let isCritical = false;
         
-        // 調試輸出 - 可通過 F12 開啟 Debug 面板查看詳細信息
-        const debugMode = false; // 使用 Debug 面板代替
+        // 詳細的傷害計算調試輸出
+        const debugMode = window.debugManager && debugManager.isEnabled;
         if (debugMode) {
             console.log(`🎯 傷害計算開始 - 基礎: ${baseDamage}, 攻擊力: ${this.attack}, 初始傷害: ${damage}`);
             console.log(`⚡ 爆擊設定 - 爆擊率: ${(this.critChance * 100).toFixed(1)}%, 爆擊倍數: ${this.critDamage}x`);
@@ -438,6 +438,7 @@ class Player {
             damage *= this.critDamage;
             isCritical = true;
             
+            // 增強爆擊調試信息，始終顯示
             console.log(`💥 爆擊觸發! 隨機值: ${critRoll.toFixed(3)}, 爆擊率: ${(this.critChance * 100).toFixed(1)}%, 倍數: ${this.critDamage}x`);
             console.log(`💥 爆擊傷害: ${oldDamage.toFixed(1)} -> ${damage.toFixed(1)} (+${(damage - oldDamage).toFixed(1)})`);
             
@@ -461,9 +462,8 @@ class Player {
             }
         }
         
-        if (debugMode) {
-            console.log(`🏆 最終傷害: ${Math.round(damage)} ${isCritical ? '(爆擊)' : ''}`);
-        }
+        // 最終傷害輸出 - 總是顯示以便調試
+        console.log(`🏆 最終傷害: ${Math.round(damage)} ${isCritical ? '(💥爆擊💥)' : '(普通)'} | 基礎:${baseDamage} + 攻擊:${this.attack}`);
         
         return {
             damage: Math.round(damage),

@@ -59,8 +59,8 @@ class DebugManager {
     // 設置鍵盤快捷鍵
     setupKeyboardShortcuts() {
         document.addEventListener('keydown', (event) => {
-            // F12 或 Ctrl+D 切換 debug 模式
-            if (event.key === 'F12' || (event.ctrlKey && event.key === 'd')) {
+            // Ctrl+D 切換 debug 模式
+            if (event.ctrlKey && event.key === 'd') {
                 event.preventDefault();
                 this.toggle();
             }

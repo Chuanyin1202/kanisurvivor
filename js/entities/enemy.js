@@ -490,19 +490,32 @@ class Enemy {
             return;
         }
         
+        // 減少隨機偏移，讓數字位置更穩定
+        const horizontalOffset = isCritical ? 0 : (Math.random() * 10 - 5); // 爆擊居中，普通傷害小幅偏移
+        const verticalOffset = isCritical ? -30 : -20; // 爆擊數字顯示位置稍高
+        
         const damageNumber = {
-            position: Vector2.add(this.position, new Vector2(Math.random() * 20 - 10, -20)),
+            position: Vector2.add(this.position, new Vector2(horizontalOffset, verticalOffset)),
             damage: Math.round(damage),
-            life: 2.0,
-            velocity: new Vector2(Math.random() * 40 - 20, -50),
-            color: isCritical ? '#ff0000' : '#ffffff', // 爆擊用紅色
-            fontSize: isCritical ? 24 : 14, // 爆擊用更大字體
+            life: isCritical ? 2.5 : 2.0, // 爆擊數字持續時間更長
+            velocity: new Vector2(
+                isCritical ? 0 : (Math.random() * 20 - 10), // 爆擊數字垂直上升，普通傷害有小幅水平飄移
+                isCritical ? -60 : -50 // 爆擊數字上升更快
+            ),
+            color: isCritical ? '#ff0000' : '#ffffff', // 爆擊用鮮紅色
+            fontSize: isCritical ? 28 : 16, // 爆擊用更大字體
             isCrit: isCritical
         };
         
         if (window.effectsManager) {
             effectsManager.addDamageNumber(damageNumber);
-            console.log(isCritical ? '🔥 顯示爆擊傷害:' : '💥 顯示傷害數字:', damage);
+            
+            // 詳細的爆擊調試信息
+            if (isCritical) {
+                console.log(`💥 顯示爆擊傷害: ${damage} at (${this.position.x.toFixed(0)}, ${this.position.y.toFixed(0)})`);
+            } else if (window.debugManager && debugManager.isEnabled) {
+                console.log(`💥 顯示普通傷害: ${damage}`);
+            }
         } else {
             console.warn('❌ EffectsManager 未就緒，無法顯示傷害數字');
         }

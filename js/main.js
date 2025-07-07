@@ -758,8 +758,10 @@ class Game {
             console.log('⏸️ 暫停選單已重置');
         }
         
-        // 開始第一波
+        // 強制更新生成點以確保正確的螢幕尺寸
         if (window.waveManager) {
+            console.log('🔄 強制更新生成點');
+            window.waveManager.setupSpawnPoints();
             console.log('🌊 開始第一波');
             window.waveManager.startWave(1);
         }

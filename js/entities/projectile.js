@@ -70,7 +70,12 @@ class Projectile {
         const spellData = gameBalance.getValue('spells', this.type);
         if (!spellData) return;
         
-        this.damage = spellData.damage;
+        // 重要：不要覆蓋已經計算好的傷害（包含爆擊）
+        // 只在沒有設定傷害時才使用基礎傷害
+        if (this.damage === 10) { // 預設傷害值
+            this.damage = spellData.damage;
+        }
+        
         this.radius = spellData.size;
         this.range = spellData.range;
         this.canPierce = spellData.piercing || false;

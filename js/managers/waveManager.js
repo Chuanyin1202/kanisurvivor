@@ -39,25 +39,27 @@ class WaveManager {
 
     // 設定生成點
     setupSpawnPoints() {
-        // 使用渲染器的邏輯尺寸而不是Canvas的實際尺寸
+        // 強制獲取當前正確的遊戲尺寸
         let width = 800;
         let height = 600;
         
-        if (window.renderer) {
-            width = window.renderer.width;
-            height = window.renderer.height;
-            console.log(`🎯 使用渲染器尺寸: ${width}x${height}`);
+        // 優先使用渲染器的邏輯尺寸，這是遊戲的實際可玩區域
+        if (window.renderer && renderer.width && renderer.height) {
+            width = renderer.width;
+            height = renderer.height;
+            console.log(`🎯 使用渲染器邏輯尺寸: ${width}x${height}`);
         } else {
-            const canvas = document.getElementById('gameCanvas');
-            if (canvas) {
-                width = canvas.width;
-                height = canvas.height;
-                console.log(`🎯 Canvas尺寸: 實際=${canvas.width}x${canvas.height}, CSS=${canvas.clientWidth}x${canvas.clientHeight}`);
-            }
-            console.log(`⚠️ 渲染器未初始化，使用Canvas尺寸: ${width}x${height}`);
+            // 回退到視窗尺寸
+            width = window.innerWidth;
+            height = window.innerHeight;
+            console.log(`🎯 使用視窗尺寸: ${width}x${height}`);
         }
         
-        console.log(`🎯 最終生成區域尺寸: ${width}x${height}`);
+        // 立即更新渲染器尺寸引用（防止不同步問題）
+        this.gameWidth = width;
+        this.gameHeight = height;
+        
+        console.log(`🎯 最終生成區域尺寸: ${width}x${height} (保存為: ${this.gameWidth}x${this.gameHeight})`);
         
         const margin = 50;
         
@@ -283,59 +285,94 @@ class WaveManager {
         return 'slime'; // 預設類型
     }
 
-    // 選擇生成點
+    // 選擇生成點 - 改進的四方向平衡算法
     selectSpawnPoint() {
         if (this.spawnPoints.length === 0) {
             console.warn('⚠️ 沒有可用的生成點，重新設置');
             this.setupSpawnPoints();
         }
         
-        // 動態獲取當前遊戲尺寸
-        let width = 800, height = 600;
-        if (window.renderer) {
-            width = window.renderer.width;
-            height = window.renderer.height;
-        }
+        // 使用緩存的尺寸，確保一致性
+        const width = this.gameWidth || window.innerWidth;
+        const height = this.gameHeight || window.innerHeight;
         
-        // 避免在玩家附近生成，但放寬距離限制
         const player = window.player;
-        const safeDistance = 80; // 縮小安全距離以獲得更多可用點
-        const safeSpawnPoints = this.spawnPoints.filter(point => {
-            if (!player) return true;
-            return point.distanceTo(player.position) > safeDistance;
+        const safeDistance = Math.min(120, Math.min(width, height) * 0.15); // 動態安全距離
+        
+        // 按四個方向分類生成點
+        const topPoints = this.spawnPoints.filter(p => p.y < 0);
+        const bottomPoints = this.spawnPoints.filter(p => p.y > height);
+        const leftPoints = this.spawnPoints.filter(p => p.x < 0);
+        const rightPoints = this.spawnPoints.filter(p => p.x > width);
+        
+        const sideBuckets = [
+            { name: '上邊', points: topPoints },
+            { name: '下邊', points: bottomPoints },
+            { name: '左邊', points: leftPoints },
+            { name: '右邊', points: rightPoints }
+        ];
+        
+        // 過濾每個方向的安全點
+        sideBuckets.forEach(bucket => {
+            bucket.safePoints = bucket.points.filter(point => {
+                if (!player) return true;
+                return point.distanceTo(player.position) > safeDistance;
+            });
         });
         
-        // 如果安全點太少，使用權重隨機選擇來避免卡在同一邊
+        // 計算總安全點數量
+        const totalSafePoints = sideBuckets.reduce((sum, bucket) => sum + bucket.safePoints.length, 0);
+        
         let selectedPoint;
-        if (safeSpawnPoints.length < 4) {
-            // 安全點太少，直接從所有點隨機選擇，但給遠離玩家的點更高權重
-            const weightedPoints = this.spawnPoints.map(point => {
-                const distance = player ? point.distanceTo(player.position) : 200;
-                const weight = Math.max(0.1, distance / 200); // 距離越遠權重越高
-                return { point, weight };
-            });
-            
-            const totalWeight = weightedPoints.reduce((sum, wp) => sum + wp.weight, 0);
-            let random = Math.random() * totalWeight;
-            
-            for (const wp of weightedPoints) {
-                random -= wp.weight;
-                if (random <= 0) {
-                    selectedPoint = wp.point;
-                    break;
-                }
+        
+        if (totalSafePoints === 0) {
+            // 完全沒有安全點，直接隨機選擇
+            selectedPoint = this.spawnPoints[Math.floor(Math.random() * this.spawnPoints.length)];
+            console.warn('⚠️ 沒有安全生成點，使用強制隨機');
+        } else {
+            // 強制四方向平衡：優先選擇最少使用的方向
+            if (!this.lastSpawnSides) {
+                this.lastSpawnSides = { 上邊: 0, 下邊: 0, 左邊: 0, 右邊: 0 };
             }
             
-            if (!selectedPoint) {
+            // 找出有安全點且使用次數最少的方向
+            const availableBuckets = sideBuckets.filter(bucket => bucket.safePoints.length > 0);
+            
+            if (availableBuckets.length > 0) {
+                // 按使用次數排序，優先選擇使用次數最少的方向
+                availableBuckets.sort((a, b) => this.lastSpawnSides[a.name] - this.lastSpawnSides[b.name]);
+                
+                // 70% 機率選擇使用次數最少的方向，30% 機率隨機選擇（增加隨機性）
+                let chosenBucket;
+                if (Math.random() < 0.7) {
+                    chosenBucket = availableBuckets[0]; // 最少使用的方向
+                } else {
+                    chosenBucket = availableBuckets[Math.floor(Math.random() * availableBuckets.length)];
+                }
+                
+                // 從選中方向隨機選擇一個點
+                selectedPoint = chosenBucket.safePoints[Math.floor(Math.random() * chosenBucket.safePoints.length)];
+                
+                // 更新使用次數
+                this.lastSpawnSides[chosenBucket.name]++;
+                
+                // 調試輸出
+                if (window.debugManager && debugManager.isEnabled) {
+                    console.log(`🎯 選擇方向: ${chosenBucket.name} (使用次數: ${this.lastSpawnSides[chosenBucket.name]})`);
+                    console.log(`📊 各方向使用次數:`, this.lastSpawnSides);
+                }
+            } else {
+                // 所有方向都沒有安全點，隨機選擇
                 selectedPoint = this.spawnPoints[Math.floor(Math.random() * this.spawnPoints.length)];
             }
-        } else {
-            // 有足夠安全點，隨機選擇
-            selectedPoint = safeSpawnPoints[Math.floor(Math.random() * safeSpawnPoints.length)];
         }
         
         // 分析生成點分佈（用於Debug面板）
-        const spawnStats = this.analyzeSpawnPointDistribution(safeSpawnPoints, width, height);
+        const spawnStats = this.analyzeSpawnPointDistribution(
+            sideBuckets.flatMap(bucket => bucket.safePoints),
+            width, 
+            height
+        );
         
         // 判斷選中點位置
         let side = '';
@@ -344,10 +381,10 @@ class WaveManager {
         else if (selectedPoint.x < 0) side = '左邊';
         else if (selectedPoint.x > width) side = '右邊';
         
-        // 調試輸出（使用Debug面板時可查看）
+        // 調試輸出
         if (window.debugManager && debugManager.isEnabled) {
-            console.log(`🎯 生成統計: 總點${this.spawnPoints.length}, 安全點${safeSpawnPoints.length}`, spawnStats);
-            console.log(`📍 選中位置: ${side} (${selectedPoint.x.toFixed(0)}, ${selectedPoint.y.toFixed(0)})`);
+            console.log(`🎯 生成統計: 總點${this.spawnPoints.length}, 安全點${totalSafePoints}`, spawnStats);
+            console.log(`📍 最終選中: ${side} (${selectedPoint.x.toFixed(0)}, ${selectedPoint.y.toFixed(0)})`);
         }
         
         return selectedPoint;
@@ -533,7 +570,13 @@ class WaveManager {
         this.eliteChance = 0.0;
         this.bossWave = false;
         
-        console.log('🔄 波次管理器已重置');
+        // 重置生成統計，確保四方向平衡
+        this.lastSpawnSides = { 上邊: 0, 下邊: 0, 左邊: 0, 右邊: 0 };
+        
+        // 重新設置生成點以適應當前螢幕尺寸
+        this.setupSpawnPoints();
+        
+        console.log('🔄 波次管理器已重置，生成點已更新');
     }
 
     // 設定難度
