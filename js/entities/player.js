@@ -32,6 +32,15 @@ class Player {
         this.selectedSpell = 'fireball';
         this.spellCooldown = 0;
         this.lastSpellCast = 0;
+        this.selectedSlot = 0; // 當前選中的法術槽位
+        
+        // 法術槽位系統 (4個槽位)
+        this.spellSlots = [
+            { type: 'fireball', name: '火球術', icon: '🔥', isCustom: false },
+            { type: 'frostbolt', name: '冰霜箭', icon: '❄️', isCustom: false },
+            { type: 'lightning', name: '閃電', icon: '⚡', isCustom: false },
+            { type: 'arcane', name: '奧術飛彈', icon: '🔮', isCustom: false }
+        ];
         
         // 移動系統
         this.moveDirection = new Vector2(0, 0);
@@ -92,6 +101,9 @@ class Player {
         
         // 生命狀態
         this.isAlive = true;
+        
+        // 載入法術配置
+        this.loadSpellConfiguration();
     }
 
     // 更新玩家
@@ -818,6 +830,138 @@ class Player {
                 maxCombo: this.stats.maxCombo,
                 goldEarned: this.calculateGoldEarned()
             });
+        }
+    }
+    
+    // ========== 法術槽位管理 ==========
+    
+    // 獲取法術槽位
+    getSpellSlots() {
+        return this.spellSlots;
+    }
+    
+    // 獲取當前選中的法術
+    getCurrentSpell() {
+        return this.spellSlots[this.selectedSlot];
+    }
+    
+    // 切換到指定槽位
+    switchToSlot(slotIndex) {
+        if (slotIndex < 0 || slotIndex >= 4) {
+            console.warn('⚠️ 無效的槽位索引:', slotIndex);
+            return false;
+        }
+        
+        this.selectedSlot = slotIndex;
+        const currentSpell = this.spellSlots[slotIndex];
+        
+        // 更新selectedSpell以保持向下兼容
+        this.selectedSpell = currentSpell.type;
+        
+        console.log(`🎯 切換到槽位 ${slotIndex + 1}: ${currentSpell.name}`);
+        
+        // 觸發UI更新事件
+        const event = new CustomEvent('spellSlotChanged', {
+            detail: { slotIndex: slotIndex, spell: currentSpell }
+        });
+        document.dispatchEvent(event);
+        
+        return true;
+    }
+    
+    // 裝備法術到指定槽位
+    equipSpellToSlot(slotIndex, spell) {
+        if (slotIndex < 0 || slotIndex >= 4) {
+            console.warn('⚠️ 無效的槽位索引:', slotIndex);
+            return false;
+        }
+        
+        // 如果是合成法術
+        if (spell.type === 'fused') {
+            this.spellSlots[slotIndex] = {
+                type: spell.id,
+                name: spell.name,
+                icon: this.getElementIcon(spell.elementCombo),
+                isCustom: true,
+                fusedSpell: spell // 保存完整的合成法術數據
+            };
+        } else {
+            // 基礎法術
+            this.spellSlots[slotIndex] = {
+                type: spell.type || spell.id,
+                name: spell.name,
+                icon: spell.icon || this.getSpellIcon(spell.type),
+                isCustom: false
+            };
+        }
+        
+        console.log(`⚔️ 裝備法術到槽位 ${slotIndex + 1}: ${spell.name}`);
+        
+        // 如果是當前選中的槽位，更新selectedSpell
+        if (this.selectedSlot === slotIndex) {
+            this.selectedSpell = this.spellSlots[slotIndex].type;
+        }
+        
+        // 觸發裝備事件
+        const event = new CustomEvent('spellEquipped', {
+            detail: { slotIndex: slotIndex, spell: this.spellSlots[slotIndex] }
+        });
+        document.dispatchEvent(event);
+        
+        this.saveSpellConfiguration();
+        return true;
+    }
+    
+    // 獲取法術圖標
+    getSpellIcon(spellType) {
+        const icons = {
+            'fireball': '🔥',
+            'frostbolt': '❄️', 
+            'lightning': '⚡',
+            'arcane': '🔮'
+        };
+        return icons[spellType] || '✨';
+    }
+    
+    // 獲取元素圖標
+    getElementIcon(elements) {
+        const iconMap = {
+            'F': '🔥',
+            'I': '❄️',
+            'L': '⚡',
+            'A': '🔮'
+        };
+        
+        if (elements && elements.length > 0) {
+            return elements.map(e => iconMap[e] || '✨').join('');
+        }
+        return '✨';
+    }
+    
+    // 保存法術配置
+    saveSpellConfiguration() {
+        const config = {
+            spellSlots: this.spellSlots,
+            selectedSlot: this.selectedSlot
+        };
+        
+        localStorage.setItem('playerSpellConfig', JSON.stringify(config));
+        console.log('💾 法術配置已保存');
+    }
+    
+    // 載入法術配置
+    loadSpellConfiguration() {
+        try {
+            const saved = localStorage.getItem('playerSpellConfig');
+            if (saved) {
+                const config = JSON.parse(saved);
+                this.spellSlots = config.spellSlots || this.spellSlots;
+                this.selectedSlot = config.selectedSlot || 0;
+                this.selectedSpell = this.spellSlots[this.selectedSlot].type;
+                console.log('📂 法術配置已載入');
+            }
+        } catch (error) {
+            console.error('❌ 載入法術配置失敗:', error);
         }
     }
 

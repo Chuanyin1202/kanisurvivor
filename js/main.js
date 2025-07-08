@@ -129,6 +129,17 @@ class Game {
             });
         }
         
+        const elementFusionBtn = document.getElementById('elementFusionBtn');
+        if (elementFusionBtn) {
+            elementFusionBtn.addEventListener('click', () => {
+                this.showElementFusion();
+            });
+            elementFusionBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                this.showElementFusion();
+            });
+        }
+        
         const settingsBtn = document.getElementById('settingsBtn');
         if (settingsBtn) {
             settingsBtn.addEventListener('click', () => {
@@ -910,6 +921,15 @@ class Game {
     // 隱藏成就
     hideAchievements() {
         document.getElementById('achievementsMenu').classList.add('hidden');
+    }
+
+    // 顯示元素合成
+    showElementFusion() {
+        if (window.elementSelector) {
+            elementSelector.show();
+        } else {
+            console.warn('⚠️ 元素選擇器尚未載入');
+        }
     }
 
     // 顯示設定

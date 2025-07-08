@@ -83,15 +83,8 @@ class MobileControls {
         selector.id = 'spellSelector';
         selector.className = 'mobile-spell-selector';
         
-        // 法術數據
-        const spells = [
-            { type: 'fireball', name: '火球術', icon: '🔥', color: '#ff6348' },
-            { type: 'frostbolt', name: '冰霜箭', icon: '❄️', color: '#74b9ff' },
-            { type: 'lightning', name: '閃電箭', icon: '⚡', color: '#feca57' },
-            { type: 'arcane', name: '奧術飛彈', icon: '🔮', color: '#a55eea' }
-        ];
-        
-        let currentSpellIndex = 0; // 預設選擇火球術
+        // 獲取玩家法術槽位
+        const spells = this.getPlayerSpellSlots();
         
         selector.innerHTML = `
             <div class="spell-selector-container">
@@ -102,9 +95,8 @@ class MobileControls {
                 <div class="spell-wheel hidden" id="spellWheel">
                     ${spells.map((spell, index) => `
                         <div class="spell-option ${index === 0 ? 'active' : ''}" 
-                             data-spell="${spell.type}" 
-                             data-index="${index}"
-                             style="border-color: ${spell.color}">
+                             data-slot="${index}"
+                             data-spell="${spell.type}">
                             <div class="spell-icon">${spell.icon}</div>
                             <div class="spell-name">${spell.name}</div>
                         </div>
@@ -116,13 +108,59 @@ class MobileControls {
         return selector;
     }
     
+    // 獲取玩家法術槽位
+    getPlayerSpellSlots() {
+        if (window.player && player.getSpellSlots) {
+            return player.getSpellSlots();
+        }
+        
+        // 預設法術
+        return [
+            { type: 'fireball', name: '火球術', icon: '🔥' },
+            { type: 'frostbolt', name: '冰霜箭', icon: '❄️' },
+            { type: 'lightning', name: '閃電箭', icon: '⚡' },
+            { type: 'arcane', name: '奧術飛彈', icon: '🔮' }
+        ];
+    }
+    
+    // 更新法術選擇器顯示
+    updateSpellSelector() {
+        if (!this.spellSelector) return;
+        
+        const spells = this.getPlayerSpellSlots();
+        const currentSpell = document.getElementById('currentSpell');
+        const spellWheel = document.getElementById('spellWheel');
+        
+        if (!currentSpell || !spellWheel) return;
+        
+        // 獲取當前選中的槽位
+        const currentSlot = window.player ? player.selectedSlot || 0 : 0;
+        
+        // 更新當前法術顯示
+        const activeSpell = spells[currentSlot];
+        currentSpell.querySelector('.spell-icon').textContent = activeSpell.icon;
+        currentSpell.querySelector('.spell-name').textContent = activeSpell.name;
+        
+        // 更新輪盤選項
+        spellWheel.innerHTML = spells.map((spell, index) => `
+            <div class="spell-option ${index === currentSlot ? 'active' : ''}" 
+                 data-slot="${index}"
+                 data-spell="${spell.type}">
+                <div class="spell-icon">${spell.icon}</div>
+                <div class="spell-name">${spell.name}</div>
+            </div>
+        `).join('');
+        
+        // 重新綁定事件
+        this.bindSpellWheelEvents();
+    }
+    
     // 設置法術選擇器事件
     setupSpellSelectorEvents() {
         if (!this.spellSelector) return;
         
         const currentSpell = this.spellSelector.querySelector('#currentSpell');
         const spellWheel = this.spellSelector.querySelector('#spellWheel');
-        const spellOptions = this.spellSelector.querySelectorAll('.spell-option');
         
         let isWheelOpen = false;
         
@@ -132,6 +170,8 @@ class MobileControls {
             isWheelOpen = !isWheelOpen;
             
             if (isWheelOpen) {
+                // 更新顯示再打開
+                this.updateSpellSelector();
                 spellWheel.classList.remove('hidden');
                 currentSpell.classList.add('selecting');
             } else {
@@ -140,36 +180,8 @@ class MobileControls {
             }
         });
         
-        // 選擇法術選項
-        spellOptions.forEach(option => {
-            option.addEventListener('touchstart', (event) => {
-                event.preventDefault();
-                
-                const spellType = option.dataset.spell;
-                const spellIndex = parseInt(option.dataset.index);
-                
-                // 更新玩家選中的法術
-                if (window.player) {
-                    player.selectedSpell = spellType;
-                    console.log(`📱 切換法術: ${spellType}`);
-                }
-                
-                // 更新視覺效果
-                spellOptions.forEach(opt => opt.classList.remove('active'));
-                option.classList.add('active');
-                
-                // 更新當前法術顯示
-                const spellIcon = option.querySelector('.spell-icon').textContent;
-                const spellName = option.querySelector('.spell-name').textContent;
-                currentSpell.querySelector('.spell-icon').textContent = spellIcon;
-                currentSpell.querySelector('.spell-name').textContent = spellName;
-                
-                // 關閉輪盤
-                spellWheel.classList.add('hidden');
-                currentSpell.classList.remove('selecting');
-                isWheelOpen = false;
-            });
-        });
+        // 綁定輪盤事件
+        this.bindSpellWheelEvents();
         
         // 點擊其他地方關閉輪盤
         document.addEventListener('touchstart', (event) => {
@@ -178,6 +190,40 @@ class MobileControls {
                 currentSpell.classList.remove('selecting');
                 isWheelOpen = false;
             }
+        });
+        
+        // 監聽法術槽位變化事件
+        document.addEventListener('spellSlotChanged', () => {
+            this.updateSpellSelector();
+        });
+        
+        document.addEventListener('spellEquipped', () => {
+            this.updateSpellSelector();
+        });
+    }
+    
+    // 綁定輪盤事件
+    bindSpellWheelEvents() {
+        const spellOptions = this.spellSelector.querySelectorAll('.spell-option');
+        
+        spellOptions.forEach(option => {
+            option.addEventListener('touchstart', (event) => {
+                event.preventDefault();
+                
+                const slotIndex = parseInt(option.dataset.slot);
+                
+                // 切換到指定槽位
+                if (window.player) {
+                    player.switchToSlot(slotIndex);
+                    console.log(`📱 切換到槽位 ${slotIndex + 1}`);
+                }
+                
+                // 關閉輪盤
+                const spellWheel = this.spellSelector.querySelector('#spellWheel');
+                const currentSpell = this.spellSelector.querySelector('#currentSpell');
+                spellWheel.classList.add('hidden');
+                currentSpell.classList.remove('selecting');
+            });
         });
     }
     

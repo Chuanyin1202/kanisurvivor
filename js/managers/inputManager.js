@@ -201,6 +201,13 @@ class InputManager {
         
         this.keys.set(key, true);
         
+        // 處理法術切換 (1234鍵)
+        if (['Digit1', 'Digit2', 'Digit3', 'Digit4'].includes(key) && window.player) {
+            const slotIndex = parseInt(key.replace('Digit', '')) - 1;
+            player.switchToSlot(slotIndex);
+            event.preventDefault();
+        }
+        
         // 防止某些按鍵的預設行為
         if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
             event.preventDefault();

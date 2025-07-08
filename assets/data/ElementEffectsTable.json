@@ -1,0 +1,20 @@
+{
+  "F": {
+    "damage": 1.2,
+    "ignite": true,
+    "burnDuration": 2
+  },
+  "I": {
+    "slow": 0.3,
+    "slowDuration": 2,
+    "cooldownReduction": 0.1
+  },
+  "L": {
+    "chain": 1,
+    "stun": true
+  },
+  "A": {
+    "tracking": true,
+    "projectileSpeedBoost": 1.5
+  }
+}
