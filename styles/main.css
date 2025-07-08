@@ -2413,3 +2413,269 @@ body {
 .ui-element[data-emotional-state="panic"] .eva-text-breathing {
     animation: eva-critical-shake 0.1s infinite;
 }
+
+/* ========================================
+   Phase 4: 對抗性動畫系統 - 機械vs有機張力
+   ======================================== */
+
+/* 機械感動畫：精確、冷酷的位移運動 */
+@keyframes eva-mechanical-shift {
+    0%, 100% { 
+        transform: translateX(0) translateY(0);
+        filter: contrast(1);
+    }
+    25% { 
+        transform: translateX(2px) translateY(0);
+        filter: contrast(1.1);
+    }
+    50% { 
+        transform: translateX(0) translateY(1px);
+        filter: contrast(1.05);
+    }
+    75% { 
+        transform: translateX(-1px) translateY(0);
+        filter: contrast(1.1);
+    }
+}
+
+/* 有機感動畫：柔和的呼吸式變化 */
+@keyframes eva-organic-pulse {
+    0%, 100% { 
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+        filter: blur(0px);
+    }
+    33% { 
+        transform: scale(1.008) rotate(0.2deg);
+        opacity: 0.98;
+        filter: blur(0.2px);
+    }
+    66% { 
+        transform: scale(0.995) rotate(-0.1deg);
+        opacity: 1.02;
+        filter: blur(0.1px);
+    }
+}
+
+/* 對抗衝突：同時具備機械和有機特徵 */
+@keyframes eva-conflict-animation {
+    0%, 100% { 
+        transform: translateX(0) scale(1) rotate(0deg);
+        filter: contrast(1) blur(0px);
+        opacity: 1;
+    }
+    20% { 
+        transform: translateX(1px) scale(1.005) rotate(0.1deg);
+        filter: contrast(1.1) blur(0.1px);
+        opacity: 0.98;
+    }
+    40% { 
+        transform: translateX(-1px) scale(0.998) rotate(-0.1deg);
+        filter: contrast(1.05) blur(0.2px);
+        opacity: 1.01;
+    }
+    60% { 
+        transform: translateX(0) scale(1.002) rotate(0.05deg);
+        filter: contrast(1.08) blur(0.1px);
+        opacity: 0.99;
+    }
+    80% { 
+        transform: translateX(0.5px) scale(1.001) rotate(-0.05deg);
+        filter: contrast(1.03) blur(0px);
+        opacity: 1.005;
+    }
+}
+
+/* 戰鬥激烈時的整體HUD顫抖 */
+@keyframes eva-battle-intensity {
+    0%, 100% { 
+        transform: translate(0, 0) scale(1);
+        filter: contrast(1) brightness(1);
+    }
+    10% { 
+        transform: translate(-0.5px, 0.5px) scale(1.001);
+        filter: contrast(1.05) brightness(1.02);
+    }
+    20% { 
+        transform: translate(0.5px, -0.3px) scale(0.999);
+        filter: contrast(1.03) brightness(1.01);
+    }
+    30% { 
+        transform: translate(-0.3px, -0.5px) scale(1.001);
+        filter: contrast(1.07) brightness(1.03);
+    }
+    40% { 
+        transform: translate(0.7px, 0.2px) scale(0.998);
+        filter: contrast(1.04) brightness(1.01);
+    }
+    50% { 
+        transform: translate(-0.2px, 0.6px) scale(1.002);
+        filter: contrast(1.06) brightness(1.04);
+    }
+    60% { 
+        transform: translate(0.4px, -0.4px) scale(0.999);
+        filter: contrast(1.03) brightness(1.02);
+    }
+    70% { 
+        transform: translate(-0.6px, 0.1px) scale(1.001);
+        filter: contrast(1.08) brightness(1.03);
+    }
+    80% { 
+        transform: translate(0.2px, 0.5px) scale(0.998);
+        filter: contrast(1.05) brightness(1.01);
+    }
+    90% { 
+        transform: translate(-0.4px, -0.2px) scale(1.002);
+        filter: contrast(1.04) brightness(1.02);
+    }
+}
+
+/* 同步失衡時的視覺干擾 */
+@keyframes eva-sync-disruption {
+    0%, 95%, 100% { 
+        transform: translate(0, 0) skew(0deg, 0deg);
+        filter: hue-rotate(0deg) contrast(1);
+        opacity: 1;
+    }
+    5% { 
+        transform: translate(-2px, 1px) skew(0.5deg, 0deg);
+        filter: hue-rotate(45deg) contrast(1.3);
+        opacity: 0.9;
+    }
+    10% { 
+        transform: translate(1px, -2px) skew(-0.3deg, 0.2deg);
+        filter: hue-rotate(-30deg) contrast(1.1);
+        opacity: 0.95;
+    }
+    15% { 
+        transform: translate(-1px, -1px) skew(0.2deg, -0.4deg);
+        filter: hue-rotate(60deg) contrast(1.4);
+        opacity: 0.8;
+    }
+    20% { 
+        transform: translate(3px, 0px) skew(-0.6deg, 0.1deg);
+        filter: hue-rotate(-45deg) contrast(1.2);
+        opacity: 0.9;
+    }
+}
+
+/* 全屏閃白警告效果 */
+@keyframes eva-flash-warning {
+    0%, 90%, 100% { 
+        background: transparent;
+        opacity: 0;
+    }
+    5%, 15% { 
+        background: rgba(255, 255, 255, 0.8);
+        opacity: 0.9;
+    }
+    10% { 
+        background: rgba(255, 0, 64, 0.6);
+        opacity: 1;
+    }
+}
+
+/* 動畫狀態類別 */
+.eva-animation-mechanical {
+    animation: eva-mechanical-shift 4s linear infinite;
+}
+
+.eva-animation-organic {
+    animation: eva-organic-pulse 6s ease-in-out infinite;
+}
+
+.eva-animation-conflict {
+    animation: eva-conflict-animation 3s ease-in-out infinite;
+}
+
+.eva-battle-active {
+    animation: eva-battle-intensity 0.2s linear infinite;
+}
+
+.eva-sync-unstable {
+    animation: eva-sync-disruption 1.5s linear infinite;
+}
+
+/* 全屏警告覆蓋層 */
+.eva-flash-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 99999;
+    pointer-events: none;
+    animation: eva-flash-warning 0.5s linear;
+}
+
+/* 情緒驅動的動畫組合 */
+.ui-element[data-emotional-state="calm"] {
+    animation: eva-organic-pulse 8s ease-in-out infinite;
+}
+
+.ui-element[data-emotional-state="tense"] {
+    animation: eva-conflict-animation 2.5s ease-in-out infinite;
+}
+
+.ui-element[data-emotional-state="panic"] {
+    animation: eva-conflict-animation 1s ease-in-out infinite, 
+               eva-sync-disruption 1.5s linear infinite;
+}
+
+/* 戰鬥狀態動畫 */
+.hud[data-battle-state="active"] {
+    animation: eva-battle-intensity 0.15s linear infinite;
+}
+
+.hud[data-battle-state="intense"] {
+    animation: eva-battle-intensity 0.08s linear infinite,
+               eva-conflict-animation 1s ease-in-out infinite;
+}
+
+/* 同步率驅動的視覺效果 */
+.ui-element[data-sync-rate="critical"] {
+    animation: eva-sync-disruption 1s linear infinite,
+               eva-critical-shake 0.1s infinite;
+    filter: contrast(1.2) brightness(1.1);
+}
+
+.ui-element[data-sync-rate="low"] {
+    animation: eva-conflict-animation 2s ease-in-out infinite;
+    filter: contrast(1.1) brightness(1.05);
+}
+
+/* 邊框呼吸效果 - 有機美學 */
+@keyframes eva-border-breathe {
+    0%, 100% { 
+        border-color: var(--eva-purple-primary);
+        box-shadow: var(--eva-glow-purple);
+    }
+    50% { 
+        border-color: var(--eva-purple-light);
+        box-shadow: var(--eva-glow-purple), 
+                    0 0 30px rgba(138, 43, 226, 0.4);
+    }
+}
+
+/* 應用邊框呼吸到關鍵UI元素 */
+.health-bar, .mana-bar, .exp-bar {
+    animation: eva-border-breathe 4s ease-in-out infinite;
+}
+
+.timer, .score {
+    animation: eva-border-breathe 5s ease-in-out infinite;
+}
+
+/* 機械感精確移動 - 數據顯示 */
+.font-mono-data {
+    animation: eva-mechanical-shift 6s linear infinite;
+}
+
+/* 按鈕的對抗性動畫 */
+.btn {
+    animation: eva-organic-pulse 7s ease-in-out infinite;
+}
+
+.btn:hover {
+    animation: eva-conflict-animation 1s ease-in-out infinite;
+}

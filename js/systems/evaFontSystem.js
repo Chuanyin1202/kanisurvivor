@@ -7,10 +7,16 @@ class EVAFontSystem {
         this.currentSyncRate = 100; // 同步率 (0-100)
         this.emotionalState = 'calm'; // calm, tense, panic
         this.systemStatus = 'normal'; // normal, alert, critical
+        this.battleState = 'idle'; // idle, active, intense
         
         // UI元素緩存
         this.uiElements = new Map();
         this.scanlineElement = null;
+        this.hudElement = null;
+        
+        // 動畫控制
+        this.animationIntervals = new Map();
+        this.flashOverlay = null;
         
         console.log('🔤 EVA字體系統初期化完了 - EVA FONT SYSTEM INITIALIZED');
     }
@@ -32,8 +38,12 @@ class EVAFontSystem {
             this.uiElements.set(id, element);
         });
         
-        // 緩存掃描線元素
+        // 緩存關鍵元素
         this.scanlineElement = document.querySelector('.eva-scanline');
+        this.hudElement = document.querySelector('.hud');
+        
+        // 創建全屏閃白覆蓋層
+        this.createFlashOverlay();
         
         console.log(`📦 UI要素キャッシュ完了 - ${this.uiElements.size} elements cached`);
     }
@@ -53,6 +63,12 @@ class EVAFontSystem {
             }
             if (e.code === 'F10') {
                 this.cycleEmotionalState();
+            }
+            if (e.code === 'F11') {
+                this.cycleBattleState();
+            }
+            if (e.code === 'F12') {
+                this.triggerFlashWarning();
             }
         });
     }
@@ -256,13 +272,160 @@ class EVAFontSystem {
         this.setEmotionalState(states[nextIndex]);
     }
     
+    // 設置戰鬥狀態
+    setBattleState(state) {
+        this.battleState = state;
+        this.updateBattleAnimations();
+        console.log(`⚔️ 戦闘状態更新 - BATTLE STATE: ${state.toUpperCase()}`);
+    }
+    
+    // 更新戰鬥動畫
+    updateBattleAnimations() {
+        if (!this.hudElement) return;
+        
+        // 移除現有戰鬥狀態類
+        this.hudElement.classList.remove('eva-battle-active', 'eva-sync-unstable');
+        this.hudElement.removeAttribute('data-battle-state');
+        
+        // 應用新戰鬥狀態
+        switch (this.battleState) {
+            case 'active':
+                this.hudElement.setAttribute('data-battle-state', 'active');
+                break;
+            case 'intense':
+                this.hudElement.setAttribute('data-battle-state', 'intense');
+                break;
+            default:
+                // idle狀態，無需特殊動畫
+                break;
+        }
+    }
+    
+    // 創建全屏閃白覆蓋層
+    createFlashOverlay() {
+        this.flashOverlay = document.createElement('div');
+        this.flashOverlay.className = 'eva-flash-overlay';
+        this.flashOverlay.style.display = 'none';
+        document.body.appendChild(this.flashOverlay);
+    }
+    
+    // 觸發全屏警告閃白
+    triggerFlashWarning() {
+        if (!this.flashOverlay) return;
+        
+        this.flashOverlay.style.display = 'block';
+        this.flashOverlay.style.animation = 'eva-flash-warning 0.5s linear';
+        
+        // 播放警告音效（如果存在）
+        if (window.audioManager && audioManager.playWarning) {
+            audioManager.playWarning();
+        }
+        
+        // 0.5秒後隱藏
+        setTimeout(() => {
+            this.flashOverlay.style.display = 'none';
+        }, 500);
+        
+        console.log('⚠️ 緊急警告発動 - EMERGENCY WARNING TRIGGERED');
+    }
+    
+    // 啟動戰鬥激烈模式
+    startIntenseBattle() {
+        this.setBattleState('intense');
+        this.setEmotionalState('tense');
+        
+        // 如果同步率低，觸發額外效果
+        if (this.currentSyncRate < 50) {
+            this.triggerFlashWarning();
+        }
+    }
+    
+    // 停止戰鬥模式
+    stopBattle() {
+        this.setBattleState('idle');
+        this.setEmotionalState('calm');
+    }
+    
+    // 模擬同步失衡事件
+    triggerSyncLoss() {
+        const previousRate = this.currentSyncRate;
+        this.setSyncRate(Math.max(10, this.currentSyncRate - 30));
+        this.setEmotionalState('panic');
+        this.triggerFlashWarning();
+        
+        // 3秒後部分恢復
+        setTimeout(() => {
+            this.setSyncRate(Math.min(previousRate, this.currentSyncRate + 15));
+            if (this.currentSyncRate > 30) {
+                this.setEmotionalState('tense');
+            }
+        }, 3000);
+        
+        console.log('💥 同期率急降下 - SYNC RATE CRITICAL DROP');
+    }
+    
+    // 調試功能：循環戰鬥狀態
+    cycleBattleState() {
+        const states = ['idle', 'active', 'intense'];
+        const currentIndex = states.indexOf(this.battleState);
+        const nextIndex = (currentIndex + 1) % states.length;
+        this.setBattleState(states[nextIndex]);
+    }
+    
+    // 自動同步率波動（模擬真實戰鬥）
+    startAutoSyncFluctuation() {
+        if (this.animationIntervals.has('syncFluctuation')) return;
+        
+        const interval = setInterval(() => {
+            if (this.battleState !== 'idle') {
+                // 戰鬥時同步率會有微幅波動
+                const fluctuation = (Math.random() - 0.5) * 10; // ±5%
+                const newRate = Math.max(0, Math.min(100, this.currentSyncRate + fluctuation));
+                this.setSyncRate(newRate);
+            }
+        }, 2000);
+        
+        this.animationIntervals.set('syncFluctuation', interval);
+    }
+    
+    // 停止自動波動
+    stopAutoSyncFluctuation() {
+        const interval = this.animationIntervals.get('syncFluctuation');
+        if (interval) {
+            clearInterval(interval);
+            this.animationIntervals.delete('syncFluctuation');
+        }
+    }
+    
+    // 與遊戲狀態集成
+    onGameStateChange(gameState) {
+        switch (gameState) {
+            case 'playing':
+                this.setBattleState('active');
+                this.startAutoSyncFluctuation();
+                break;
+            case 'paused':
+                this.setBattleState('idle');
+                break;
+            case 'gameOver':
+                this.triggerSyncLoss();
+                this.stopAutoSyncFluctuation();
+                break;
+            default:
+                this.setBattleState('idle');
+                this.stopAutoSyncFluctuation();
+        }
+    }
+    
     // 獲取當前狀態信息
     getStatus() {
         return {
             syncRate: this.currentSyncRate,
             emotionalState: this.emotionalState,
             systemStatus: this.systemStatus,
-            elementsManaged: this.uiElements.size
+            battleState: this.battleState,
+            elementsManaged: this.uiElements.size,
+            animationsActive: this.animationIntervals.size
         };
     }
 }

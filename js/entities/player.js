@@ -537,6 +537,23 @@ class Player {
         this.health -= actualDamage;
         this.stats.damageTaken += actualDamage;
         
+        // EVA字體系統：根據生命值變化調整同步率和情緒狀態
+        if (window.evaFontSystem) {
+            const healthPercent = (this.health / this.maxHealth) * 100;
+            evaFontSystem.setSyncRate(healthPercent + Math.random() * 10 - 5); // 健康值+隨機波動
+            
+            if (healthPercent < 25) {
+                evaFontSystem.setEmotionalState('panic');
+                if (Math.random() < 0.3) { // 30%機率觸發警告
+                    evaFontSystem.triggerFlashWarning();
+                }
+            } else if (healthPercent < 50) {
+                evaFontSystem.setEmotionalState('tense');
+            } else {
+                evaFontSystem.setEmotionalState('calm');
+            }
+        }
+        
         // 視覺效果
         this.animation.state = 'hit';
         
@@ -821,6 +838,12 @@ class Player {
         
         console.log('玩家死亡');
         this.isAlive = false;
+        
+        // EVA字體系統：死亡時觸發同步失衡
+        if (window.evaFontSystem) {
+            evaFontSystem.triggerSyncLoss();
+            evaFontSystem.onGameStateChange('gameOver');
+        }
         
         // 觸發遊戲結束
         if (window.gameStateManager) {

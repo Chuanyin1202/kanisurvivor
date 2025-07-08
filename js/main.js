@@ -746,6 +746,11 @@ class Game {
         gameStateManager.changeState('gamePlay');
         console.log('✅ 狀態已切換到 gamePlay');
         
+        // EVA字體系統：切換到遊戲中狀態
+        if (window.evaFontSystem) {
+            evaFontSystem.onGameStateChange('playing');
+        }
+        
         // 隱藏主選單和暫停選單，顯示遊戲UI
         const mainMenu = document.getElementById('mainMenu');
         const gameUI = document.getElementById('gameUI');
@@ -810,6 +815,11 @@ class Game {
             gameStateManager.pushState('pause');
             this.isPaused = true;
             
+            // EVA字體系統：切換到暫停狀態
+            if (window.evaFontSystem) {
+                evaFontSystem.onGameStateChange('paused');
+            }
+            
             // 隱藏法術選擇器
             if (window.mobileControls) {
                 mobileControls.hideSpellSelector();
@@ -834,6 +844,11 @@ class Game {
         if (gameStateManager.isCurrentState('pause')) {
             gameStateManager.popState();
             this.isPaused = false;
+            
+            // EVA字體系統：恢復到遊戲狀態
+            if (window.evaFontSystem) {
+                evaFontSystem.onGameStateChange('playing');
+            }
             
             // 顯示法術選擇器
             if (window.mobileControls && mobileControls.isEnabled) {
@@ -883,6 +898,11 @@ class Game {
         console.log('🏠 返回主選單');
         this.isPaused = false;
         gameStateManager.changeState('mainMenu');
+        
+        // EVA字體系統：切換到主選單狀態
+        if (window.evaFontSystem) {
+            evaFontSystem.onGameStateChange('mainMenu');
+        }
         
         // 顯示主選單UI
         const mainMenu = document.getElementById('mainMenu');
