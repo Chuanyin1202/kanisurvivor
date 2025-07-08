@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手機控制系統測試</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: white;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        #testArea {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.1);
+        }
+        
+        #info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 1000;
+            font-size: 12px;
+        }
+        
+        .mobile-dpad {
+            position: fixed;
+            z-index: 40; /* 降低層級 */
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            opacity: 0.3;
+            transition: opacity 0.3s ease, transform 0.2s ease;
+        }
+
+        .mobile-dpad.hidden {
+            display: none;
+        }
+
+        .mobile-dpad.inactive {
+            opacity: 0.3;
+            pointer-events: none;
+            transform: scale(0.9);
+        }
+
+        .mobile-dpad.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1);
+        }
+
+        .mobile-dpad.controlling {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .dpad-label {
+            text-align: center;
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+        }
+
+        .joystick-container {
+            width: 120px;
+            height: 120px;
+            position: relative;
+        }
+
+        .joystick-bg {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.8) 100%);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 0 20px rgba(74, 144, 226, 0.3);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .joystick-knob {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, rgba(74, 144, 226, 0.9), rgba(80, 201, 195, 0.9));
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 15px rgba(74, 144, 226, 0.6);
+            transition: all 0.1s ease;
+            pointer-events: none;
+        }
+
+        .mobile-spell-selector-vertical {
+            position: fixed;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            z-index: 50;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        .spell-buttons-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .spell-button {
+            width: 45px;
+            height: 45px;
+            background: radial-gradient(circle, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.9) 100%);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 15px rgba(74, 144, 226, 0.3);
+            backdrop-filter: blur(5px);
+        }
+
+        .spell-button:active {
+            transform: scale(0.95);
+        }
+
+        .spell-button.active {
+            background: radial-gradient(circle, rgba(74, 144, 226, 0.8) 0%, rgba(80, 201, 195, 0.8) 100%);
+            border-color: rgba(74, 144, 226, 0.9);
+            box-shadow: 0 0 20px rgba(74, 144, 226, 0.7);
+            transform: scale(1.1);
+        }
+
+        .spell-button .spell-icon {
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="testArea">
+        <div id="info">
+            <div>🎮 手機控制系統測試 v3</div>
+            <div>📱 長按 (250ms) 或拖拉 (8px) 激活DPAD</div>
+            <div>⬅️ 左半邊：移動控制 | ➡️ 右半邊：攻擊控制</div>
+            <div>🔥 支援雙手同時操作 | 🔮 右側：法術選擇</div>
+            <div>⚡ DPAD立即消失 | 🛡️ 避開HUD區域</div>
+            <div id="status">等待輸入...</div>
+        </div>
+    </div>
+
+    <script src="js/utils/vector2.js"></script>
+    <script>
+        // 簡化版的手機控制系統用於測試
+        class TestMobileControls {
+            constructor() {
+                this.isEnabled = false;
+                this.leftDpad = null;
+                this.rightDpad = null;
+                this.spellSelector = null;
+                
+                this.moveDirection = { x: 0, y: 0 };
+                this.attackDirection = { x: 0, y: 0 };
+                
+                this.createControls();
+                this.detectMobile();
+            }
+
+            detectMobile() {
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                                 ('ontouchstart' in window) ||
+                                 (navigator.maxTouchPoints > 0);
+                
+                if (isMobile) {
+                    this.enable();
+                } else {
+                    this.enable(); // 為了測試，桌面也啟用
+                }
+                
+                console.log(`📱 設備檢測: ${isMobile ? '手機' : '桌面'}`);
+            }
+
+            createControls() {
+                this.leftDpad = this.createDpad('movepad', 'left');
+                this.leftDpad.innerHTML = this.generateDpadHTML('移動');
+                
+                this.rightDpad = this.createDpad('attackpad', 'right');
+                this.rightDpad.innerHTML = this.generateDpadHTML('攻擊');
+                
+                this.spellSelector = this.createSpellSelector();
+                
+                document.body.appendChild(this.leftDpad);
+                document.body.appendChild(this.rightDpad);
+                document.body.appendChild(this.spellSelector);
+                
+                this.setupDynamicDpadEvents();
+                this.setupSpellSelectorEvents();
+            }
+
+            createDpad(id, side) {
+                const dpad = document.createElement('div');
+                dpad.id = id;
+                dpad.className = `mobile-dpad ${side}`;
+                dpad.style.opacity = '0.3';
+                dpad.style.pointerEvents = 'none';
+                return dpad;
+            }
+
+            generateDpadHTML(label) {
+                return `
+                    <div class="dpad-label">${label}</div>
+                    <div class="joystick-container">
+                        <div class="joystick-bg">
+                            <div class="joystick-knob"></div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            createSpellSelector() {
+                const selector = document.createElement('div');
+                selector.id = 'spellSelector';
+                selector.className = 'mobile-spell-selector-vertical';
+                
+                const spells = [
+                    { type: 'fireball', name: '火球術', icon: '🔥' },
+                    { type: 'frostbolt', name: '冰霜箭', icon: '❄️' },
+                    { type: 'lightning', name: '閃電箭', icon: '⚡' },
+                    { type: 'arcane', name: '奧術飛彈', icon: '🔮' }
+                ];
+                
+                selector.innerHTML = `
+                    <div class="spell-buttons-container">
+                        ${spells.map((spell, index) => `
+                            <div class="spell-button ${index === 0 ? 'active' : ''}" 
+                                 data-slot="${index}"
+                                 data-spell="${spell.type}">
+                                <div class="spell-icon">${spell.icon}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+                return selector;
+            }
+
+            setupSpellSelectorEvents() {
+                if (!this.spellSelector) return;
+                
+                this.bindSpellButtonEvents();
+            }
+
+            bindSpellButtonEvents() {
+                const spellButtons = this.spellSelector.querySelectorAll('.spell-button');
+                
+                spellButtons.forEach(button => {
+                    button.addEventListener('touchstart', (event) => {
+                        event.preventDefault();
+                        
+                        const slotIndex = parseInt(button.dataset.slot);
+                        
+                        spellButtons.forEach(btn => btn.classList.remove('active'));
+                        button.classList.add('active');
+                        
+                        this.updateStatus(`法術切換到槽位 ${slotIndex + 1}`);
+                        console.log(`📱 切換到槽位 ${slotIndex + 1}`);
+                    });
+                });
+            }
+
+            setupDynamicDpadEvents() {
+                this.setupScreenTouchEvents();
+                this.setupJoystickEvents(this.leftDpad, 'move');
+                this.setupJoystickEvents(this.rightDpad, 'attack');
+            }
+
+            setupScreenTouchEvents() {
+                // 雙DPAD獨立狀態管理
+                let leftDpadState = {
+                    active: false,
+                    touchId: null,
+                    startPos: { x: 0, y: 0 },
+                    startTime: 0,
+                    longPressTimer: null
+                };
+                
+                let rightDpadState = {
+                    active: false,
+                    touchId: null,
+                    startPos: { x: 0, y: 0 },
+                    startTime: 0,
+                    longPressTimer: null
+                };
+                
+                const LONG_PRESS_THRESHOLD = 250; // 250ms長按閾值
+                const DRAG_THRESHOLD = 8; // 8px拖拉閾值
+                
+                document.addEventListener('touchstart', (event) => {
+                    if (!this.isEnabled) return;
+                    
+                    if (this.spellSelector && this.spellSelector.contains(event.target)) {
+                        return;
+                    }
+                    
+                    if (isDpadActive) return;
+                    
+                    const touch = event.touches[0];
+                    touchStartTime = Date.now();
+                    touchStartPos.x = touch.clientX;
+                    touchStartPos.y = touch.clientY;
+                    activeTouch = touch.identifier;
+                    
+                    this.updateStatus(`觸控開始: 等待長按或拖拉...`);
+                    
+                    longPressTimer = setTimeout(() => {
+                        if (!isDpadActive && activeTouch !== null) {
+                            this.activateDpadAt(touch.clientX, touch.clientY);
+                            isDpadActive = true;
+                        }
+                    }, LONG_PRESS_THRESHOLD);
+                });
+                
+                document.addEventListener('touchmove', (event) => {
+                    if (!this.isEnabled || activeTouch === null) return;
+                    
+                    const touch = this.findTouchById(event.touches, activeTouch);
+                    if (!touch) return;
+                    
+                    const deltaX = touch.clientX - touchStartPos.x;
+                    const deltaY = touch.clientY - touchStartPos.y;
+                    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                    
+                    if (!isDpadActive && distance > DRAG_THRESHOLD) {
+                        if (longPressTimer) {
+                            clearTimeout(longPressTimer);
+                            longPressTimer = null;
+                        }
+                        this.activateDpadAt(touchStartPos.x, touchStartPos.y);
+                        isDpadActive = true;
+                    }
+                    
+                    if (isDpadActive && activeDpad) {
+                        this.updateDpadControl(activeDpad, touch.clientX, touch.clientY);
+                    }
+                });
+                
+                document.addEventListener('touchend', (event) => {
+                    if (!this.isEnabled) return;
+                    
+                    const touch = this.findTouchById(event.changedTouches, activeTouch);
+                    if (!touch) return;
+                    
+                    if (longPressTimer) {
+                        clearTimeout(longPressTimer);
+                        longPressTimer = null;
+                    }
+                    
+                    if (isDpadActive && activeDpad) {
+                        this.deactivateDpad(activeDpad);
+                    }
+                    
+                    isDpadActive = false;
+                    activeDpad = null;
+                    activeTouch = null;
+                    this.moveDirection = { x: 0, y: 0 };
+                    this.attackDirection = { x: 0, y: 0 };
+                    this.updateStatus(`觸控結束`);
+                });
+                
+                this.activateDpadAt = (x, y) => {
+                    const screenCenter = window.innerWidth / 2;
+                    const isLeftSide = x < screenCenter;
+                    
+                    activeDpad = isLeftSide ? this.leftDpad : this.rightDpad;
+                    const dpadType = isLeftSide ? '移動' : '攻擊';
+                    
+                    this.positionDpadAt(activeDpad, x, y);
+                    
+                    activeDpad.classList.remove('inactive');
+                    activeDpad.classList.add('active');
+                    activeDpad.style.pointerEvents = 'auto';
+                    
+                    this.updateStatus(`${dpadType}DPAD激活`);
+                };
+                
+                this.deactivateDpad = (dpad) => {
+                    if (!dpad) return;
+                    
+                    dpad.classList.remove('active', 'controlling');
+                    dpad.classList.add('inactive');
+                    dpad.style.pointerEvents = 'none';
+                    
+                    const knob = dpad.querySelector('.joystick-knob');
+                    if (knob) {
+                        knob.style.transform = 'translate(-50%, -50%)';
+                    }
+                };
+                
+                this.findTouchById = (touchList, id) => {
+                    for (let i = 0; i < touchList.length; i++) {
+                        if (touchList[i].identifier === id) {
+                            return touchList[i];
+                        }
+                    }
+                    return null;
+                };
+            }
+
+            showDpadAt(dpad, x, y) {
+                if (!dpad) return;
+                
+                const dpadSize = 120;
+                const halfSize = dpadSize / 2;
+                
+                const maxX = window.innerWidth - dpadSize;
+                const maxY = window.innerHeight - dpadSize;
+                
+                let adjustedX = Math.max(0, Math.min(x - halfSize, maxX));
+                let adjustedY = Math.max(0, Math.min(y - halfSize, maxY));
+                
+                dpad.style.left = adjustedX + 'px';
+                dpad.style.top = adjustedY + 'px';
+                dpad.style.position = 'fixed';
+                
+                dpad.classList.remove('dynamic-hidden');
+                dpad.classList.add('dynamic-visible');
+                
+                console.log(`🎮 DPAD顯示在 (${adjustedX}, ${adjustedY})`);
+            }
+
+            hideDpad(dpad) {
+                if (!dpad) return;
+                
+                dpad.classList.remove('dynamic-visible');
+                dpad.classList.add('dynamic-hidden');
+            }
+
+            setupJoystickEvents(dpad, type) {
+                const container = dpad.querySelector('.joystick-container');
+                const bg = dpad.querySelector('.joystick-bg');
+                const knob = dpad.querySelector('.joystick-knob');
+                
+                if (!container || !bg || !knob) return;
+                
+                let isActive = false;
+                let startPos = { x: 0, y: 0 };
+                let activeTouch = null;
+                const maxRadius = 45;
+                
+                const handleStart = (clientX, clientY, touchId = null) => {
+                    if (isActive) return;
+                    
+                    isActive = true;
+                    activeTouch = touchId;
+                    const rect = bg.getBoundingClientRect();
+                    startPos.x = rect.left + rect.width / 2;
+                    startPos.y = rect.top + rect.height / 2;
+                    
+                    container.classList.add('active');
+                    dpad.classList.add('active');
+                    this.updateJoystick(clientX, clientY, startPos, knob, maxRadius, type);
+                };
+                
+                const handleMove = (clientX, clientY, touchId = null) => {
+                    if (!isActive || (activeTouch !== null && activeTouch !== touchId)) return;
+                    this.updateJoystick(clientX, clientY, startPos, knob, maxRadius, type);
+                };
+                
+                const handleEnd = (touchId = null) => {
+                    if (!isActive || (activeTouch !== null && activeTouch !== touchId)) return;
+                    
+                    isActive = false;
+                    activeTouch = null;
+                    
+                    knob.style.transform = 'translate(-50%, -50%)';
+                    container.classList.remove('active');
+                    dpad.classList.remove('active');
+                    
+                    this.hideDpad(dpad);
+                    
+                    if (type === 'move') {
+                        this.moveDirection = { x: 0, y: 0 };
+                    } else if (type === 'attack') {
+                        this.attackDirection = { x: 0, y: 0 };
+                    }
+                    
+                    this.updateStatus(`${type === 'move' ? '移動' : '攻擊'}控制結束`);
+                };
+
+                bg.addEventListener('touchstart', (event) => {
+                    event.preventDefault();
+                    
+                    for (let i = 0; i < event.touches.length; i++) {
+                        const touch = event.touches[i];
+                        const rect = bg.getBoundingClientRect();
+                        
+                        if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
+                            touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+                            handleStart(touch.clientX, touch.clientY, touch.identifier);
+                            break;
+                        }
+                    }
+                });
+                
+                bg.addEventListener('touchmove', (event) => {
+                    event.preventDefault();
+                    
+                    for (let i = 0; i < event.touches.length; i++) {
+                        const touch = event.touches[i];
+                        if (touch.identifier === activeTouch) {
+                            handleMove(touch.clientX, touch.clientY, touch.identifier);
+                            break;
+                        }
+                    }
+                });
+                
+                bg.addEventListener('touchend', (event) => {
+                    event.preventDefault();
+                    
+                    for (let i = 0; i < event.changedTouches.length; i++) {
+                        const touch = event.changedTouches[i];
+                        if (touch.identifier === activeTouch) {
+                            handleEnd(touch.identifier);
+                            break;
+                        }
+                    }
+                });
+                
+                // 滑鼠事件（桌面測試用）
+                bg.addEventListener('mousedown', (event) => {
+                    event.preventDefault();
+                    handleStart(event.clientX, event.clientY);
+                    
+                    const mouseMoveHandler = (e) => {
+                        handleMove(e.clientX, e.clientY);
+                    };
+                    
+                    const mouseUpHandler = () => {
+                        handleEnd();
+                        document.removeEventListener('mousemove', mouseMoveHandler);
+                        document.removeEventListener('mouseup', mouseUpHandler);
+                    };
+                    
+                    document.addEventListener('mousemove', mouseMoveHandler);
+                    document.addEventListener('mouseup', mouseUpHandler);
+                });
+            }
+
+            updateJoystick(clientX, clientY, startPos, knob, maxRadius, type) {
+                const deltaX = clientX - startPos.x;
+                const deltaY = clientY - startPos.y;
+                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                
+                const clampedDistance = Math.min(distance, maxRadius);
+                const angle = Math.atan2(deltaY, deltaX);
+                
+                const knobX = Math.cos(angle) * clampedDistance;
+                const knobY = Math.sin(angle) * clampedDistance;
+                
+                knob.style.transform = `translate(${knobX - 15}px, ${knobY - 15}px)`;
+                
+                const normalizedX = clampedDistance > 10 ? knobX / maxRadius : 0;
+                const normalizedY = clampedDistance > 10 ? knobY / maxRadius : 0;
+                
+                if (type === 'move') {
+                    this.moveDirection = { x: normalizedX, y: normalizedY };
+                } else if (type === 'attack') {
+                    this.attackDirection = { x: normalizedX, y: normalizedY };
+                }
+                
+                if (clampedDistance > 10) {
+                    this.updateStatus(`${type === 'move' ? '移動' : '攻擊'}: (${normalizedX.toFixed(2)}, ${normalizedY.toFixed(2)})`);
+                }
+            }
+
+            positionDpadAt(dpad, x, y) {
+                if (!dpad) return;
+                
+                const dpadSize = 120;
+                const halfSize = dpadSize / 2;
+                
+                const maxX = window.innerWidth - dpadSize;
+                const maxY = window.innerHeight - dpadSize;
+                
+                let adjustedX = Math.max(0, Math.min(x - halfSize, maxX));
+                let adjustedY = Math.max(0, Math.min(y - halfSize, maxY));
+                
+                dpad.style.left = adjustedX + 'px';
+                dpad.style.top = adjustedY + 'px';
+                dpad.style.position = 'fixed';
+                
+                dpad.dataset.centerX = adjustedX + halfSize;
+                dpad.dataset.centerY = adjustedY + halfSize;
+            }
+
+            updateDpadControl(dpad, touchX, touchY) {
+                if (!dpad) return;
+                
+                const centerX = parseFloat(dpad.dataset.centerX);
+                const centerY = parseFloat(dpad.dataset.centerY);
+                const maxRadius = 45;
+                
+                const deltaX = touchX - centerX;
+                const deltaY = touchY - centerY;
+                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                
+                const clampedDistance = Math.min(distance, maxRadius);
+                const angle = Math.atan2(deltaY, deltaX);
+                
+                const knobX = Math.cos(angle) * clampedDistance;
+                const knobY = Math.sin(angle) * clampedDistance;
+                
+                const knob = dpad.querySelector('.joystick-knob');
+                if (knob) {
+                    knob.style.transform = `translate(${knobX - 15}px, ${knobY - 15}px)`;
+                }
+                
+                const normalizedX = clampedDistance > 10 ? knobX / maxRadius : 0;
+                const normalizedY = clampedDistance > 10 ? knobY / maxRadius : 0;
+                
+                const isLeftDpad = dpad === this.leftDpad;
+                if (isLeftDpad) {
+                    this.moveDirection = { x: normalizedX, y: normalizedY };
+                } else {
+                    this.attackDirection = { x: normalizedX, y: normalizedY };
+                }
+                
+                if (clampedDistance > 10) {
+                    dpad.classList.add('controlling');
+                    const type = isLeftDpad ? '移動' : '攻擊';
+                    this.updateStatus(`${type}: (${normalizedX.toFixed(2)}, ${normalizedY.toFixed(2)})`);
+                } else {
+                    dpad.classList.remove('controlling');
+                }
+            }
+
+            enable() {
+                this.isEnabled = true;
+                
+                if (this.leftDpad) {
+                    this.leftDpad.classList.add('inactive');
+                }
+                if (this.rightDpad) {
+                    this.rightDpad.classList.add('inactive');
+                }
+                
+                console.log('📱 手機控制已啟用');
+            }
+
+            updateStatus(message) {
+                const statusElement = document.getElementById('status');
+                if (statusElement) {
+                    statusElement.textContent = message;
+                }
+            }
+        }
+
+        // 初始化測試控制器
+        const testControls = new TestMobileControls();
+        window.testControls = testControls;
+    </script>
+</body>
+</html>

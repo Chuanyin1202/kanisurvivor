@@ -786,6 +786,15 @@ class Game {
         console.log('🔄 更新遊戲UI');
         this.updateGameUI();
         
+        // 觸發遊戲重新開始事件（通知手機控制系統同步法術選擇器）
+        setTimeout(() => {
+            const gameRestartedEvent = new CustomEvent('gameRestarted', {
+                detail: { timestamp: Date.now() }
+            });
+            document.dispatchEvent(gameRestartedEvent);
+            console.log('📡 遊戲重新開始事件已觸發');
+        }, 200); // 稍微延遲以確保玩家狀態已完全初始化
+        
         // 確保遊戲運行
         if (!this.isRunning) {
             console.log('▶️ 啟動遊戲主循環');

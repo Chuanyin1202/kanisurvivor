@@ -197,7 +197,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    z-index: 100;
+    z-index: 600; /* 提高層級，確保在DPAD上方 */
     max-width: 40vw; /* 限制最大寬度避免重疊 */
 }
 
@@ -206,7 +206,7 @@ body {
     top: 20px;
     right: 20px;
     text-align: right;
-    z-index: 100;
+    z-index: 600; /* 提高層級，確保在DPAD上方 */
     max-width: 35vw; /* 限制最大寬度避免重疊 */
 }
 
@@ -1007,33 +1007,35 @@ body {
     }
 }
 
-/* Mobile Controls - Dual DPad System */
+/* Mobile Controls - Dynamic DPad System */
 .mobile-dpad {
     position: fixed;
-    z-index: 500;
+    z-index: 40; /* 降低層級，避免覆蓋HUD */
     user-select: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
-    opacity: 0.3; /* 預設半透明 */
-    transition: opacity 0.3s ease;
+    transition: opacity 0.3s ease, transform 0.2s ease;
 }
 
 .mobile-dpad.hidden {
     display: none;
 }
 
+.mobile-dpad.inactive {
+    opacity: 0.3;
+    pointer-events: none;
+    transform: scale(0.9);
+}
+
 .mobile-dpad.active {
-    opacity: 0.9; /* 觸碰時變為不透明 */
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1);
 }
 
-.mobile-dpad.left {
-    bottom: max(20px, env(safe-area-inset-bottom) + 10px);
-    left: max(20px, env(safe-area-inset-left) + 10px);
-}
-
-.mobile-dpad.right {
-    bottom: max(20px, env(safe-area-inset-bottom) + 10px);
-    right: max(20px, env(safe-area-inset-right) + 10px);
+.mobile-dpad.controlling {
+    opacity: 1;
+    transform: scale(1.05);
 }
 
 .dpad-label {
@@ -1161,7 +1163,62 @@ body {
     opacity: 1;
 }
 
-/* 手機法術選擇器 */
+/* 手機法術選擇器 - 垂直佈局 */
+.mobile-spell-selector-vertical {
+    position: fixed;
+    top: 50%;
+    right: max(10px, env(safe-area-inset-right) + 5px);
+    transform: translateY(-50%);
+    z-index: 50; /* 降低z-index，避免覆蓋升級界面 */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+.mobile-spell-selector-vertical.hidden {
+    display: none;
+}
+
+/* 法術按鈕容器 */
+.spell-buttons-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+}
+
+/* 法術按鈕 */
+.spell-button {
+    width: 45px;
+    height: 45px;
+    background: radial-gradient(circle, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.9) 100%);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 0 15px rgba(74, 144, 226, 0.3);
+    backdrop-filter: blur(5px);
+}
+
+.spell-button:active {
+    transform: scale(0.95);
+}
+
+.spell-button.active {
+    background: radial-gradient(circle, rgba(74, 144, 226, 0.8) 0%, rgba(80, 201, 195, 0.8) 100%);
+    border-color: rgba(74, 144, 226, 0.9);
+    box-shadow: 0 0 20px rgba(74, 144, 226, 0.7);
+    transform: scale(1.1);
+}
+
+.spell-button .spell-icon {
+    font-size: 20px;
+}
+
+/* 舊版法術選擇器保留 */
 .mobile-spell-selector {
     position: fixed;
     top: max(20px, env(safe-area-inset-top) + 10px);
@@ -1284,7 +1341,27 @@ body {
     line-height: 1;
 }
 
-/* 法術選擇器橫屏優化 */
+/* 垂直法術選擇器橫屏優化 */
+@media screen and (orientation: landscape) and (max-height: 500px) {
+    .mobile-spell-selector-vertical {
+        right: max(5px, env(safe-area-inset-right) + 3px);
+    }
+    
+    .spell-button {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .spell-button .spell-icon {
+        font-size: 16px;
+    }
+    
+    .spell-buttons-container {
+        gap: 6px;
+    }
+}
+
+/* 舊版法術選擇器橫屏優化 */
 @media screen and (orientation: landscape) and (max-height: 500px) {
     .mobile-spell-selector {
         top: max(10px, env(safe-area-inset-top) + 5px);
