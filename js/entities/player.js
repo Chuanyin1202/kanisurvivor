@@ -34,12 +34,12 @@ class Player {
         this.lastSpellCast = 0;
         this.selectedSlot = 0; // 當前選中的法術槽位
         
-        // 法術槽位系統 (4個槽位)
+        // 法術槽位系統 (4個槽位) - 機甲魔法風格
         this.spellSlots = [
-            { type: 'fireball', name: '火球術', icon: '🔥', isCustom: false },
-            { type: 'frostbolt', name: '冰霜箭', icon: '❄️', isCustom: false },
-            { type: 'lightning', name: '閃電', icon: '⚡', isCustom: false },
-            { type: 'arcane', name: '奧術飛彈', icon: '🔮', isCustom: false }
+            { type: 'fireball', name: '烈焰砲擊 - BLAZE CANNON', icon: '🔥', isCustom: false },
+            { type: 'frostbolt', name: '氷結射撃 - FREEZE SHOT', icon: '❄️', isCustom: false },
+            { type: 'lightning', name: '雷撃衝動 - THUNDER IMPULSE', icon: '⚡', isCustom: false },
+            { type: 'arcane', name: '魔導追尾 - MAGI HOMING', icon: '🔮', isCustom: false }
         ];
         
         // 移動系統

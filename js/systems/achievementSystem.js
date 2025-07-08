@@ -18,10 +18,10 @@ class AchievementSystem {
 
     // 初始化成就資料
     initializeAchievements() {
-        // 擊殺類成就
+        // 擊殺類成就 - 機甲魔法風格
         this.addAchievement('first_kill', {
-            name: '初次擊殺',
-            description: '擊殺第一個敵人',
+            name: '初陣撃破 - FIRST VICTORY',
+            description: '機甲魔導師的首次敵機殲滅確認',
             type: 'kills',
             target: 1,
             reward: { gold: 10 },
@@ -29,8 +29,8 @@ class AchievementSystem {
         });
 
         this.addAchievement('killer', {
-            name: '殺手',
-            description: '累計擊殺50個敵人',
+            name: '戦場殲滅者 - BATTLEFIELD ELIMINATOR',
+            description: '50機の敵性個体を撃破完了',
             type: 'kills',
             target: 50,
             reward: { gold: 50 },
@@ -38,8 +38,8 @@ class AchievementSystem {
         });
 
         this.addAchievement('slaughter', {
-            name: '屠殺者',
-            description: '累計擊殺200個敵人',
+            name: '無双撃破王 - UNMATCHED DESTROYER',
+            description: '200機連続殲滅達成 - 圧倒的火力確認',
             type: 'kills',
             target: 200,
             reward: { gold: 100 },
@@ -47,18 +47,18 @@ class AchievementSystem {
         });
 
         this.addAchievement('massacre', {
-            name: '大屠殺',
-            description: '累計擊殺500個敵人',
+            name: '殲滅機甲師 - ANNIHILATOR PILOT',
+            description: '500機大規模殲滅作戦完遂 - 戦果絶大',
             type: 'kills',
             target: 500,
             reward: { gold: 200 },
             icon: '⚡'
         });
 
-        // 生存類成就
+        // 生存類成就 - 機甲魔法風格
         this.addAchievement('survivor', {
-            name: '生存者',
-            description: '生存1分鐘',
+            name: '不屈機師 - INDOMITABLE PILOT',
+            description: '1分間作戦継続 - 初期生存確認',
             type: 'survival',
             target: 60,
             reward: { gold: 25 },
@@ -66,8 +66,8 @@ class AchievementSystem {
         });
 
         this.addAchievement('veteran', {
-            name: '老兵',
-            description: '生存5分鐘',
+            name: '精鋭操縦士 - ELITE OPERATOR',
+            description: '5分間長期戦闘継続 - 高度技能認定',
             type: 'survival',
             target: 300,
             reward: { gold: 100 },
@@ -75,8 +75,8 @@ class AchievementSystem {
         });
 
         this.addAchievement('legend', {
-            name: '傳奇',
-            description: '生存10分鐘',
+            name: '伝説魔導師 - LEGENDARY MAGI',
+            description: '10分間極限作戦遂行 - 神話級戦績',
             type: 'survival',
             target: 600,
             reward: { gold: 250 },
@@ -84,18 +84,18 @@ class AchievementSystem {
         });
 
         this.addAchievement('immortal', {
-            name: '不朽',
-            description: '生存20分鐘',
+            name: '不滅機神 - IMMORTAL MACHINE',
+            description: '20分間究極生存達成 - 機神級認定',
             type: 'survival',
             target: 1200,
             reward: { gold: 500 },
             icon: '🌟'
         });
 
-        // 連擊類成就
+        // 連擊類成就 - 機甲魔法風格
         this.addAchievement('combo_10', {
-            name: '連擊新手',
-            description: '達成10連擊',
+            name: '連続必殺 - CHAIN ELIMINATOR',
+            description: '10連続撃破確認 - 基礎戦術習得',
             type: 'combo',
             target: 10,
             reward: { gold: 20 },
@@ -103,8 +103,8 @@ class AchievementSystem {
         });
 
         this.addAchievement('combo_25', {
-            name: '連擊高手',
-            description: '達成25連擊',
+            name: '連鎖殲滅 - CHAIN ANNIHILATION',
+            description: '25連続撃破達成 - 戦術熟練度上昇',
             type: 'combo',
             target: 25,
             reward: { gold: 50 },
@@ -112,8 +112,8 @@ class AchievementSystem {
         });
 
         this.addAchievement('combo_50', {
-            name: '連擊大師',
-            description: '達成50連擊',
+            name: '戦闘王者 - COMBAT SOVEREIGN',
+            description: '50連続撃破完遂 - 戦術指揮官認定',
             type: 'combo',
             target: 50,
             reward: { gold: 100 },
@@ -121,18 +121,18 @@ class AchievementSystem {
         });
 
         this.addAchievement('combo_100', {
-            name: '連擊之神',
-            description: '達成100連擊',
+            name: '殲滅機神 - ANNIHILATION GOD',
+            description: '100連続撃破神話級達成 - 究極戦闘AI認定',
             type: 'combo',
             target: 100,
             reward: { gold: 200 },
             icon: '🌪️'
         });
 
-        // 金幣類成就
+        // 資源回收類成就 - 機甲魔法風格
         this.addAchievement('collector', {
-            name: '收集者',
-            description: '收集100金幣',
+            name: '回収開始 - RETRIEVAL INITIATE',
+            description: '100エネルギーユニット回収確認',
             type: 'gold',
             target: 100,
             reward: { gold: 25 },
@@ -140,8 +140,8 @@ class AchievementSystem {
         });
 
         this.addAchievement('rich', {
-            name: '富有',
-            description: '收集500金幣',
+            name: '資源管制官 - RESOURCE COMMANDER',
+            description: '500エネルギーユニット備蓄達成',
             type: 'gold',
             target: 500,
             reward: { gold: 100 },
@@ -149,8 +149,8 @@ class AchievementSystem {
         });
 
         this.addAchievement('wealthy', {
-            name: '富豪',
-            description: '收集1000金幣',
+            name: '補給総監 - SUPPLY DIRECTOR',
+            description: '1000エネルギーユニット大量確保',
             type: 'gold',
             target: 1000,
             reward: { gold: 200 },
@@ -158,18 +158,18 @@ class AchievementSystem {
         });
 
         this.addAchievement('millionaire', {
-            name: '百萬富翁',
-            description: '收集5000金幣',
+            name: '資源帝王 - RESOURCE EMPEROR',
+            description: '5000エネルギーユニット超大量確保 - 経済支配達成',
             type: 'gold',
             target: 5000,
             reward: { gold: 500 },
             icon: '🏆'
         });
 
-        // 特殊成就
+        // 特殊戦闘成就 - 機甲魔法風格
         this.addAchievement('speed_demon', {
-            name: '速度惡魔',
-            description: '在2分鐘內擊殺50個敵人',
+            name: '高速殲滅機 - RAPID ELIMINATOR',
+            description: '2分間以内50機撃破 - 超高速戦闘能力認定',
             type: 'special',
             target: { kills: 50, time: 120 },
             reward: { gold: 100 },
@@ -177,18 +177,18 @@ class AchievementSystem {
         });
 
         this.addAchievement('pacifist', {
-            name: '和平主義者',
-            description: '生存1分鐘而不攻擊',
+            name: '回避専門機 - EVASION SPECIALIST',
+            description: '1分間無攻撃生存 - 超絶回避技能証明',
             type: 'special',
             target: { survival: 60, attacks: 0 },
             reward: { gold: 150 },
             icon: '🕊️'
         });
 
-        // 白金獎杯
+        // 終極認定 - 機甲魔法風格
         this.addAchievement('platinum', {
-            name: '白金獎杯',
-            description: '解鎖所有其他成就',
+            name: '機神完全体 - PERFECT MAGI-MECH',
+            description: '全認定項目達成 - 機甲魔導師最高位証明',
             type: 'platinum',
             target: this.achievements.size - 1, // 除了自己之外的所有成就
             reward: { gold: 1000 },
@@ -336,7 +336,7 @@ class AchievementSystem {
         // 顯示通知
         if (window.uiManager) {
             uiManager.showNotification(
-                `成就解鎖: ${achievement.name}`,
+                `認定達成: ${achievement.name}`,
                 'success',
                 5000
             );
@@ -345,7 +345,7 @@ class AchievementSystem {
         // 觸發事件
         this.emit('achievementUnlocked', achievement);
         
-        console.log(`🏆 成就解鎖: ${achievement.name}`);
+        console.log(`🏆 認定達成: ${achievement.name}`);
         return true;
     }
 
@@ -368,10 +368,10 @@ class AchievementSystem {
         
         if (reward.gold && window.gameData) {
             gameData.addGold(reward.gold);
-            console.log(`獲得金幣獎勵: ${reward.gold}`);
+            console.log(`エネルギーユニット獲得: ${reward.gold}`);
         }
         
-        // 可以擴展其他類型的獎勵
+        // 可擴展其他類型獎勵系統
     }
 
     // 獲取成就列表

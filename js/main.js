@@ -54,7 +54,7 @@ class Game {
             this.initializeManagers();
             
             this.isInitialized = true;
-            console.log('✅ 遊戲初始化完成');
+            console.log('✅ システム起動完了 - SYSTEM BOOT COMPLETE');
             
             // 開始遊戲循環
             this.start();
@@ -75,7 +75,7 @@ class Game {
         this.renderer = new Renderer(this.canvas);
         window.renderer = this.renderer; // 全域存取
         
-        console.log('📺 Canvas 初始化完成');
+        console.log('📺 キャンバス初期化完了 - CANVAS INITIALIZED');
     }
 
     // 設定遊戲狀態
@@ -445,7 +445,7 @@ class Game {
             100
         );
         
-        console.log('🏊 物件池初始化完成');
+        console.log('🏊 オブジェクトプール初期化完了 - OBJECT POOL READY');
     }
 
     // 初始化管理器
@@ -506,8 +506,8 @@ class Game {
             }
         }
 
-        console.log('🎮 管理器初始化完成');
-        console.log('🌊 WaveManager 已就緒:', !!window.waveManager);
+        console.log('🎮 マネージャー初期化完了 - MANAGERS INITIALIZED');
+        console.log('🌊 ウェーブシステムスタンバイ - WAVE SYSTEM STANDBY:', !!window.waveManager);
         console.log('👹 EnemyManager 已就緒:', !!window.enemyManager);
         console.log('✨ EffectsManager 已就緒:', !!window.effectsManager);
         console.log('💰 LootManager 已就緒:', !!window.lootManager);

@@ -287,8 +287,29 @@ body {
     max-width: 35vw; /* 限制最大寬度避免重疊 */
 }
 
+/* HUD標籤樣式 */
+.hud-label {
+    font-size: 0.8rem;
+    color: var(--eva-green-primary);
+    font-weight: bold;
+    letter-spacing: 1px;
+    min-width: 120px;
+    text-shadow: var(--eva-glow-green);
+    font-family: 'Orbitron', monospace;
+}
+
 /* 血量和魔法條 - EVA風格 */
 .health-bar, .mana-bar, .exp-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.health-bar > .bar-container, 
+.mana-bar > .bar-container, 
+.exp-bar > .bar-container {
     display: flex;
     align-items: center;
     gap: 10px;

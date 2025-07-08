@@ -315,20 +315,20 @@ class ShopSystem {
         }
         
         if (!window.gameData) {
-            return { success: false, message: '遊戲數據不可用' };
+            return { success: false, message: 'システムエラー - SYSTEM ERROR' };
         }
         
         const totalCost = item.price * quantity;
         const currentGold = gameData.getGold();
         
         if (currentGold < totalCost) {
-            return { success: false, message: '金幣不足' };
+            return { success: false, message: 'エネルギーユニット不足' };
         }
         
         // 檢查是否為消耗品且有堆疊限制
         if (item.stackable && item.maxStack) {
             if (item.quantity + quantity > item.maxStack) {
-                return { success: false, message: '超過堆疊上限' };
+                return { success: false, message: 'スタック上限達成 - STACK LIMIT REACHED' };
             }
         }
         
@@ -361,7 +361,7 @@ class ShopSystem {
         // 儲存數據
         this.savePurchaseHistory();
         
-        return { success: true, message: '購買成功' };
+        return { success: true, message: '裝備取得完了 - EQUIPMENT ACQUIRED' };
     }
     
     // 升級物品
@@ -379,12 +379,12 @@ class ShopSystem {
         const upgradeCost = this.getUpgradeCost(item, currentLevel);
         
         if (!window.gameData) {
-            return { success: false, message: '遊戲數據不可用' };
+            return { success: false, message: 'システムエラー - SYSTEM ERROR' };
         }
         
         const currentGold = gameData.getGold();
         if (currentGold < upgradeCost) {
-            return { success: false, message: '金幣不足' };
+            return { success: false, message: 'エネルギーユニット不足' };
         }
         
         // 扣除金幣
@@ -403,7 +403,7 @@ class ShopSystem {
         // 儲存數據
         this.savePurchaseHistory();
         
-        return { success: true, message: '升級成功' };
+        return { success: true, message: 'アップグレード完了 - UPGRADE COMPLETE' };
     }
     
     // 計算升級成本
@@ -416,11 +416,11 @@ class ShopSystem {
     useConsumable(itemId) {
         const item = this.items.get(itemId);
         if (!item || !item.owned || item.type !== 'consumable') {
-            return { success: false, message: '無法使用此物品' };
+            return { success: false, message: 'アイテム使用不可 - ITEM UNUSABLE' };
         }
         
         if (item.quantity <= 0) {
-            return { success: false, message: '物品數量不足' };
+            return { success: false, message: 'アイテム不足 - INSUFFICIENT ITEMS' };
         }
         
         // 減少數量
@@ -441,7 +441,7 @@ class ShopSystem {
         
         return { 
             success: true, 
-            message: '使用成功',
+            message: 'アイテム消費完了 - ITEM CONSUMED',
             effect: item.effect 
         };
     }

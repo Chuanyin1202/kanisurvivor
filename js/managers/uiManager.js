@@ -25,7 +25,7 @@ class UIManager {
         this.setupUpdateCallbacks();
         this.isInitialized = true;
         
-        console.log('UI 管理器初始化完成');
+        console.log('UI システム初期化完了 - UI SYSTEM INITIALIZED');
     }
 
     // 緩存 UI 元素引用

@@ -116,12 +116,12 @@ class MobileControls {
             return player.getSpellSlots();
         }
         
-        // 預設法術
+        // 預設法術 - 機甲魔法風格
         return [
-            { type: 'fireball', name: '火球術', icon: '🔥' },
-            { type: 'frostbolt', name: '冰霜箭', icon: '❄️' },
-            { type: 'lightning', name: '閃電箭', icon: '⚡' },
-            { type: 'arcane', name: '奧術飛彈', icon: '🔮' }
+            { type: 'fireball', name: '烈焰砲擊', icon: '🔥' },
+            { type: 'frostbolt', name: '氷結射撃', icon: '❄️' },
+            { type: 'lightning', name: '雷撃衝動', icon: '⚡' },
+            { type: 'arcane', name: '魔導追尾', icon: '🔮' }
         ];
     }
     

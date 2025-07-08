@@ -19,27 +19,27 @@
         <div id="mainMenu" class="screen-overlay">
             <div class="menu-content">
                 <h1 class="game-title">Kani: Pixel Mage Survivor</h1>
-                <p class="game-subtitle">像素魔法貓咪的彈幕生存冒險</p>
+                <p class="game-subtitle">機甲魔導師 Kani の戦場記録 - MAGI PILOT BATTLE LOG</p>
                 
                 <div class="menu-buttons">
-                    <button id="startBtn" class="btn btn-primary">開始遊戲</button>
-                    <button id="shopBtn" class="btn btn-secondary">商店</button>
-                    <button id="achievementsBtn" class="btn btn-secondary">成就</button>
-                    <button id="elementFusionBtn" class="btn btn-secondary">元素合成</button>
-                    <button id="settingsBtn" class="btn btn-secondary">設定</button>
+                    <button id="startBtn" class="btn btn-primary">機甲啟動 - MECH ACTIVATION</button>
+                    <button id="shopBtn" class="btn btn-secondary">裝備武裝 - ARMAMENT CONFIG</button>
+                    <button id="achievementsBtn" class="btn btn-secondary">戰績記錄 - BATTLE ARCHIVE</button>
+                    <button id="elementFusionBtn" class="btn btn-secondary">魔裝調律 - MAGI CALIBRATION</button>
+                    <button id="settingsBtn" class="btn btn-secondary">系統調整 - SYSTEM ADJUST</button>
                 </div>
                 
                 <div class="stats-display">
                     <div class="stat-item">
-                        <span class="stat-label">金幣:</span>
+                        <span class="stat-label">資金 - CREDITS:</span>
                         <span id="goldDisplay">0</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-label">最佳時間:</span>
+                        <span class="stat-label">最高作戰時間:</span>
                         <span id="bestTimeDisplay">0:00</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-label">總擊殺數:</span>
+                        <span class="stat-label">総殲滅数:</span>
                         <span id="totalKillsDisplay">0</span>
                     </div>
                 </div>
@@ -51,18 +51,21 @@
             <div class="hud">
                 <div class="hud-top">
                     <div class="health-bar">
+                        <span class="hud-label">機體強度 - FRAME</span>
                         <div class="bar-container">
                             <div id="healthBar" class="bar health"></div>
                         </div>
                         <span id="healthText">100/100</span>
                     </div>
                     <div class="mana-bar">
+                        <span class="hud-label">魔力爐心 - MANA CORE</span>
                         <div class="bar-container">
                             <div id="manaBar" class="bar mana"></div>
                         </div>
                         <span id="manaText">50/50</span>
                     </div>
                     <div class="exp-bar">
+                        <span class="hud-label">熟練度 - PROFICIENCY</span>
                         <div class="bar-container">
                             <div id="expBar" class="bar exp"></div>
                         </div>
@@ -72,11 +75,12 @@
                 
                 <div class="hud-side">
                     <div class="timer">
+                        <div class="hud-label">作戰時間 - OPERATION</div>
                         <span id="gameTimer">0:00</span>
                     </div>
                     <div class="score">
-                        <span id="killCount">擊殺: 0</span>
-                        <span id="combo">連擊: 0</span>
+                        <span id="killCount">殲滅数: 0</span>
+                        <span id="combo">連続撃破: 0</span>
                     </div>
                 </div>
             </div>

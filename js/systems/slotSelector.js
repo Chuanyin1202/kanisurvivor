@@ -136,10 +136,10 @@ class SlotSelector {
         if (!window.player) return;
         
         const spellSlots = player.getSpellSlots ? player.getSpellSlots() : [
-            { type: 'fireball', name: '火球術', icon: '🔥' },
-            { type: 'frostbolt', name: '冰霜箭', icon: '❄️' },
-            { type: 'lightning', name: '閃電', icon: '⚡' },
-            { type: 'arcane', name: '奧術飛彈', icon: '🔮' }
+            { type: 'fireball', name: '烈焰砲擊', icon: '🔥' },
+            { type: 'frostbolt', name: '氷結射撃', icon: '❄️' },
+            { type: 'lightning', name: '雷撃衝動', icon: '⚡' },
+            { type: 'arcane', name: '魔導追尾', icon: '🔮' }
         ];
         
         spellSlots.forEach((spell, index) => {
@@ -164,13 +164,13 @@ class SlotSelector {
         return icons[spellType] || '✨';
     }
     
-    // 獲取法術名稱
+    // 獲取法術名稱 - 機甲魔法風格
     getSpellName(spellType) {
         const names = {
-            'fireball': '火球術',
-            'frostbolt': '冰霜箭',
-            'lightning': '閃電',
-            'arcane': '奧術飛彈'
+            'fireball': '烈焰砲擊',
+            'frostbolt': '氷結射撃',
+            'lightning': '雷撃衝動',
+            'arcane': '魔導追尾'
         };
         return names[spellType] || spellType;
     }
@@ -193,11 +193,11 @@ class SlotSelector {
     // 選擇槽位
     selectSlot(slotIndex) {
         if (slotIndex < 0 || slotIndex > 3) {
-            console.warn('⚠️ 無效的槽位索引:', slotIndex);
+            console.warn('⚠️ 無効スロットインデックス - INVALID SLOT INDEX:', slotIndex);
             return;
         }
         
-        console.log(`🎯 選擇槽位 ${slotIndex + 1}`);
+        console.log(`🎯 スロット選択 - SLOT ${slotIndex + 1} SELECTED`);
         
         if (this.onSlotSelected) {
             this.onSlotSelected(slotIndex);
@@ -229,7 +229,7 @@ class SlotSelector {
             game.pauseGame();
         }
         
-        console.log('🎯 槽位選擇器已顯示');
+        console.log('🎯 スロットセレクター起動 - SLOT SELECTOR ACTIVE');
     }
     
     // 隱藏槽位選擇器
@@ -244,7 +244,7 @@ class SlotSelector {
             game.resumeGame();
         }
         
-        console.log('🎯 槽位選擇器已隱藏');
+        console.log('🎯 スロットセレクター停止 - SLOT SELECTOR DEACTIVATED');
     }
 }
 
