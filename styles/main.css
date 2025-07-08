@@ -1,4 +1,43 @@
-/* Kani: Pixel Mage Survivor - 主要樣式 */
+/* Kani: Pixel Mage Survivor - EVA風格主要樣式 */
+
+/* EVA配色變數系統 */
+:root {
+    /* EVA主色系 */
+    --eva-purple-primary: #8A2BE2;
+    --eva-purple-dark: #6A1B9A;
+    --eva-purple-light: #9C4DCC;
+    
+    /* EVA警告紅色系 */
+    --eva-red-primary: #FF0040;
+    --eva-red-dark: #CC0033;
+    --eva-red-light: #FF3366;
+    
+    /* EVA矩陣綠色系 */
+    --eva-green-primary: #00FF41;
+    --eva-green-dark: #00CC33;
+    --eva-green-light: #33FF66;
+    
+    /* EVA橙色警戒系 */
+    --eva-orange-primary: #FF6600;
+    --eva-orange-dark: #CC5200;
+    --eva-orange-light: #FF8533;
+    
+    /* EVA背景黑色系 */
+    --eva-black-primary: #0F0F0F;
+    --eva-black-light: #1A1A1A;
+    --eva-black-dark: #050505;
+    
+    /* EVA輔助色 */
+    --eva-white: #FFFFFF;
+    --eva-gray-light: #CCCCCC;
+    --eva-gray-dark: #666666;
+    
+    /* EVA發光效果 */
+    --eva-glow-purple: 0 0 20px rgba(138, 43, 226, 0.6);
+    --eva-glow-red: 0 0 20px rgba(255, 0, 64, 0.6);
+    --eva-glow-green: 0 0 20px rgba(0, 255, 65, 0.6);
+    --eva-glow-orange: 0 0 20px rgba(255, 102, 0, 0.6);
+}
 
 /* 全域設定 */
 * {
@@ -8,9 +47,9 @@
 }
 
 body {
-    font-family: 'Orbitron', monospace, sans-serif;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-    color: #ffffff;
+    font-family: 'Orbitron', 'Noto Sans JP', monospace, sans-serif;
+    background: linear-gradient(135deg, var(--eva-black-primary) 0%, var(--eva-black-light) 50%, var(--eva-purple-dark) 100%);
+    color: var(--eva-white);
     overflow: hidden;
     user-select: none;
     -webkit-user-select: none;
@@ -28,7 +67,7 @@ body {
 /* 遊戲畫布 - 全屏設計 */
 #gameCanvas {
     display: block;
-    background: #1a1a2e;
+    background: var(--eva-black-primary);
     width: 100vw;
     height: 100vh;
     position: fixed;
@@ -51,7 +90,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(15, 15, 15, 0.9);
     z-index: 100;
     transition: opacity 0.3s ease;
 }
@@ -60,38 +99,57 @@ body {
     display: none;
 }
 
-/* 主選單樣式 */
+/* 主選單樣式 - EVA風格 */
 #mainMenu {
-    background: linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(22, 33, 62, 0.95) 100%);
+    background: linear-gradient(135deg, rgba(15, 15, 15, 0.95) 0%, rgba(106, 27, 154, 0.1) 100%);
 }
 
 .menu-content {
     text-align: center;
     padding: 2rem;
-    border-radius: 15px;
-    border: 2px solid #4a90e2;
-    background: rgba(0, 0, 0, 0.7);
-    box-shadow: 0 0 30px rgba(74, 144, 226, 0.5);
+    border-radius: 0px; /* 移除圓角 */
+    border: 2px solid var(--eva-purple-primary);
+    background: rgba(15, 15, 15, 0.8);
+    box-shadow: var(--eva-glow-purple);
     max-width: 500px;
     width: 90%;
+    position: relative;
+}
+
+.menu-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--eva-purple-primary), transparent);
+    animation: scan-line 2s linear infinite;
+}
+
+@keyframes scan-line {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
 }
 
 .game-title {
     font-size: 3rem;
     font-weight: 900;
     margin-bottom: 0.5rem;
-    background: linear-gradient(45deg, #4a90e2, #50c9c3);
+    background: linear-gradient(45deg, var(--eva-purple-primary), var(--eva-red-primary));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-shadow: 0 0 20px rgba(74, 144, 226, 0.3);
+    text-shadow: var(--eva-glow-purple);
+    letter-spacing: 2px;
 }
 
 .game-subtitle {
     font-size: 1.2rem;
-    color: #b8b8b8;
+    color: var(--eva-gray-light);
     margin-bottom: 2rem;
     font-weight: 400;
+    letter-spacing: 1px;
 }
 
 .menu-buttons {
@@ -101,20 +159,22 @@ body {
     margin-bottom: 2rem;
 }
 
-/* 按鈕樣式 */
+/* 按鈕樣式 - EVA風格 */
 .btn {
     padding: 0.8rem 2rem;
-    border: none;
-    border-radius: 8px;
-    font-family: 'Orbitron', monospace;
+    border: 2px solid var(--eva-purple-primary);
+    border-radius: 0px; /* 移除圓角，改為方形 */
+    font-family: 'Orbitron', 'Noto Sans JP', monospace;
     font-size: 1rem;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.3s ease;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 2px;
     position: relative;
     overflow: hidden;
+    background: var(--eva-black-light);
+    color: var(--eva-white);
 }
 
 .btn::before {
@@ -124,8 +184,9 @@ body {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    background: linear-gradient(90deg, transparent, var(--eva-purple-light), transparent);
     transition: left 0.5s;
+    opacity: 0.3;
 }
 
 .btn:hover::before {
@@ -133,29 +194,32 @@ body {
 }
 
 .btn-primary {
-    background: linear-gradient(45deg, #4a90e2, #50c9c3);
-    color: white;
-    box-shadow: 0 5px 15px rgba(74, 144, 226, 0.4);
+    background: linear-gradient(45deg, var(--eva-purple-primary), var(--eva-red-primary));
+    color: var(--eva-white);
+    box-shadow: var(--eva-glow-purple);
+    border-color: var(--eva-purple-light);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(74, 144, 226, 0.6);
+    box-shadow: var(--eva-glow-red);
+    border-color: var(--eva-red-primary);
 }
 
 .btn-secondary {
-    background: linear-gradient(45deg, #6c5ce7, #a29bfe);
-    color: white;
-    box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
+    background: linear-gradient(45deg, var(--eva-gray-dark), var(--eva-purple-dark));
+    color: var(--eva-white);
+    box-shadow: 0 5px 15px rgba(102, 102, 102, 0.4);
+    border-color: var(--eva-gray-dark);
 }
 
 .btn-secondary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(108, 92, 231, 0.6);
+    box-shadow: var(--eva-glow-purple);
+    border-color: var(--eva-purple-primary);
 }
 
-
-/* 統計顯示 */
+/* 統計顯示 - EVA風格 */
 .stats-display {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -165,14 +229,27 @@ body {
 
 .stat-item {
     padding: 0.5rem;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 5px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(15, 15, 15, 0.8);
+    border-radius: 0px; /* 移除圓角 */
+    border: 1px solid var(--eva-purple-primary);
+    position: relative;
+}
+
+.stat-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: var(--eva-green-primary);
+    opacity: 0.6;
 }
 
 .stat-label {
-    color: #b8b8b8;
+    color: var(--eva-gray-light);
     font-size: 0.9rem;
+    letter-spacing: 1px;
 }
 
 /* 遊戲中 UI */
@@ -210,7 +287,7 @@ body {
     max-width: 35vw; /* 限制最大寬度避免重疊 */
 }
 
-/* 血量和魔法條 */
+/* 血量和魔法條 - EVA風格 */
 .health-bar, .mana-bar, .exp-bar {
     display: flex;
     align-items: center;
@@ -220,46 +297,73 @@ body {
 .bar-container {
     width: min(200px, 25vw); /* 響應式寬度 */
     height: 20px;
-    background: rgba(0, 0, 0, 0.7);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-radius: 10px;
+    background: var(--eva-black-light);
+    border: 2px solid var(--eva-purple-primary);
+    border-radius: 0px; /* 移除圓角 */
     overflow: hidden;
+    position: relative;
+}
+
+.bar-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--eva-green-primary);
+    opacity: 0.8;
 }
 
 .bar {
     height: 100%;
     transition: width 0.3s ease;
-    border-radius: 8px;
+    border-radius: 0px;
+    position: relative;
 }
 
 .bar.health {
-    background: linear-gradient(90deg, #e74c3c, #c0392b);
-    box-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+    background: linear-gradient(90deg, var(--eva-red-primary), var(--eva-red-dark));
+    box-shadow: var(--eva-glow-red);
 }
 
 .bar.mana {
-    background: linear-gradient(90deg, #3498db, #2980b9);
-    box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+    background: linear-gradient(90deg, var(--eva-purple-primary), var(--eva-purple-dark));
+    box-shadow: var(--eva-glow-purple);
 }
 
 .bar.exp {
-    background: linear-gradient(90deg, #f39c12, #e67e22);
-    box-shadow: 0 0 10px rgba(243, 156, 18, 0.5);
+    background: linear-gradient(90deg, var(--eva-orange-primary), var(--eva-orange-dark));
+    box-shadow: var(--eva-glow-orange);
 }
 
-/* 計時器和分數 */
+/* 計時器和分數 - EVA風格 */
 .timer, .score {
-    background: rgba(0, 0, 0, 0.7);
+    background: var(--eva-black-light);
     padding: 0.5rem 1rem;
-    border-radius: 8px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 0px; /* 移除圓角 */
+    border: 2px solid var(--eva-green-primary);
     margin-bottom: 10px;
     font-weight: bold;
+    position: relative;
+}
+
+.timer::before, .score::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: var(--eva-green-primary);
+    opacity: 0.6;
 }
 
 .timer {
     font-size: 1.5rem;
-    color: #50c9c3;
+    color: var(--eva-green-primary);
+    letter-spacing: 2px;
+    font-family: 'Orbitron', monospace;
 }
 
 .score {
@@ -267,30 +371,45 @@ body {
     display: flex;
     flex-direction: column;
     gap: 5px;
+    color: var(--eva-white);
 }
 
-/* 模態對話框 */
+/* 模態對話框 - EVA風格 */
 .modal {
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(15, 15, 15, 0.95);
 }
 
 .modal-content {
-    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    background: linear-gradient(135deg, var(--eva-black-primary), var(--eva-black-light));
     padding: 2rem;
-    border-radius: 15px;
-    border: 2px solid #4a90e2;
-    box-shadow: 0 0 40px rgba(74, 144, 226, 0.6);
+    border-radius: 0px; /* 移除圓角 */
+    border: 2px solid var(--eva-purple-primary);
+    box-shadow: var(--eva-glow-purple);
     max-width: 600px;
     width: 90%;
     max-height: 80vh;
     overflow-y: auto;
     text-align: center;
+    position: relative;
+}
+
+.modal-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--eva-red-primary), transparent);
+    animation: scan-line 3s linear infinite;
 }
 
 .modal-content h2 {
     margin-bottom: 1.5rem;
-    color: #4a90e2;
+    color: var(--eva-purple-primary);
     font-size: 2rem;
+    letter-spacing: 2px;
+    text-shadow: var(--eva-glow-purple);
 }
 
 /* 商店樣式 */
@@ -382,9 +501,9 @@ body {
     z-index: 50;
 }
 
-/* 載入畫面 */
+/* 載入畫面 - EVA風格 */
 #loadingScreen {
-    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    background: linear-gradient(135deg, var(--eva-black-primary), var(--eva-purple-dark));
 }
 
 .loading-content {
@@ -394,11 +513,12 @@ body {
 .loading-spinner {
     width: 50px;
     height: 50px;
-    border: 3px solid rgba(74, 144, 226, 0.3);
-    border-top: 3px solid #4a90e2;
-    border-radius: 50%;
+    border: 3px solid rgba(138, 43, 226, 0.3);
+    border-top: 3px solid var(--eva-purple-primary);
+    border-radius: 0%; /* 方形載入器 */
     animation: spin 1s linear infinite;
     margin: 0 auto 1rem;
+    transform: rotate(45deg); /* 45度旋轉讓方形看起來像鑽石 */
 }
 
 @keyframes spin {
