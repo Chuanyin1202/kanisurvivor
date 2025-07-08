@@ -8,25 +8,60 @@
     <link rel="stylesheet" href="styles/main.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=M+PLUS+1+Code:wght@400;700&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
     <div id="game-container">
+        <!-- EVA掃描線效果 -->
+        <div class="eva-scanline"></div>
+        
         <!-- 遊戲畫布 -->
         <canvas id="gameCanvas"></canvas>
         
         <!-- 主選單畫面 -->
         <div id="mainMenu" class="screen-overlay">
             <div class="menu-content">
-                <h1 class="game-title">Kani: Pixel Mage Survivor</h1>
-                <p class="game-subtitle">機甲魔導師 Kani の戦場記録 - MAGI PILOT BATTLE LOG</p>
+                <h1 class="game-title eva-text-breathing">
+                    <span class="eva-mixed-text">
+                        <span class="english">KANI:</span> 
+                        <span class="japanese">機甲共鳴者</span>
+                    </span>
+                </h1>
+                <p class="game-subtitle font-japanese-mixed">
+                    <span class="eva-mixed-text">
+                        <span class="japanese">機甲魔導師</span>
+                        <span class="code">KANI-K01</span>
+                        <span class="japanese">の戦場記録</span>
+                        <span class="english">- MAGI PILOT BATTLE LOG</span>
+                    </span>
+                </p>
                 
                 <div class="menu-buttons">
-                    <button id="startBtn" class="btn btn-primary">機甲啟動 - MECH ACTIVATION</button>
-                    <button id="shopBtn" class="btn btn-secondary">裝備武裝 - ARMAMENT CONFIG</button>
-                    <button id="achievementsBtn" class="btn btn-secondary">戰績記錄 - BATTLE ARCHIVE</button>
-                    <button id="elementFusionBtn" class="btn btn-secondary">魔裝調律 - MAGI CALIBRATION</button>
-                    <button id="settingsBtn" class="btn btn-secondary">系統調整 - SYSTEM ADJUST</button>
+                    <button id="startBtn" class="btn btn-primary font-state-normal">
+                        <span class="eva-mixed-text">
+                            <span class="japanese">機甲啟動</span> - <span class="english">MECH ACTIVATION</span>
+                        </span>
+                    </button>
+                    <button id="shopBtn" class="btn btn-secondary font-japanese-mixed">
+                        <span class="eva-mixed-text">
+                            <span class="japanese">裝備武裝</span> - <span class="english">ARMAMENT CONFIG</span>
+                        </span>
+                    </button>
+                    <button id="achievementsBtn" class="btn btn-secondary font-japanese-mixed">
+                        <span class="eva-mixed-text">
+                            <span class="japanese">戰績記錄</span> - <span class="english">BATTLE ARCHIVE</span>
+                        </span>
+                    </button>
+                    <button id="elementFusionBtn" class="btn btn-secondary font-japanese-mixed">
+                        <span class="eva-mixed-text">
+                            <span class="japanese">魔裝調律</span> - <span class="english">MAGI CALIBRATION</span>
+                        </span>
+                    </button>
+                    <button id="settingsBtn" class="btn btn-secondary font-japanese-mixed">
+                        <span class="eva-mixed-text">
+                            <span class="japanese">系統調整</span> - <span class="english">SYSTEM ADJUST</span>
+                        </span>
+                    </button>
                 </div>
                 
                 <div class="stats-display">
@@ -50,37 +85,61 @@
         <div id="gameUI" class="screen-overlay hidden">
             <div class="hud">
                 <div class="hud-top">
-                    <div class="health-bar">
-                        <span class="hud-label">機體強度 - FRAME</span>
+                    <div class="health-bar ui-element" data-sync-rate="normal">
+                        <span class="hud-label font-mono-data eva-text-breathing">
+                            <span class="eva-mixed-text">
+                                <span class="japanese">機體強度</span> - <span class="code">FRAME</span>
+                            </span>
+                        </span>
                         <div class="bar-container">
                             <div id="healthBar" class="bar health"></div>
                         </div>
-                        <span id="healthText">100/100</span>
+                        <span id="healthText" class="font-mono-data">100/100</span>
                     </div>
-                    <div class="mana-bar">
-                        <span class="hud-label">魔力爐心 - MANA CORE</span>
+                    <div class="mana-bar ui-element" data-sync-rate="normal">
+                        <span class="hud-label font-mono-data eva-text-breathing">
+                            <span class="eva-mixed-text">
+                                <span class="japanese">魔力爐心</span> - <span class="code">MANA CORE</span>
+                            </span>
+                        </span>
                         <div class="bar-container">
                             <div id="manaBar" class="bar mana"></div>
                         </div>
-                        <span id="manaText">50/50</span>
+                        <span id="manaText" class="font-mono-data">50/50</span>
                     </div>
-                    <div class="exp-bar">
-                        <span class="hud-label">熟練度 - PROFICIENCY</span>
+                    <div class="exp-bar ui-element" data-sync-rate="normal">
+                        <span class="hud-label font-mono-data eva-text-breathing">
+                            <span class="eva-mixed-text">
+                                <span class="japanese">熟練度</span> - <span class="code">PROFICIENCY</span>
+                            </span>
+                        </span>
                         <div class="bar-container">
                             <div id="expBar" class="bar exp"></div>
                         </div>
-                        <span id="levelText">Lv.1</span>
+                        <span id="levelText" class="font-mono-data">Lv.1</span>
                     </div>
                 </div>
                 
                 <div class="hud-side">
-                    <div class="timer">
-                        <div class="hud-label">作戰時間 - OPERATION</div>
-                        <span id="gameTimer">0:00</span>
+                    <div class="timer ui-element" data-emotional-state="calm">
+                        <div class="hud-label font-mono-data eva-text-breathing">
+                            <span class="eva-mixed-text">
+                                <span class="japanese">作戰時間</span> - <span class="code">OPERATION</span>
+                            </span>
+                        </div>
+                        <span id="gameTimer" class="font-mono-data">0:00</span>
                     </div>
-                    <div class="score">
-                        <span id="killCount">殲滅数: 0</span>
-                        <span id="combo">連続撃破: 0</span>
+                    <div class="score ui-element" data-emotional-state="calm">
+                        <span id="killCount" class="font-mono-data">
+                            <span class="eva-mixed-text">
+                                <span class="japanese">殲滅数</span>: <span class="code">0</span>
+                            </span>
+                        </span>
+                        <span id="combo" class="font-mono-data">
+                            <span class="eva-mixed-text">
+                                <span class="japanese">連続撃破</span>: <span class="code">0</span>
+                            </span>
+                        </span>
                     </div>
                 </div>
             </div>
@@ -216,6 +275,7 @@
     <script src="js/systems/achievementSystem.js"></script>
     <script src="js/systems/equipmentSystem.js"></script>
     <script src="js/systems/shopSystem.js"></script>
+    <script src="js/systems/evaFontSystem.js"></script>
     
     <!-- 主遊戲檔案 -->
     <script src="js/main.js"></script>

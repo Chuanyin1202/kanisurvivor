@@ -37,6 +37,23 @@
     --eva-glow-red: 0 0 20px rgba(255, 0, 64, 0.6);
     --eva-glow-green: 0 0 20px rgba(0, 255, 65, 0.6);
     --eva-glow-orange: 0 0 20px rgba(255, 102, 0, 0.6);
+    
+    /* EVA字體系統 - 情感狀態驅動 */
+    --font-primary: 'Orbitron', 'M PLUS 1 Code', sans-serif;
+    --font-mono: 'Share Tech Mono', 'M PLUS 1 Code', monospace;
+    --font-japanese: 'Noto Sans JP', 'M PLUS 1 Code', sans-serif;
+    --font-mixed: 'M PLUS 1 Code', 'Orbitron', 'Noto Sans JP', sans-serif;
+    
+    /* 字體權重 - 對抗性美學 */
+    --weight-normal: 400;
+    --weight-bold: 700;
+    --weight-heavy: 900;
+    
+    /* 字間距 - 機械感調節 */
+    --letter-spacing-tight: -0.5px;
+    --letter-spacing-normal: 0px;
+    --letter-spacing-wide: 1px;
+    --letter-spacing-ultra: 2px;
 }
 
 /* 全域設定 */
@@ -107,13 +124,18 @@ body {
 .menu-content {
     text-align: center;
     padding: 2rem;
-    border-radius: 0px; /* 移除圓角 */
-    border: 2px solid var(--eva-purple-primary);
-    background: rgba(15, 15, 15, 0.8);
-    box-shadow: var(--eva-glow-purple);
+    border-radius: 0px; /* EVA純矩形風格 */
+    border: 3px solid var(--eva-purple-primary);
+    background: var(--eva-black-primary);
+    box-shadow: 
+        var(--eva-glow-purple),
+        inset 0 0 20px rgba(138, 43, 226, 0.1);
     max-width: 500px;
     width: 90%;
     position: relative;
+    /* EVA式邊框強化 */
+    outline: 1px solid var(--eva-white);
+    outline-offset: -8px;
 }
 
 .menu-content::before {
@@ -298,13 +320,21 @@ body {
     font-family: 'Orbitron', monospace;
 }
 
-/* 血量和魔法條 - EVA風格 */
+/* 血量和魔法條 - EVA矩形模塊風格 */
 .health-bar, .mana-bar, .exp-bar {
     display: flex;
     align-items: center;
     gap: 10px;
     flex-direction: column;
     align-items: flex-start;
+    /* EVA矩形模塊包裝 */
+    background: var(--eva-black-primary);
+    border: 2px solid var(--eva-purple-primary);
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    position: relative;
+    outline: 1px solid var(--eva-white);
+    outline-offset: -4px;
 }
 
 .health-bar > .bar-container, 
@@ -358,15 +388,21 @@ body {
     box-shadow: var(--eva-glow-orange);
 }
 
-/* 計時器和分數 - EVA風格 */
+/* 計時器和分數 - EVA矩形模塊強化 */
 .timer, .score {
-    background: var(--eva-black-light);
-    padding: 0.5rem 1rem;
-    border-radius: 0px; /* 移除圓角 */
-    border: 2px solid var(--eva-green-primary);
+    background: var(--eva-black-primary);
+    padding: 0.8rem 1.2rem;
+    border-radius: 0px; /* EVA純矩形風格 */
+    border: 3px solid var(--eva-green-primary);
     margin-bottom: 10px;
     font-weight: bold;
     position: relative;
+    /* 雙重邊框系統 */
+    outline: 1px solid var(--eva-white);
+    outline-offset: -6px;
+    box-shadow: 
+        var(--eva-glow-green),
+        inset 0 0 10px rgba(0, 255, 65, 0.1);
 }
 
 .timer::before, .score::before {
@@ -2170,4 +2206,210 @@ body {
         height: 50px;
         font-size: 1.8rem;
     }
+}
+
+/* ========================================
+   EVA情感字體狀態系統 - 對抗性美學
+   ======================================== */
+
+/* 基礎字體情緒狀態 */
+.font-state-normal {
+    font-family: var(--font-primary);
+    font-weight: var(--weight-normal);
+    letter-spacing: var(--letter-spacing-normal);
+    color: var(--eva-white);
+    transition: all 0.3s ease;
+    text-shadow: none;
+}
+
+.font-state-alert {
+    font-family: var(--font-primary);
+    font-weight: var(--weight-bold);
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--eva-red-primary);
+    text-shadow: var(--eva-glow-red);
+    animation: eva-pulse 2s infinite;
+    transition: all 0.2s ease;
+}
+
+.font-state-critical {
+    font-family: var(--font-primary);
+    font-weight: var(--weight-heavy);
+    letter-spacing: var(--letter-spacing-ultra);
+    color: var(--eva-red-light);
+    text-shadow: var(--eva-glow-red);
+    animation: eva-critical-shake 0.1s infinite;
+    filter: brightness(1.2) contrast(1.1);
+}
+
+/* 專用字體類型 */
+.font-mono-data {
+    font-family: var(--font-mono);
+    font-weight: var(--weight-normal);
+    letter-spacing: var(--letter-spacing-tight);
+    color: var(--eva-green-primary);
+    text-shadow: var(--eva-glow-green);
+}
+
+.font-japanese-mixed {
+    font-family: var(--font-mixed);
+    font-weight: var(--weight-bold);
+    letter-spacing: var(--letter-spacing-normal);
+    color: var(--eva-white);
+}
+
+.font-system-warning {
+    font-family: var(--font-primary);
+    font-weight: var(--weight-heavy);
+    letter-spacing: var(--letter-spacing-ultra);
+    color: var(--eva-orange-primary);
+    text-shadow: var(--eva-glow-orange);
+    text-transform: uppercase;
+}
+
+/* EVA動畫效果 - 機械vs有機張力 */
+@keyframes eva-pulse {
+    0%, 100% { 
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% { 
+        opacity: 0.8;
+        transform: scale(1.02);
+    }
+}
+
+@keyframes eva-critical-shake {
+    0%, 100% { transform: translateX(0px) translateY(0px); }
+    25% { transform: translateX(-1px) translateY(-1px); }
+    50% { transform: translateX(1px) translateY(0px); }
+    75% { transform: translateX(0px) translateY(1px); }
+}
+
+@keyframes eva-glitch {
+    0%, 90%, 100% { 
+        transform: translate(0);
+        filter: hue-rotate(0deg);
+    }
+    10% { 
+        transform: translate(-2px, 2px);
+        filter: hue-rotate(90deg);
+    }
+    20% { 
+        transform: translate(2px, -2px);
+        filter: hue-rotate(180deg);
+    }
+    30% { 
+        transform: translate(-2px, -2px);
+        filter: hue-rotate(270deg);
+    }
+}
+
+@keyframes eva-breathe {
+    0%, 100% { 
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% { 
+        transform: scale(1.015);
+        opacity: 0.95;
+    }
+}
+
+/* 掃描線效果 - 機械美學 */
+@keyframes eva-scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
+}
+
+.eva-scanline {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        var(--eva-green-primary) 50%, 
+        transparent 100%);
+    z-index: 9999;
+    animation: eva-scanline 3s linear infinite;
+    pointer-events: none;
+}
+
+/* 文字破碎效果 - 同步失衡視覺化 */
+.eva-text-fragmented {
+    position: relative;
+    overflow: hidden;
+}
+
+.eva-text-fragmented::before {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: var(--eva-red-primary);
+    clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+    animation: eva-glitch 0.8s infinite;
+}
+
+.eva-text-fragmented::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: var(--eva-green-primary);
+    clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
+    animation: eva-glitch 0.8s infinite reverse;
+}
+
+/* 呼吸效果 - 有機美學 */
+.eva-text-breathing {
+    animation: eva-breathe 4s ease-in-out infinite;
+}
+
+/* 英日混排優化 */
+.eva-mixed-text {
+    display: inline-block;
+}
+
+.eva-mixed-text .japanese {
+    font-family: var(--font-japanese);
+    font-weight: var(--weight-bold);
+}
+
+.eva-mixed-text .english {
+    font-family: var(--font-primary);
+    font-weight: var(--weight-normal);
+    letter-spacing: var(--letter-spacing-wide);
+}
+
+.eva-mixed-text .code {
+    font-family: var(--font-mono);
+    font-weight: var(--weight-normal);
+    color: var(--eva-green-primary);
+    background: rgba(0, 255, 65, 0.1);
+    padding: 0 4px;
+    border-radius: 3px;
+}
+
+/* 狀態驅動的字體切換 */
+.ui-element[data-sync-rate="low"] {
+    animation: eva-critical-shake 0.15s infinite;
+}
+
+.ui-element[data-sync-rate="critical"] {
+    animation: eva-glitch 0.5s infinite;
+}
+
+.ui-element[data-emotional-state="calm"] .eva-text-breathing {
+    animation-duration: 6s;
+}
+
+.ui-element[data-emotional-state="tense"] .eva-text-breathing {
+    animation-duration: 2s;
+}
+
+.ui-element[data-emotional-state="panic"] .eva-text-breathing {
+    animation: eva-critical-shake 0.1s infinite;
 }
