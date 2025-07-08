@@ -8,7 +8,11 @@
       "Bash(git push:*)",
       "Bash(find:*)",
       "Bash(rg:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(git commit:*)",
+      "Bash(diff:*)",
+      "Bash(mv:*)",
+      "Bash(ls:*)"
     ],
     "deny": []
   }
