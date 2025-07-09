@@ -10,6 +10,9 @@ reference/
 ehthumbs.db
 Thumbs.db
 
+# Windows Zone.Identifier 檔案 (安全標記檔案)
+*:Zone.Identifier
+
 # 編輯器設定
 .vscode/
 .idea/
