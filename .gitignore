@@ -1,6 +1,9 @@
 # 參考資料夾 (使用者個人參考用，不需要版本控制)
 reference/
 
+# Claude Code 設定檔 (個人開發環境設定)
+.claude/
+
 # 系統檔案
 .DS_Store
 .DS_Store?
