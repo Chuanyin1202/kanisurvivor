@@ -35,7 +35,12 @@ class AudioManager {
         this.sfxCooldowns = new Map();
         this.cooldownTime = 0.05; // 50ms
         
+        // 用戶互動狀態
+        this.userInteracted = false;
+        this.audioInitialized = false;
+        
         this.setupAudioContext();
+        this.setupUserInteractionListeners();
     }
 
     // 設定音頻上下文
@@ -52,38 +57,57 @@ class AudioManager {
             // 預載入常用音效
             this.preloadCommonSounds();
             
+            // 立即初始化音效系統
+            this.audioInitialized = true;
+            console.log('✅ 音效系統初始化完成');
+            
         } catch (error) {
             console.error('Failed to setup audio context:', error);
             this.isSupported = false;
         }
     }
 
-    // 預載入常用音效
-    preloadCommonSounds() {
-        // 這些是佔位符，實際專案中會有真實的音效檔案
-        const commonSounds = [
-            'button_click',
-            'button_hover',
-            'spell_fire',
-            'spell_ice',
-            'spell_lightning',
-            'spell_arcane',
-            'enemy_hit',
-            'enemy_death',
-            'player_hit',
-            'levelup',
-            'coin',
-            'achievement'
-        ];
+    // 設定用戶互動監聽器
+    setupUserInteractionListeners() {
+        const interactionEvents = ['click', 'touchstart', 'touchend', 'keydown'];
         
-        commonSounds.forEach(soundName => {
-            this.preloadSound(soundName, `assets/audio/sfx/${soundName}.mp3`);
+        const handleFirstInteraction = (e) => {
+            if (!this.userInteracted) {
+                console.log('🎵 用戶互動檢測到:', e.type);
+                this.userInteracted = true;
+                
+                // 移除監聽器
+                interactionEvents.forEach(event => {
+                    document.removeEventListener(event, handleFirstInteraction, true);
+                });
+            }
+        };
+        
+        // 添加全域監聽器
+        interactionEvents.forEach(event => {
+            document.addEventListener(event, handleFirstInteraction, true);
         });
         
-        // 預載入音樂
-        this.preloadMusic('menu', 'assets/audio/music/menu.mp3');
-        this.preloadMusic('game', 'assets/audio/music/game.mp3');
-        this.preloadMusic('boss', 'assets/audio/music/boss.mp3');
+        console.log('🎵 用戶互動監聽器已設定');
+    }
+
+    // 用戶互動後初始化音頻
+    async initializeAudioOnInteraction() {
+        // 不再需要特殊的初始化邏輯，交給 synthSoundGenerator 在需要時處理
+        console.log('🎵 音效系統已就緒，等待使用');
+    }
+
+    // 預載入常用音效
+    preloadCommonSounds() {
+        // 使用合成音效生成器，不需要實際音效檔案
+        console.log('🎵 使用合成音效生成器，跳過檔案預載入');
+        
+        // 初始化合成音效生成器
+        if (window.synthSoundGenerator) {
+            console.log('✅ 合成音效生成器已就緒');
+        } else {
+            console.warn('⚠️ 合成音效生成器未載入');
+        }
     }
 
     // 預載入音效
@@ -197,40 +221,19 @@ class AudioManager {
         return null;
     }
 
-    // 播放音樂
+    // 播放音樂 (使用合成音樂)
     playMusic(musicName, fadeInTime = 1.0) {
         if (!this.isSupported || this.isMuted) return;
         
-        const music = this.musicTracks.get(musicName);
-        if (!music) {
-            console.warn(`Music track not found: ${musicName}`);
-            return;
+        // 使用合成音樂生成器
+        if (window.synthSoundGenerator) {
+            synthSoundGenerator.playBackgroundMusic(musicName);
         }
         
-        // 如果已經在播放相同音樂，忽略
-        if (this.currentMusicName === musicName && this.currentMusic && !this.currentMusic.paused) {
-            return;
-        }
-        
-        // 停止當前音樂
-        this.stopMusic(1.0);
-        
-        // 開始播放新音樂
-        this.currentMusic = music;
+        // 更新當前音樂名稱
         this.currentMusicName = musicName;
         
-        music.volume = 0;
-        music.currentTime = 0;
-        
-        const playPromise = music.play();
-        if (playPromise) {
-            playPromise.catch(error => {
-                console.warn(`Failed to play music ${musicName}:`, error);
-            });
-        }
-        
-        // 淡入效果
-        this.fadeInMusic(fadeInTime);
+        console.log(`🎵 播放合成音樂: ${musicName}`);
     }
 
     // 停止音樂
@@ -375,41 +378,137 @@ class AudioManager {
         }
     }
 
-    // 便捷音效播放方法
+    // 便捷音效播放方法 (使用合成音效)
     playButtonClick() {
-        this.playSound('button_click', 0.5);
+        if (this.canPlaySound()) {
+            synthSoundGenerator.playButtonClick();
+            console.log('🔊 播放按鈕點擊音效');
+        }
     }
 
     playButtonHover() {
-        this.playSound('button_hover', 0.3);
+        if (this.canPlaySound()) {
+            synthSoundGenerator.playButtonHover();
+            console.log('🔊 播放按鈕懸停音效');
+        }
+    }
+
+    // 檢查是否可以播放音效
+    canPlaySound() {
+        if (!window.synthSoundGenerator) {
+            return false;
+        }
+        
+        if (this.isMuted) {
+            return false;
+        }
+        
+        if (!this.userInteracted) {
+            return false;
+        }
+        
+        return true;
     }
 
     playSpellSound(spellType, position = null) {
-        this.playSound(`spell_${spellType}`, 0.8, position);
+        if (this.canPlaySound()) {
+            // 根據法術類型播放不同音效
+            switch(spellType) {
+                case 'fire':
+                    synthSoundGenerator.playSpellFire();
+                    console.log('🔥 播放火焰法術音效');
+                    break;
+                case 'ice':
+                    synthSoundGenerator.playSpellIce();
+                    console.log('❄️ 播放冰霜法術音效');
+                    break;
+                case 'lightning':
+                    synthSoundGenerator.playSpellLightning();
+                    console.log('⚡ 播放閃電法術音效');
+                    break;
+                case 'arcane':
+                    synthSoundGenerator.playSpellArcane();
+                    console.log('🔮 播放奧術法術音效');
+                    break;
+                default:
+                    synthSoundGenerator.playSpellFire(); // 預設音效
+                    console.log('🔥 播放預設法術音效');
+            }
+        }
     }
 
     playEnemyHit(position = null) {
-        this.playSound('enemy_hit', 0.6, position);
+        if (this.canPlaySound()) {
+            synthSoundGenerator.playEnemyHit();
+            console.log('💥 播放敵人受擊音效');
+        }
     }
 
     playEnemyDeath(position = null) {
-        this.playSound('enemy_death', 0.7, position);
+        if (this.canPlaySound()) {
+            synthSoundGenerator.playEnemyDeath();
+            console.log('💀 播放敵人死亡音效');
+        }
     }
 
     playPlayerHit() {
-        this.playSound('player_hit', 0.8);
+        if (this.canPlaySound()) {
+            synthSoundGenerator.playPlayerHit();
+            console.log('🩸 播放玩家受傷音效');
+        }
     }
 
     playLevelUp() {
-        this.playSound('levelup', 1.0);
+        if (this.canPlaySound()) {
+            synthSoundGenerator.playLevelUp();
+            console.log('🆙 播放升級音效');
+        }
     }
 
     playCoinCollect(position = null) {
-        this.playSound('coin', 0.4, position);
+        if (this.canPlaySound()) {
+            synthSoundGenerator.playCoinCollect();
+            console.log('💰 播放金幣收集音效');
+        }
     }
 
     playAchievement() {
-        this.playSound('achievement', 0.9);
+        if (this.canPlaySound()) {
+            synthSoundGenerator.playAchievement();
+            console.log('🏆 播放成就音效');
+        }
+    }
+
+    // 測試所有音效
+    testAllSounds() {
+        console.log('🔊 開始音效測試...');
+        
+        if (!this.canPlaySound()) {
+            console.error('❌ 無法播放音效，請檢查系統狀態');
+            return;
+        }
+        
+        const testSequence = [
+            { name: '按鈕點擊', fn: () => this.playButtonClick() },
+            { name: '按鈕懸停', fn: () => this.playButtonHover() },
+            { name: '火焰法術', fn: () => this.playSpellSound('fire') },
+            { name: '冰霜法術', fn: () => this.playSpellSound('ice') },
+            { name: '閃電法術', fn: () => this.playSpellSound('lightning') },
+            { name: '奧術法術', fn: () => this.playSpellSound('arcane') },
+            { name: '敵人受擊', fn: () => this.playEnemyHit() },
+            { name: '敵人死亡', fn: () => this.playEnemyDeath() },
+            { name: '玩家受傷', fn: () => this.playPlayerHit() },
+            { name: '升級', fn: () => this.playLevelUp() },
+            { name: '金幣收集', fn: () => this.playCoinCollect() },
+            { name: '成就解鎖', fn: () => this.playAchievement() }
+        ];
+        
+        testSequence.forEach((test, index) => {
+            setTimeout(() => {
+                console.log(`🎵 測試 ${index + 1}/${testSequence.length}: ${test.name}`);
+                test.fn();
+            }, index * 800);
+        });
     }
 
     // 獲取音效狀態
@@ -422,7 +521,14 @@ class AudioManager {
             isMuted: this.isMuted,
             currentMusic: this.currentMusicName,
             loadedSounds: this.audioCache.size,
-            loadedMusic: this.musicTracks.size
+            loadedMusic: this.musicTracks.size,
+            userInteracted: this.userInteracted,
+            audioInitialized: this.audioInitialized,
+            synthSoundGenerator: window.synthSoundGenerator ? {
+                isInitialized: synthSoundGenerator.isInitialized,
+                audioContextState: synthSoundGenerator.audioContext ? synthSoundGenerator.audioContext.state : 'not created',
+                masterVolume: synthSoundGenerator.masterVolume
+            } : null
         };
     }
 
@@ -450,3 +556,4 @@ class AudioManager {
 
 // 全域音效管理器
 const audioManager = new AudioManager();
+window.audioManager = audioManager;

@@ -90,11 +90,11 @@ Language preference: **中文繁體回覆**
 To enhance Claude's capability, the following MCP Servers are recommended:
 
 | MCP Tool            | Purpose                                 |
-|---------------------|------------------------------------------|
-| `mcp-image-gen`     | Generate pixel-art assets (Kani, monsters, tiles) |
-| `mcp-ui-reviewer`   | Audit UI hierarchy and spacing issues    |
-| `mcp-dialog-writer` | Help write achievement or item descriptions |
-| `mcp-prototype-pitch` | Generate Steam store pitch and promo copy |
+| --------------------- | ---------------------------------------------------------------------------- |
+| `context7`            | Extend Claude with document/context memory and retrieval capabilities        |
+| `sequential-thinking` | Enable multi-step task breakdown and structured reasoning                    |
+| `puppeteer`           | Automate browser actions like clicking, typing, scraping via headless Chrome |
+| `magic`               | Provide intelligent code documentation, refactoring, and test generation     |
 
 These can be activated via Claude Desktop or Claude CLI when available.
 

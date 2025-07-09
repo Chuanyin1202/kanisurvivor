@@ -1,6 +1,6 @@
 /**
- * 玩家角色類別 - Kani 魔法貓咪
- * 處理玩家的移動、法術施放、屬性等
+ * 玩家角色類別 - Kani 靈魂同步體
+ * 處理同步體的移動、語式施放、屬性等
  */
 class Player {
     constructor(x, y) {
@@ -15,7 +15,7 @@ class Player {
         this.experience = 0;
         this.experienceToNext = gameBalance.getValue('player', 'levelUp', 'experienceBase');
         
-        // 生命值和魔法值
+        // 生命值和語式能量
         this.maxHealth = gameBalance.getValue('player', 'baseHealth');
         this.health = this.maxHealth;
         this.maxMana = gameBalance.getValue('player', 'baseMana');
@@ -28,18 +28,18 @@ class Player {
         this.critDamage = gameBalance.getValue('player', 'baseCritDamage');
         this.speed = gameBalance.getValue('player', 'baseSpeed');
         
-        // 法術系統
+        // 語式系統
         this.selectedSpell = 'fireball';
         this.spellCooldown = 0;
         this.lastSpellCast = 0;
-        this.selectedSlot = 0; // 當前選中的法術槽位
+        this.selectedSlot = 0; // 當前選中的語式槽位
         
-        // 法術槽位系統 (4個槽位) - 機甲魔法風格
+        // 語式槽位系統 (4個槽位) - 殘響崩壞風格  
         this.spellSlots = [
-            { type: 'fireball', name: '烈焰砲擊 - BLAZE CANNON', icon: '🔥', isCustom: false },
-            { type: 'frostbolt', name: '氷結射撃 - FREEZE SHOT', icon: '❄️', isCustom: false },
-            { type: 'lightning', name: '雷撃衝動 - THUNDER IMPULSE', icon: '⚡', isCustom: false },
-            { type: 'arcane', name: '魔導追尾 - MAGI HOMING', icon: '🔮', isCustom: false }
+            { type: 'fireball', name: '熱量分解式 - THERMAL DECOMP', icon: '🔥', isCustom: false },
+            { type: 'frostbolt', name: '凍結構造式 - FREEZE SYNTAX', icon: '❄️', isCustom: false },
+            { type: 'lightning', name: '電磁脈動式 - PULSE PATTERN', icon: '⚡', isCustom: false },
+            { type: 'arcane', name: '虛空追跡式 - VOID TRACE', icon: '🔮', isCustom: false }
         ];
         
         // 移動系統
@@ -418,18 +418,22 @@ class Player {
             direction,
             this
         );
+        
+        // 播放法術音效
+        if (window.audioManager && this.selectedSpell) {
+            const spellType = this.selectedSpell.element || 'fire';
+            audioManager.playSpellSound(spellType);
+        }
     }
 
-    // 計算法術傷害
-    calculateSpellDamage(baseDamage) {
+    // 計算基礎法術傷害（不包含爆擊）
+    calculateBaseSpellDamage(baseDamage) {
         let damage = baseDamage + this.attack;
-        let isCritical = false;
         
         // 詳細的傷害計算調試輸出
         const debugMode = window.debugManager && debugManager.isEnabled;
         if (debugMode) {
-            console.log(`🎯 傷害計算開始 - 基礎: ${baseDamage}, 攻擊力: ${this.attack}, 初始傷害: ${damage}`);
-            console.log(`⚡ 爆擊設定 - 爆擊率: ${(this.critChance * 100).toFixed(1)}%, 爆擊倍數: ${this.critDamage}x`);
+            console.log(`🎯 基礎傷害計算 - 基礎: ${baseDamage}, 攻擊力: ${this.attack}, 初始傷害: ${damage}`);
         }
         
         // 應用能力效果修正法術傷害
@@ -443,6 +447,24 @@ class Player {
             }
         }
         
+        // 裝備加成
+        const equipmentMultiplier = this.getEquipmentDamageMultiplier();
+        if (equipmentMultiplier !== 1) {
+            const oldDamage = damage;
+            damage *= equipmentMultiplier;
+            if (debugMode) {
+                console.log(`⚔️ 裝備加成: ${equipmentMultiplier}x, ${oldDamage} -> ${damage}`);
+            }
+        }
+        
+        return Math.round(damage);
+    }
+    
+    // 計算最終傷害（在實際命中時調用，包含爆擊）
+    calculateFinalDamage(baseDamage) {
+        let damage = baseDamage;
+        let isCritical = false;
+        
         // 暴擊檢查
         const critRoll = Math.random();
         if (critRoll < this.critChance) {
@@ -454,33 +476,25 @@ class Player {
             console.log(`💥 爆擊觸發! 隨機值: ${critRoll.toFixed(3)}, 爆擊率: ${(this.critChance * 100).toFixed(1)}%, 倍數: ${this.critDamage}x`);
             console.log(`💥 爆擊傷害: ${oldDamage.toFixed(1)} -> ${damage.toFixed(1)} (+${(damage - oldDamage).toFixed(1)})`);
             
-            // 暴擊時觸發螢幕震動
-            if (window.renderer) {
-                renderer.startShake(8, 0.4); // 強度8，持續0.4秒
-            }
-        } else {
-            if (debugMode) {
-                console.log(`⚪ 未爆擊 - 隨機值: ${critRoll.toFixed(3)}, 需要: <${this.critChance.toFixed(3)}`);
-            }
-        }
-        
-        // 裝備加成
-        const equipmentMultiplier = this.getEquipmentDamageMultiplier();
-        if (equipmentMultiplier !== 1) {
-            const oldDamage = damage;
-            damage *= equipmentMultiplier;
-            if (debugMode) {
-                console.log(`⚔️ 裝備加成: ${equipmentMultiplier}x, ${oldDamage} -> ${damage}`);
-            }
+            // 爆擊視覺效果已移動到實際命中時觸發（projectile.js中）
+            // if (window.effectsManager) {
+            //     effectsManager.createCriticalHitEffect(this.position.x, this.position.y);
+            // }
         }
         
         // 最終傷害輸出 - 總是顯示以便調試
-        console.log(`🏆 最終傷害: ${Math.round(damage)} ${isCritical ? '(💥爆擊💥)' : '(普通)'} | 基礎:${baseDamage} + 攻擊:${this.attack}`);
+        console.log(`🏆 最終傷害: ${Math.round(damage)} ${isCritical ? '(💥爆擊💥)' : '(普通)'} | 基礎:${baseDamage}`);
         
         return {
             damage: Math.round(damage),
             isCritical: isCritical
         };
+    }
+    
+    // 計算法術傷害（保持向後兼容）
+    calculateSpellDamage(baseDamage) {
+        // 使用新的基礎傷害計算，保持向後兼容
+        return this.calculateBaseSpellDamage(baseDamage);
     }
 
     // 開始衝刺
@@ -562,6 +576,11 @@ class Player {
             renderer.startShake(5, 0.3);
         }
         
+        // 受傷音效已移除 - 避免敵人碰撞時過度干擾
+        // if (window.audioManager) {
+        //     audioManager.playPlayerHit();
+        // }
+        
         // 檢查死亡
         if (this.health <= 0) {
             this.health = 0;
@@ -611,6 +630,11 @@ class Player {
         // 視覺效果
         if (window.renderer) {
             renderer.startShake(3, 0.8);
+        }
+        
+        // 播放升級音效
+        if (window.audioManager) {
+            audioManager.playLevelUp();
         }
         
         console.log(`🆙 等級提升！現在是 ${this.level} 級`);
@@ -808,11 +832,16 @@ class Player {
         // 擊殺回復MP
         this.restoreMana(5);
         
-        // 連擊獎勵MP回復 (每10連擊獎勵10MP)
+        // 同步鏈結獎勵MP回復 (每10鏈結獎勵10MP) - 移除視覺效果
         if (this.stats.currentCombo % 10 === 0) {
             this.restoreMana(10);
-            console.log(`🔥 連擊 ${this.stats.currentCombo}！獲得額外MP回復！`);
+            console.log(`🔗 連擊同步鏈結 ${this.stats.currentCombo}！獲得額外MP回復！`);
+            
+            // 視覺效果已移除，只保留MP回復功能
         }
+        
+        // 三國無雙風格的擊殺數里程碑
+        this.checkKillMilestone();
         
         // 檢查能力效果（吸血等）
         if (window.abilityManager) {
@@ -827,6 +856,45 @@ class Player {
         
         if (this.stats.currentCombo > this.stats.maxCombo) {
             this.stats.maxCombo = this.stats.currentCombo;
+        }
+    }
+
+    // 檢查擊殺里程碑 - 簡化版本（移除視覺效果）
+    checkKillMilestone() {
+        const killCount = this.stats.kills;
+        let shouldShowMilestone = false;
+        let milestoneText = '';
+        
+        // 三國無雙風格的顯示邏輯
+        if (killCount === 10) {
+            shouldShowMilestone = true;
+            milestoneText = '殲滅開始';
+        } else if (killCount === 25) {
+            shouldShowMilestone = true;
+            milestoneText = '連続殲滅';
+        } else if (killCount === 50) {
+            shouldShowMilestone = true;
+            milestoneText = '圧倒的優勢';
+        } else if (killCount === 100) {
+            shouldShowMilestone = true;
+            milestoneText = '百体斬';
+        } else if (killCount === 200) {
+            shouldShowMilestone = true;
+            milestoneText = '無双乱舞';
+        } else if (killCount === 500) {
+            shouldShowMilestone = true;
+            milestoneText = '殲滅王者';
+        } else if (killCount === 1000) {
+            shouldShowMilestone = true;
+            milestoneText = '千体斬達成';
+        } else if (killCount % 500 === 0 && killCount > 1000) {
+            shouldShowMilestone = true;
+            milestoneText = '伝説級殲滅';
+        }
+        
+        if (shouldShowMilestone) {
+            // 只在控制台輸出，移除視覺效果
+            console.log(`🎯 ${milestoneText}: ${killCount}`);
         }
     }
 

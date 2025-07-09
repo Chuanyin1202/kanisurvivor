@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Kani: Pixel Mage Survivor</title>
-    <meta name="description" content="快節奏像素藝術彈幕生存遊戲，扮演魔法貓咪 Kani 在彈幕地獄中生存">
+    <title>Kani: Resonance Collapse</title>
+    <meta name="description" content="機甲魔導共鳴崩壞後的殘響收集戰鬥，駕駛靈魂同步體 KANI-K01 於裂界中收集語式片段，防止宇宙完全解構">
     <link rel="stylesheet" href="styles/main.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,9 +12,6 @@
 </head>
 <body>
     <div id="game-container">
-        <!-- EVA掃描線效果 -->
-        <div class="eva-scanline"></div>
-        
         <!-- 遊戲畫布 -->
         <canvas id="gameCanvas"></canvas>
         
@@ -24,57 +21,65 @@
                 <h1 class="game-title eva-text-breathing">
                     <span class="eva-mixed-text">
                         <span class="english">KANI:</span> 
-                        <span class="japanese">機甲共鳴者</span>
+                        <span class="japanese">共鳴崩壞</span>
                     </span>
+                    <div class="subtitle-line">
+                        <span class="english">RESONANCE COLLAPSE</span>
+                    </div>
                 </h1>
                 <p class="game-subtitle font-japanese-mixed">
                     <span class="eva-mixed-text">
-                        <span class="japanese">機甲魔導師</span>
+                        <span class="japanese">靈魂同步體</span>
                         <span class="code">KANI-K01</span>
-                        <span class="japanese">の戦場記録</span>
-                        <span class="english">- MAGI PILOT BATTLE LOG</span>
+                        <span class="japanese">殘響収集記録</span>
+                        <span class="english">- ECHO RETRIEVAL LOG</span>
                     </span>
                 </p>
                 
                 <div class="menu-buttons">
                     <button id="startBtn" class="btn btn-primary font-state-normal">
                         <span class="eva-mixed-text">
-                            <span class="japanese">機甲啟動</span> - <span class="english">MECH ACTIVATION</span>
+                            <span class="japanese">同步開始</span> - <span class="english">SYNC INITIATE</span>
                         </span>
                     </button>
                     <button id="shopBtn" class="btn btn-secondary font-japanese-mixed">
                         <span class="eva-mixed-text">
-                            <span class="japanese">裝備武裝</span> - <span class="english">ARMAMENT CONFIG</span>
+                            <span class="japanese">模組調整</span> - <span class="english">MODULE CONFIG</span>
                         </span>
                     </button>
                     <button id="achievementsBtn" class="btn btn-secondary font-japanese-mixed">
                         <span class="eva-mixed-text">
-                            <span class="japanese">戰績記錄</span> - <span class="english">BATTLE ARCHIVE</span>
+                            <span class="japanese">作戰記録</span> - <span class="english">OPERATION LOG</span>
                         </span>
                     </button>
                     <button id="elementFusionBtn" class="btn btn-secondary font-japanese-mixed">
                         <span class="eva-mixed-text">
-                            <span class="japanese">魔裝調律</span> - <span class="english">MAGI CALIBRATION</span>
+                            <span class="japanese">語式合成</span> - <span class="english">SYNTAX FUSION</span>
                         </span>
                     </button>
                     <button id="settingsBtn" class="btn btn-secondary font-japanese-mixed">
                         <span class="eva-mixed-text">
-                            <span class="japanese">系統調整</span> - <span class="english">SYSTEM ADJUST</span>
+                            <span class="japanese">系統設定</span> - <span class="english">SYSTEM CONFIG</span>
+                        </span>
+                    </button>
+                    <button id="testAudioBtn" class="btn btn-accent font-japanese-mixed">
+                        <span class="eva-mixed-text">
+                            <span class="japanese">音效測試</span> - <span class="english">AUDIO TEST</span>
                         </span>
                     </button>
                 </div>
                 
                 <div class="stats-display">
                     <div class="stat-item">
-                        <span class="stat-label">資金 - CREDITS:</span>
+                        <span class="stat-label">エネルギーユニット - E.U.:</span>
                         <span id="goldDisplay">0</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-label">最高作戰時間:</span>
+                        <span class="stat-label">最長同步時間:</span>
                         <span id="bestTimeDisplay">0:00</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-label">総殲滅数:</span>
+                        <span class="stat-label">殘響體殲滅数:</span>
                         <span id="totalKillsDisplay">0</span>
                     </div>
                 </div>
@@ -84,66 +89,55 @@
         <!-- 遊戲中 UI -->
         <div id="gameUI" class="screen-overlay hidden">
             <div class="hud">
-                <div class="hud-top">
-                    <div class="health-bar ui-element" data-sync-rate="normal">
-                        <span class="hud-label font-mono-data eva-text-breathing">
-                            <span class="eva-mixed-text">
-                                <span class="japanese">機體強度</span> - <span class="code">FRAME</span>
-                            </span>
-                        </span>
-                        <div class="bar-container">
-                            <div id="healthBar" class="bar health"></div>
+                <!-- 左上角 - 血量條 -->
+                <div class="status-bar-container top-left">
+                    <div class="status-bar health-bar">
+                        <div class="bar-label eva-mixed-text">
+                            <span class="japanese">載体</span><span class="code">-FRAME</span>
                         </div>
-                        <span id="healthText" class="font-mono-data">100/100</span>
-                    </div>
-                    <div class="mana-bar ui-element" data-sync-rate="normal">
-                        <span class="hud-label font-mono-data eva-text-breathing">
-                            <span class="eva-mixed-text">
-                                <span class="japanese">魔力爐心</span> - <span class="code">MANA CORE</span>
-                            </span>
-                        </span>
-                        <div class="bar-container">
-                            <div id="manaBar" class="bar mana"></div>
+                        <div class="bar-display">
+                            <div class="bar-background">
+                                <div id="healthBarFill" class="bar-fill health-fill"></div>
+                            </div>
+                            <span id="healthValue" class="bar-value">100</span>
                         </div>
-                        <span id="manaText" class="font-mono-data">50/50</span>
-                    </div>
-                    <div class="exp-bar ui-element" data-sync-rate="normal">
-                        <span class="hud-label font-mono-data eva-text-breathing">
-                            <span class="eva-mixed-text">
-                                <span class="japanese">熟練度</span> - <span class="code">PROFICIENCY</span>
-                            </span>
-                        </span>
-                        <div class="bar-container">
-                            <div id="expBar" class="bar exp"></div>
-                        </div>
-                        <span id="levelText" class="font-mono-data">Lv.1</span>
                     </div>
                 </div>
                 
-                <div class="hud-side">
-                    <div class="timer ui-element" data-emotional-state="calm">
-                        <div class="hud-label font-mono-data eva-text-breathing">
-                            <span class="eva-mixed-text">
-                                <span class="japanese">作戰時間</span> - <span class="code">OPERATION</span>
-                            </span>
+                <!-- 右上角 - 魔力條 -->
+                <div class="status-bar-container top-right">
+                    <div class="status-bar mana-bar">
+                        <div class="bar-label eva-mixed-text">
+                            <span class="japanese">マナコア</span><span class="code">-MANA</span>
                         </div>
-                        <span id="gameTimer" class="font-mono-data">0:00</span>
-                    </div>
-                    <div class="score ui-element" data-emotional-state="calm">
-                        <span id="killCount" class="font-mono-data">
-                            <span class="eva-mixed-text">
-                                <span class="japanese">殲滅数</span>: <span class="code">0</span>
-                            </span>
-                        </span>
-                        <span id="combo" class="font-mono-data">
-                            <span class="eva-mixed-text">
-                                <span class="japanese">連続撃破</span>: <span class="code">0</span>
-                            </span>
-                        </span>
+                        <div class="bar-display">
+                            <div class="bar-background">
+                                <div id="manaBarFill" class="bar-fill mana-fill"></div>
+                            </div>
+                            <span id="manaValue" class="bar-value">50</span>
+                        </div>
                     </div>
                 </div>
+                
+                <!-- 頂部中央 - 時間顯示 -->
+                <div class="timer-container top-center">
+                    <div class="timer-display eva-mixed-text">
+                        <span class="japanese">作戦時間</span>
+                        <span id="gameTimer" class="timer-value">0:00</span>
+                    </div>
+                    
+                    <!-- 簡化的連擊顯示 - 固定在計時器附近 -->
+                    <div id="simpleComboDisplay" class="simple-combo-display hidden">
+                        <span class="combo-label">連擊</span>
+                        <span id="simpleComboValue" class="combo-value">0</span>
+                    </div>
+                </div>
+                
+                <!-- 版本顯示 -->
+                <div class="version-display">
+                    <span id="versionDisplay" class="version-text">v2025.1_1.0000</span>
+                </div>
             </div>
-            
             
         </div>
         
@@ -162,11 +156,11 @@
         <!-- 商店 -->
         <div id="shopMenu" class="screen-overlay modal hidden">
             <div class="modal-content">
-                <h2>魔法商店</h2>
+                <h2>模組商店 - MODULE SHOP</h2>
                 <div class="shop-tabs">
-                    <button class="tab-btn active" data-tab="weapons">武器</button>
-                    <button class="tab-btn" data-tab="armor">護甲</button>
-                    <button class="tab-btn" data-tab="accessories">飾品</button>
+                    <button class="tab-btn active" data-tab="weapons">語式模組</button>
+                    <button class="tab-btn" data-tab="armor">防護框架</button>
+                    <button class="tab-btn" data-tab="accessories">共鳴器件</button>
                 </div>
                 
                 <div class="shop-content">
@@ -174,7 +168,7 @@
                 </div>
                 
                 <div class="shop-footer">
-                    <span class="gold-display">金幣: <span id="shopGold">0</span></span>
+                    <span class="gold-display">エネルギーユニット: <span id="shopGold">0</span></span>
                     <button id="closeShopBtn" class="btn btn-secondary">關閉</button>
                 </div>
             </div>
@@ -238,6 +232,7 @@
     <script src="js/utils/vector2.js"></script>
     <script src="js/utils/objectPool.js"></script>
     <script src="js/utils/storage.js"></script>
+    <script src="js/utils/synthSoundGenerator.js"></script>
     
     <!-- 核心系統 -->
     <script src="js/core/gameState.js"></script>
@@ -260,6 +255,7 @@
     <script src="js/managers/waveManager.js"></script>
     <script src="js/managers/inputManager.js"></script>
     <script src="js/managers/uiManager.js"></script>
+    <script src="js/managers/simpleUIUpdater.js"></script>
     <script src="js/managers/audioManager.js"></script>
     <script src="js/managers/effectsManager.js"></script>
     

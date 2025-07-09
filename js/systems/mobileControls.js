@@ -116,12 +116,12 @@ class MobileControls {
             return player.getSpellSlots();
         }
         
-        // 預設法術 - 機甲魔法風格
+        // 預設語式片段 - 殘響崩壞風格
         return [
-            { type: 'fireball', name: '烈焰砲擊', icon: '🔥' },
-            { type: 'frostbolt', name: '氷結射撃', icon: '❄️' },
-            { type: 'lightning', name: '雷撃衝動', icon: '⚡' },
-            { type: 'arcane', name: '魔導追尾', icon: '🔮' }
+            { type: 'fireball', name: '熱量分解式', icon: '🔥' },
+            { type: 'frostbolt', name: '凍結構造式', icon: '❄️' },
+            { type: 'lightning', name: '電磁脈動式', icon: '⚡' },
+            { type: 'arcane', name: '虛空追跡式', icon: '🔮' }
         ];
     }
     

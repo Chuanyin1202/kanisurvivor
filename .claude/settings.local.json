@@ -12,7 +12,11 @@
       "Bash(git commit:*)",
       "Bash(diff:*)",
       "Bash(mv:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(pkill:*)",
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(node:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }

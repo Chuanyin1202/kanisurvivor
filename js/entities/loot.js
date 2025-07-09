@@ -178,6 +178,13 @@ class Loot {
         // 創建收集效果
         this.createCollectEffect();
         
+        // 播放收集音效
+        if (window.audioManager) {
+            if (this.type === 'gold') {
+                audioManager.playCoinCollect();
+            }
+        }
+        
         console.log(`收集了 ${this.type}: ${this.value}`);
     }
 

@@ -469,6 +469,11 @@ class Enemy {
             }
         }
         
+        // 播放受擊音效
+        if (window.audioManager) {
+            audioManager.playEnemyHit();
+        }
+        
         // 檢查死亡
         if (this.health <= 0) {
             this.die();
@@ -540,6 +545,11 @@ class Enemy {
         
         // 死亡效果
         this.createDeathEffects();
+        
+        // 播放死亡音效
+        if (window.audioManager) {
+            audioManager.playEnemyDeath();
+        }
         
         console.log(`${this.type} 被擊敗了！`);
     }

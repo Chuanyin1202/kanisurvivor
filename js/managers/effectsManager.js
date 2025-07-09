@@ -8,6 +8,8 @@ class EffectsManager {
         this.damageNumbers = [];
         this.maxParticles = 200;
         this.maxDamageNumbers = 50;
+        // 致命一擊效果已移除
+        // 同步鏈結效果已移除
     }
 
     // 添加粒子
@@ -177,6 +179,16 @@ class EffectsManager {
         }
     }
 
+    // 致命一擊效果已完全移除
+
+    // 創建同步鏈結效果
+    // 同步鏈結效果已移除
+    createSyncChainEffect(x, y, chainCount) {
+        // 此功能已移除，只保留接口避免錯誤
+        console.log(`🔗 同步鏈結效果已移除: ${chainCount}`);
+    }
+
+
     // 創建拖尾效果
     createTrailEffect(startPos, endPos, color = '#ffffff', intensity = 1.0) {
         const distance = startPos.distanceTo(endPos);
@@ -203,6 +215,8 @@ class EffectsManager {
     update(deltaTime) {
         this.updateParticles(deltaTime);
         this.updateDamageNumbers(deltaTime);
+        // 致命一擊效果已移除
+        // 同步鏈結效果更新已移除
     }
 
     // 更新粒子
@@ -263,10 +277,20 @@ class EffectsManager {
         }
     }
 
+    // 致命一擊效果更新邏輯已移除
+
+    // 同步鏈結效果更新已移除
+    updateSyncChainEffects(deltaTime) {
+        // 此功能已移除
+    }
+
+
     // 渲染所有特效
     render(renderer) {
         this.renderParticles(renderer);
         this.renderDamageNumbers(renderer);
+        // 致命一擊效果渲染已移除
+        // 同步鏈結效果渲染已移除
     }
 
     // 渲染粒子
@@ -335,10 +359,20 @@ class EffectsManager {
         });
     }
 
+    // 致命一擊效果渲染邏輯已完全移除
+
+    // 同步鏈結效果渲染已移除
+    renderSyncChainEffects(renderer) {
+        // 此功能已移除
+    }
+
+
     // 清除所有特效
     clearAll() {
         this.particles = [];
         this.damageNumbers = [];
+        // 致命一擊效果已移除
+        // 同步鏈結效果已移除
     }
 
     // 清除特定類型的特效

@@ -37,7 +37,7 @@ class UIManager {
             
             // 遊戲中 UI
             'gameUI', 'healthBar', 'healthText', 'expBar', 'levelText',
-            'gameTimer', 'killCount', 'combo', 'pauseBtn',
+            'gameTimer', 'killCount', 'combo', 'pauseBtn', 'simpleComboDisplay', 'versionDisplay',
             
             // 選單和對話框
             'pauseMenu', 'resumeBtn', 'restartBtn', 'mainMenuBtn',
@@ -102,12 +102,12 @@ class UIManager {
         });
     }
 
-    // 更新 UI
+    // 更新 UI - 暫時禁用，使用SimpleUIUpdater
     update(deltaTime) {
-        // 執行當前螢幕的更新回調
-        if (this.updateCallbacks.has(this.currentScreen)) {
-            this.updateCallbacks.get(this.currentScreen)();
-        }
+        // 舊的回調系統已暫時禁用
+        // if (this.updateCallbacks.has(this.currentScreen)) {
+        //     this.updateCallbacks.get(this.currentScreen)();
+        // }
         
         // 更新動畫
         this.updateAnimations(deltaTime);
@@ -119,8 +119,14 @@ class UIManager {
         
         const playerInfo = window.player.getInfo();
         
+        // Debug: 檢查player信息 - 生產環境關閉調試
+        // console.log('🔍 UI更新 - 載體血量:', playerInfo.health, '/', playerInfo.maxHealth, '魔力:', playerInfo.mana, '/', playerInfo.maxMana, '時間:', playerInfo.stats.survivalTime);
+        
         // 更新血量條
         this.updateHealthBar(playerInfo.health, playerInfo.maxHealth);
+        
+        // 更新魔力條
+        this.updateManaBar(playerInfo.mana, playerInfo.maxMana);
         
         // 更新經驗條
         this.updateExpBar(playerInfo.experience, playerInfo.experienceToNext, playerInfo.level);
@@ -130,81 +136,151 @@ class UIManager {
         
         // 更新技能冷卻顯示
         this.updateSkillCooldowns(playerInfo);
+        
+        // 更新版本顯示
+        this.updateVersionDisplay();
     }
 
     // 更新血量條
     updateHealthBar(health, maxHealth) {
-        const healthBar = this.elements.get('healthBar');
-        const healthText = this.elements.get('healthText');
+        const healthValue = document.getElementById('healthValue');
+        const healthBarFill = document.getElementById('healthBarFill');
+        const healthBar = document.querySelector('.health-bar');
         
-        if (healthBar) {
-            const healthPercent = Math.max(0, (health / maxHealth) * 100);
-            healthBar.style.width = `${healthPercent}%`;
-            
-            // 血量顏色變化
-            if (healthPercent < 25) {
-                healthBar.style.background = 'linear-gradient(90deg, #e74c3c, #c0392b)';
-            } else if (healthPercent < 50) {
-                healthBar.style.background = 'linear-gradient(90deg, #f39c12, #e67e22)';
-            } else {
-                healthBar.style.background = 'linear-gradient(90deg, #27ae60, #229954)';
-            }
+        if (healthValue) {
+            healthValue.textContent = Math.round(health);
         }
         
-        if (healthText) {
-            healthText.textContent = `${Math.round(health)}/${maxHealth}`;
+        if (healthBarFill) {
+            const percentage = Math.max(0, (health / maxHealth) * 100);
+            healthBarFill.style.width = `${percentage}%`;
+        }
+        
+        // 低血量警告效果
+        if (healthBar) {
+            if (health / maxHealth < 0.3) {
+                healthBar.classList.add('low-health');
+            } else {
+                healthBar.classList.remove('low-health');
+            }
+        }
+    }
+
+    // 更新魔力條
+    updateManaBar(mana, maxMana) {
+        const manaValue = document.getElementById('manaValue');
+        const manaBarFill = document.getElementById('manaBarFill');
+        const manaBar = document.querySelector('.mana-bar');
+        
+        if (manaValue) {
+            manaValue.textContent = Math.round(mana);
+        }
+        
+        if (manaBarFill) {
+            const percentage = Math.max(0, (mana / maxMana) * 100);
+            manaBarFill.style.width = `${percentage}%`;
+        }
+        
+        // 低魔力警告效果
+        if (manaBar) {
+            if (mana / maxMana < 0.2) {
+                manaBar.classList.add('low-mana');
+            } else {
+                manaBar.classList.remove('low-mana');
+            }
         }
     }
 
     // 更新經驗條
     updateExpBar(experience, experienceToNext, level) {
-        const expBar = this.elements.get('expBar');
         const levelText = this.elements.get('levelText');
-        
-        if (expBar) {
-            const expPercent = (experience / experienceToNext) * 100;
-            expBar.style.width = `${expPercent}%`;
-        }
+        const expText = document.getElementById('expText');
+        const expBar = this.elements.get('expBar');
         
         if (levelText) {
             levelText.textContent = `Lv.${level}`;
+        }
+        
+        if (expText) {
+            expText.textContent = `${Math.round(experience)}/${experienceToNext}`;
+        }
+        
+        if (expBar) {
+            const percentage = (experience / experienceToNext) * 100;
+            // 使用::after偽元素來顯示進度
+            expBar.style.setProperty('--exp-percentage', `${percentage}%`);
         }
     }
 
     // 更新遊戲統計
     updateGameStats(stats) {
-        const killCount = this.elements.get('killCount');
-        const combo = this.elements.get('combo');
         const gameTimer = this.elements.get('gameTimer');
-        
-        if (killCount) {
-            killCount.textContent = `擊殺: ${stats.kills}`;
-        }
-        
-        if (combo) {
-            combo.textContent = `連擊: ${stats.currentCombo}`;
-            
-            // 連擊高亮效果
-            if (stats.currentCombo > 10) {
-                combo.style.color = '#f1c40f';
-                combo.style.textShadow = '0 0 10px #f1c40f';
-            } else {
-                combo.style.color = '#ffffff';
-                combo.style.textShadow = 'none';
-            }
-        }
         
         if (gameTimer) {
             const minutes = Math.floor(stats.survivalTime / 60);
             const seconds = Math.floor(stats.survivalTime % 60);
             gameTimer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
         }
+        
+        // 更新簡化的連擊顯示 - 固定UI在計時器附近
+        this.updateSimpleComboDisplay(stats.currentCombo || 0);
     }
 
     // 更新技能冷卻顯示
     updateSkillCooldowns(playerInfo) {
         // 這裡可以添加技能冷卻時間的視覺指示
         // 例如在技能圖標上顯示冷卻進度
+    }
+    
+    // 更新簡化的連擊顯示 - 固定UI在計時器附近
+    updateSimpleComboDisplay(combo) {
+        const comboDisplay = document.getElementById('simpleComboDisplay');
+        const comboValue = document.getElementById('simpleComboValue');
+        
+        if (comboDisplay && comboValue) {
+            if (combo > 2) {
+                comboDisplay.classList.remove('hidden');
+                comboValue.textContent = combo;
+            } else {
+                comboDisplay.classList.add('hidden');
+            }
+        }
+    }
+    
+    // 更新版本顯示
+    updateVersionDisplay() {
+        if (!window.gameVersion) {
+            window.gameVersion = this.generateVersionNumber();
+        }
+        
+        const versionDisplay = document.getElementById('versionDisplay');
+        if (versionDisplay) {
+            versionDisplay.textContent = `v${window.gameVersion}`;
+        }
+    }
+    
+    // 生成版本號 - 格式: 年.週_次數.時間
+    generateVersionNumber() {
+        const now = new Date();
+        const year = now.getFullYear();
+        
+        // 計算週數
+        const startOfYear = new Date(year, 0, 1);
+        const pastDaysOfYear = (now - startOfYear) / 86400000;
+        const weekNumber = Math.ceil((pastDaysOfYear + startOfYear.getDay() + 1) / 7);
+        
+        // 獲取或生成構建次數
+        const buildKey = `build_${year}_${weekNumber}`;
+        let buildCount = localStorage.getItem(buildKey) || 0;
+        buildCount++;
+        localStorage.setItem(buildKey, buildCount);
+        
+        // 格式化時間
+        const hours = now.getHours().toString().padStart(2, '0');
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        const timeString = `${hours}${minutes}`;
+        
+        return `${year}.${weekNumber}_${buildCount}.${timeString}`;
     }
 
     // 更新主選單統計

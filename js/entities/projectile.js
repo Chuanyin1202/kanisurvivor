@@ -286,8 +286,26 @@ class Projectile {
     hitEnemy(enemy) {
         this.hitTargets.add(enemy);
         
-        // 計算傷害
+        // 計算最終傷害（包含爆擊判定）
         let damage = this.damage;
+        let isCritical = false;
+        
+        // 在命中時才進行爆擊判定
+        if (this.owner && this.owner.calculateFinalDamage) {
+            const finalDamageInfo = this.owner.calculateFinalDamage(this.damage);
+            damage = finalDamageInfo.damage;
+            isCritical = finalDamageInfo.isCritical;
+        } else if (this.owner && this.owner.critChance) {
+            // 向後兼容：直接在這裡進行爆擊判定
+            const critRoll = Math.random();
+            if (critRoll < this.owner.critChance) {
+                damage *= this.owner.critDamage || 2.0;
+                isCritical = true;
+                console.log(`💥 爆擊觸發! 隨機值: ${critRoll.toFixed(3)}, 爆擊率: ${(this.owner.critChance * 100).toFixed(1)}%`);
+                
+                // 致命一擊視覺效果已移除
+            }
+        }
         
         // Debug: 追蹤投射物命中時的傷害數據（使用 Debug 面板）
         // console.log(`💥 投射物命中前 - 投射物傷害: ${this.damage}, 爆擊: ${this.isCritical}`);
@@ -303,7 +321,7 @@ class Projectile {
         // console.log(`💥 最終命中傷害: ${Math.round(damage)}, 爆擊標記: ${this.isCritical}`);
         
         // 造成傷害（傳遞爆擊信息）
-        enemy.takeDamage(Math.round(damage), true, this.isCritical);
+        enemy.takeDamage(Math.round(damage), true, isCritical);
         
         // 應用狀態效果
         if (this.statusEffect && this.statusDuration > 0) {
@@ -673,14 +691,18 @@ class ProjectileManager {
         
         const velocity = Vector2.multiply(direction.normalize(), spellData.speed);
         
-        // 計算傷害和爆擊信息
-        let damageInfo = { damage: spellData.damage, isCritical: false };
-        if (owner && owner.calculateSpellDamage) {
-            damageInfo = owner.calculateSpellDamage(spellData.damage);
+        // 計算基礎傷害（不包含爆擊）
+        let baseDamage = spellData.damage;
+        if (owner && owner.calculateBaseSpellDamage) {
+            baseDamage = owner.calculateBaseSpellDamage(spellData.damage);
+        } else if (owner && owner.calculateSpellDamage) {
+            // 向後兼容
+            const legacyDamageInfo = owner.calculateSpellDamage(spellData.damage);
+            baseDamage = legacyDamageInfo.damage;
         }
         
         // Debug: 投射物創建傷害追蹤（可通過 Debug 面板查看）
-        // console.log(`🚀 創建投射物 ${type}: 基礎傷害=${spellData.damage}, 計算後傷害=${damageInfo.damage}, 爆擊=${damageInfo.isCritical}`);
+        // console.log(`🚀 創建投射物 ${type}: 基礎傷害=${spellData.damage}, 計算後傷害=${baseDamage}`);
         
         const config = {
             x: startPos.x,
@@ -689,8 +711,8 @@ class ProjectileManager {
             velY: velocity.y,
             type: type,
             owner: owner,
-            damage: damageInfo.damage,
-            isCritical: damageInfo.isCritical
+            damage: baseDamage,
+            isCritical: false // 爆擊判定延遲到實際命中時進行
         };
         
         return this.addProjectile(config);

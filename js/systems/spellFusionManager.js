@@ -7,7 +7,7 @@ class SpellFusionManager {
         this.skillTemplates = null;
         this.fusionTable = null;
         this.elementEffects = null;
-        this.playerSpells = []; // 玩家已購買的合成法術
+        this.playerSpells = []; // 玩家已購買的合成語式
         this.equippedSpells = [null, null, null, null]; // 4個技能槽位
         
         this.isLoaded = false;
@@ -32,12 +32,12 @@ class SpellFusionManager {
             this.elementEffects = await effectsResponse.json();
             
             this.isLoaded = true;
-            console.log('✅ 法術合成系統資料載入完成');
+            console.log('✅ 語式合成系統資料載入完成');
             console.log(`📚 技能模板: ${this.skillTemplates.skills.length} 種`);
             console.log(`🔗 合成組合: ${Object.keys(this.fusionTable).length} 種`);
             
         } catch (error) {
-            console.error('❌ 法術合成系統載入失敗:', error);
+            console.error('❌ 語式合成系統載入失敗:', error);
             this.isLoaded = false;
         }
         

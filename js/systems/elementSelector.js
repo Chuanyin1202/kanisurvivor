@@ -24,7 +24,7 @@ class ElementSelector {
         container.innerHTML = `
             <div class="element-selector-content">
                 <div class="selector-header">
-                    <h3>🧙‍♂️ 元素法術合成</h3>
+                    <h3>⚡ 語式片段合成</h3>
                     <button id="closeSelectorBtn" class="close-btn">×</button>
                 </div>
                 
@@ -81,7 +81,7 @@ class ElementSelector {
                 </div>
                 
                 <div class="selector-actions">
-                    <button id="purchaseSpellBtn" class="btn btn-success" disabled>購買法術</button>
+                    <button id="purchaseSpellBtn" class="btn btn-success" disabled>購買語式</button>
                 </div>
             </div>
         `;

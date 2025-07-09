@@ -1,6 +1,6 @@
 /**
- * 成就系統
- * 管理遊戲成就的解鎖和進度追蹤
+ * 認定系統 - RECOGNITION SYSTEM
+ * 管理殘響收集作戰的認定記録和進度追蹤
  */
 class AchievementSystem {
     constructor() {
@@ -18,7 +18,7 @@ class AchievementSystem {
 
     // 初始化成就資料
     initializeAchievements() {
-        // 擊殺類成就 - 機甲魔法風格
+        // 殘響體除去認定 - 共鳴崩壞風格
         this.addAchievement('first_kill', {
             name: '初陣撃破 - FIRST VICTORY',
             description: '機甲魔導師的首次敵機殲滅確認',
@@ -55,7 +55,7 @@ class AchievementSystem {
             icon: '⚡'
         });
 
-        // 生存類成就 - 機甲魔法風格
+        // 生存類成就 - 殘響崩壞風格
         this.addAchievement('survivor', {
             name: '不屈機師 - INDOMITABLE PILOT',
             description: '1分間作戦継続 - 初期生存確認',
@@ -92,7 +92,7 @@ class AchievementSystem {
             icon: '🌟'
         });
 
-        // 連擊類成就 - 機甲魔法風格
+        // 連擊類成就 - 殘響崩壞風格
         this.addAchievement('combo_10', {
             name: '連続必殺 - CHAIN ELIMINATOR',
             description: '10連続撃破確認 - 基礎戦術習得',
@@ -129,7 +129,7 @@ class AchievementSystem {
             icon: '🌪️'
         });
 
-        // 資源回收類成就 - 機甲魔法風格
+        // 資源回收類成就 - 殘響崩壞風格
         this.addAchievement('collector', {
             name: '回収開始 - RETRIEVAL INITIATE',
             description: '100エネルギーユニット回収確認',
@@ -166,7 +166,7 @@ class AchievementSystem {
             icon: '🏆'
         });
 
-        // 特殊戦闘成就 - 機甲魔法風格
+        // 特殊戦闘成就 - 殘響崩壞風格
         this.addAchievement('speed_demon', {
             name: '高速殲滅機 - RAPID ELIMINATOR',
             description: '2分間以内50機撃破 - 超高速戦闘能力認定',
@@ -185,7 +185,7 @@ class AchievementSystem {
             icon: '🕊️'
         });
 
-        // 終極認定 - 機甲魔法風格
+        // 終極認定 - 殘響崩壞風格
         this.addAchievement('platinum', {
             name: '機神完全体 - PERFECT MAGI-MECH',
             description: '全認定項目達成 - 機甲魔導師最高位証明',

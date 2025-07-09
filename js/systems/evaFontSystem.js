@@ -87,7 +87,7 @@ class EVAFontSystem {
         }
         
         this.updateAllElements();
-        console.log(`⚡ 同期率更新 - SYNC RATE: ${this.currentSyncRate}% [${this.systemStatus.toUpperCase()}]`);
+        console.log(`⚡ 載體同期率更新 - SYNC RATE: ${this.currentSyncRate}% [${this.systemStatus.toUpperCase()}]`);
     }
     
     // 設置情緒狀態

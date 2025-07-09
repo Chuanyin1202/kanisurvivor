@@ -24,38 +24,38 @@ class ShopSystem {
         this.loadPurchaseHistory();
     }
     
-    // 設定商店類別
+    // 設定模組商店類別 - 殘響崩壞風格
     setupCategories() {
         this.categories.set('weapons', {
-            name: '武器',
+            name: '語式模組',
             icon: '⚔️',
-            description: '提升攻擊力和法術威力'
+            description: '提升語式威力和共鳴穩定度'
         });
         
         this.categories.set('armor', {
-            name: '防具',
+            name: '防護框架',
             icon: '🛡️',
-            description: '增加防禦力和生命值'
+            description: '增強同步體結構強度'
         });
         
         this.categories.set('accessories', {
-            name: '飾品',
+            name: '共鳴器件',
             icon: '💍',
-            description: '特殊效果和屬性加成'
+            description: '特殊共鳴效果和語式增幅'
         });
         
         this.categories.set('consumables', {
-            name: '消耗品',
+            name: '臨時片段',
             icon: '🧪',
-            description: '一次性使用的增益道具'
+            description: '一次性語式強化片段'
         });
     }
     
     // 設定商店物品
     setupItems() {
-        // 武器類
-        this.addItem('basic_wand', {
-            name: '基礎法杖',
+        // 語式模組類
+        this.addItem('basic_module', {
+            name: '基礎語式核心 - BASIC SYNTAX CORE',
             category: 'weapons',
             type: 'weapon',
             rarity: 'common',
@@ -64,13 +64,13 @@ class ShopSystem {
                 attack: 5,
                 magicPower: 10
             },
-            description: '一把簡單的法杖，適合新手使用',
+            description: '標準語式処理模組，適合初期同步',
             icon: '🪄',
             unlocked: true
         });
         
-        this.addItem('fire_wand', {
-            name: '火焰法杖',
+        this.addItem('thermal_module', {
+            name: '熱量分解模組 - THERMAL MODULE',
             category: 'weapons',
             type: 'weapon',
             rarity: 'uncommon',
@@ -80,14 +80,14 @@ class ShopSystem {
                 magicPower: 15,
                 fireBonus: 20
             },
-            description: '增強火系法術威力',
+            description: '專門處理熱量分解式的強化模組',
             icon: '🔥',
             unlocked: false,
             unlockRequirement: { totalKills: 50 }
         });
         
-        this.addItem('ice_wand', {
-            name: '冰霜法杖',
+        this.addItem('freeze_module', {
+            name: '凍結構造模組 - FREEZE MODULE',
             category: 'weapons',
             type: 'weapon',
             rarity: 'uncommon',
@@ -97,15 +97,15 @@ class ShopSystem {
                 magicPower: 15,
                 iceBonus: 20
             },
-            description: '增強冰系法術威力',
+            description: '專門處理凍結構造式的強化模組',
             icon: '❄️',
             unlocked: false,
             unlockRequirement: { totalKills: 50 }
         });
         
-        // 防具類
-        this.addItem('cloth_robe', {
-            name: '布袍',
+        // 防護框架類
+        this.addItem('basic_frame', {
+            name: '基礎防護框架 - BASIC GUARD FRAME',
             category: 'armor',
             type: 'armor',
             rarity: 'common',
@@ -114,13 +114,13 @@ class ShopSystem {
                 defense: 3,
                 maxHealth: 20
             },
-            description: '基本的法師袍',
-            icon: '👘',
+            description: '標準同步體防護結構',
+            icon: '🛡️',
             unlocked: true
         });
         
-        this.addItem('magic_robe', {
-            name: '魔法袍',
+        this.addItem('syntax_frame', {
+            name: '語式強化框架 - SYNTAX GUARD FRAME',
             category: 'armor',
             type: 'armor',
             rarity: 'uncommon',
@@ -130,15 +130,15 @@ class ShopSystem {
                 maxHealth: 35,
                 magicPower: 8
             },
-            description: '注入魔力的法袍',
-            icon: '🧙',
+            description: '注入語式能量的防護框架',
+            icon: '🛡️',
             unlocked: false,
             unlockRequirement: { totalKills: 30 }
         });
         
-        // 飾品類
-        this.addItem('health_ring', {
-            name: '生命戒指',
+        // 共鳴器件類
+        this.addItem('life_resonator', {
+            name: '生命共鳴器 - LIFE RESONATOR',
             category: 'accessories',
             type: 'accessory',
             rarity: 'common',
@@ -147,13 +147,13 @@ class ShopSystem {
                 maxHealth: 50,
                 healthRegen: 1
             },
-            description: '增加生命值和恢復能力',
+            description: '增強同步體生命共鳴頻率',
             icon: '💚',
             unlocked: true
         });
         
-        this.addItem('speed_boots', {
-            name: '疾速靴',
+        this.addItem('mobility_amplifier', {
+            name: '機動增幅器 - MOBILITY AMP',
             category: 'accessories',
             type: 'accessory',
             rarity: 'uncommon',
@@ -161,15 +161,15 @@ class ShopSystem {
             stats: {
                 movementSpeed: 20
             },
-            description: '增加移動速度',
-            icon: '👟',
+            description: '提升同步體移動效率',
+            icon: '⚡',
             unlocked: false,
             unlockRequirement: { bestSurvivalTime: 300 }
         });
         
-        // 消耗品類
-        this.addItem('health_potion', {
-            name: '生命藥水',
+        // 臨時片段類
+        this.addItem('repair_fragment', {
+            name: '修復片段 - REPAIR FRAGMENT',
             category: 'consumables',
             type: 'consumable',
             rarity: 'common',
@@ -178,15 +178,15 @@ class ShopSystem {
                 type: 'heal',
                 value: 50
             },
-            description: '立即恢復50點生命值',
+            description: '臨時修復同步體結構損傷',
             icon: '🧪',
             unlocked: true,
             stackable: true,
             maxStack: 5
         });
         
-        this.addItem('mana_potion', {
-            name: '魔力藥水',
+        this.addItem('energy_fragment', {
+            name: '能量片段 - ENERGY FRAGMENT',
             category: 'consumables',
             type: 'consumable',
             rarity: 'common',
@@ -195,7 +195,7 @@ class ShopSystem {
                 type: 'mana',
                 value: 50
             },
-            description: '立即恢復50點魔力值',
+            description: '臨時補充語式能量',
             icon: '🔮',
             unlocked: true,
             stackable: true,

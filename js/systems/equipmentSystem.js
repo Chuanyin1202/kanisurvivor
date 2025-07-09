@@ -1,16 +1,16 @@
 /**
- * 裝備系統
- * 管理玩家的裝備和屬性加成
+ * 模組系統 - MODULE SYSTEM
+ * 管理同步體的模組配置和屬性加成
  */
 class EquipmentSystem {
     constructor() {
-        // 裝備槽位
+        // 模組槽位
         this.equipmentSlots = new Map();
         
-        // 當前裝備
+        // 當前配置
         this.equipped = new Map();
         
-        // 裝備庫存
+        // 模組庫存
         this.inventory = new Map();
         
         // 事件監聽器
@@ -19,34 +19,34 @@ class EquipmentSystem {
         this.initializeSlots();
     }
     
-    // 初始化裝備槽位
+    // 初始化模組槽位
     initializeSlots() {
-        // 定義裝備槽位
+        // 定義模組槽位
         this.equipmentSlots.set('weapon', {
-            name: '武器',
+            name: '語式模組',
             type: 'weapon',
-            icon: '⚔️',
+            icon: '⚡',
             required: true
         });
         
         this.equipmentSlots.set('armor', {
-            name: '防具',
+            name: '防護框架',
             type: 'armor',
             icon: '🛡️',
             required: false
         });
         
         this.equipmentSlots.set('accessory1', {
-            name: '飾品1',
+            name: '共鳴器件1',
             type: 'accessory',
-            icon: '💍',
+            icon: '💎',
             required: false
         });
         
         this.equipmentSlots.set('accessory2', {
-            name: '飾品2',
+            name: '共鳴器件2',
             type: 'accessory',
-            icon: '💍',
+            icon: '💎',
             required: false
         });
         
