@@ -166,6 +166,16 @@ body {
     letter-spacing: 2px;
 }
 
+.subtitle-line {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-top: 0.5rem;
+    color: var(--eva-red-primary);
+    text-shadow: var(--eva-glow-red);
+    letter-spacing: 3px;
+    font-family: var(--font-primary);
+}
+
 .game-subtitle {
     font-size: 1.2rem;
     color: var(--eva-gray-light);
@@ -321,7 +331,7 @@ body {
 }
 
 /* 血量和魔法條 - EVA矩形模塊風格 */
-.health-bar, .mana-bar, .exp-bar {
+.health-bar, .mana-bar {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -338,8 +348,7 @@ body {
 }
 
 .health-bar > .bar-container, 
-.mana-bar > .bar-container, 
-.exp-bar > .bar-container {
+.mana-bar > .bar-container {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -444,13 +453,18 @@ body {
     box-shadow: var(--eva-glow-purple);
     max-width: 600px;
     width: 90%;
-    max-height: 80vh;
-    overflow-y: auto;
+    max-height: 85vh;
+    overflow-y: hidden; /* 預設隱藏，避免不必要的滾動條 */
     text-align: center;
     position: relative;
 }
 
-.modal-content::before {
+/* 當內容確實需要滾動時的類別 */
+.modal-content.scrollable {
+    overflow-y: auto;
+}
+
+/* .modal-content::before {
     content: '';
     position: absolute;
     top: 0;
@@ -459,7 +473,7 @@ body {
     height: 2px;
     background: linear-gradient(90deg, transparent, var(--eva-red-primary), transparent);
     animation: scan-line 3s linear infinite;
-}
+} */ /* 掃描線動畫已移除，避免對話框中出現奇怪線條 */
 
 .modal-content h2 {
     margin-bottom: 1.5rem;
@@ -811,7 +825,11 @@ body {
 .level-up-content {
     max-width: 900px;
     width: 95%;
-    max-height: 90vh;
+    max-height: 85vh;
+    overflow-y: hidden; /* 預設隱藏滾動條 */
+}
+
+.level-up-content.scrollable {
     overflow-y: auto;
 }
 
@@ -1609,10 +1627,14 @@ body {
     padding: 2rem;
     max-width: 800px;
     width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
+    max-height: 85vh;
+    overflow-y: hidden; /* 預設隱藏滾動條 */
     box-shadow: 0 0 40px rgba(74, 144, 226, 0.6);
     backdrop-filter: blur(15px);
+}
+
+.element-selector-content.scrollable {
+    overflow-y: auto;
 }
 
 /* 選擇器頭部 */
@@ -2238,7 +2260,7 @@ body {
     letter-spacing: var(--letter-spacing-ultra);
     color: var(--eva-red-light);
     text-shadow: var(--eva-glow-red);
-    animation: eva-critical-shake 0.1s infinite;
+    /* animation: eva-critical-shake 0.1s infinite; */ /* 震動特效已移除 */
     filter: brightness(1.2) contrast(1.1);
 }
 
@@ -2279,12 +2301,12 @@ body {
     }
 }
 
-@keyframes eva-critical-shake {
+/* @keyframes eva-critical-shake {
     0%, 100% { transform: translateX(0px) translateY(0px); }
     25% { transform: translateX(-1px) translateY(-1px); }
     50% { transform: translateX(1px) translateY(0px); }
     75% { transform: translateX(0px) translateY(1px); }
-}
+} */ /* 震動特效已移除，防止文字模糊 */
 
 @keyframes eva-glitch {
     0%, 90%, 100% { 
@@ -2316,26 +2338,7 @@ body {
     }
 }
 
-/* 掃描線效果 - 機械美學 */
-@keyframes eva-scanline {
-    0% { transform: translateY(-100%); }
-    100% { transform: translateY(100vh); }
-}
-
-.eva-scanline {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: linear-gradient(90deg, 
-        transparent 0%, 
-        var(--eva-green-primary) 50%, 
-        transparent 100%);
-    z-index: 9999;
-    animation: eva-scanline 3s linear infinite;
-    pointer-events: none;
-}
+/* 掃描線效果已移除 - 過於干擾遊戲體驗 */
 
 /* 文字破碎效果 - 同步失衡視覺化 */
 .eva-text-fragmented {
@@ -2395,7 +2398,7 @@ body {
 
 /* 狀態驅動的字體切換 */
 .ui-element[data-sync-rate="low"] {
-    animation: eva-critical-shake 0.15s infinite;
+    /* animation: eva-critical-shake 0.15s infinite; */ /* 震動特效已移除 */
 }
 
 .ui-element[data-sync-rate="critical"] {
@@ -2411,7 +2414,7 @@ body {
 }
 
 .ui-element[data-emotional-state="panic"] .eva-text-breathing {
-    animation: eva-critical-shake 0.1s infinite;
+    /* animation: eva-critical-shake 0.1s infinite; */ /* 震動特效已移除 */
 }
 
 /* ========================================
@@ -2487,7 +2490,7 @@ body {
 }
 
 /* 戰鬥激烈時的整體HUD顫抖 */
-@keyframes eva-battle-intensity {
+/* @keyframes eva-battle-intensity {
     0%, 100% { 
         transform: translate(0, 0) scale(1);
         filter: contrast(1) brightness(1);
@@ -2528,10 +2531,10 @@ body {
         transform: translate(-0.4px, -0.2px) scale(1.002);
         filter: contrast(1.04) brightness(1.02);
     }
-}
+} */ /* 戰鬥震動效果已移除 */
 
 /* 同步失衡時的視覺干擾 */
-@keyframes eva-sync-disruption {
+/* @keyframes eva-sync-disruption {
     0%, 95%, 100% { 
         transform: translate(0, 0) skew(0deg, 0deg);
         filter: hue-rotate(0deg) contrast(1);
@@ -2557,7 +2560,7 @@ body {
         filter: hue-rotate(-45deg) contrast(1.2);
         opacity: 0.9;
     }
-}
+} */ /* 同步中斷震動效果已移除 */
 
 /* 全屏閃白警告效果 */
 @keyframes eva-flash-warning {
@@ -2589,11 +2592,11 @@ body {
 }
 
 .eva-battle-active {
-    animation: eva-battle-intensity 0.2s linear infinite;
+    /* animation: eva-battle-intensity 0.2s linear infinite; */ /* 戰鬥震動已移除 */
 }
 
 .eva-sync-unstable {
-    animation: eva-sync-disruption 1.5s linear infinite;
+    /* animation: eva-sync-disruption 1.5s linear infinite; */ /* 同步震動已移除 */
 }
 
 /* 全屏警告覆蓋層 */
@@ -2618,24 +2621,24 @@ body {
 }
 
 .ui-element[data-emotional-state="panic"] {
-    animation: eva-conflict-animation 1s ease-in-out infinite, 
-               eva-sync-disruption 1.5s linear infinite;
+    animation: eva-conflict-animation 1s ease-in-out infinite;
+               /* eva-sync-disruption 1.5s linear infinite; */ /* 震動已移除 */
 }
 
 /* 戰鬥狀態動畫 */
 .hud[data-battle-state="active"] {
-    animation: eva-battle-intensity 0.15s linear infinite;
+    /* animation: eva-battle-intensity 0.15s linear infinite; */ /* 戰鬥震動已移除 */
 }
 
 .hud[data-battle-state="intense"] {
-    animation: eva-battle-intensity 0.08s linear infinite,
+    animation: /* eva-battle-intensity 0.08s linear infinite, */ /* 震動已移除 */
                eva-conflict-animation 1s ease-in-out infinite;
 }
 
 /* 同步率驅動的視覺效果 */
 .ui-element[data-sync-rate="critical"] {
-    animation: eva-sync-disruption 1s linear infinite,
-               eva-critical-shake 0.1s infinite;
+    /* animation: eva-sync-disruption 1s linear infinite; */ /* 震動已移除 */
+               /* eva-critical-shake 0.1s infinite; */ /* 震動特效已移除 */
     filter: contrast(1.2) brightness(1.1);
 }
 
@@ -2658,12 +2661,17 @@ body {
 }
 
 /* 應用邊框呼吸到關鍵UI元素 */
-.health-bar, .mana-bar, .exp-bar {
+.status-bar {
     animation: eva-border-breathe 4s ease-in-out infinite;
 }
 
-.timer, .score {
-    animation: eva-border-breathe 5s ease-in-out infinite;
+.timer-display {
+    /* animation: eva-border-breathe 5s ease-in-out infinite; */ /* 移除紫色光暈 */
+}
+
+/* 隱藏類別 */
+.hidden {
+    display: none !important;
 }
 
 /* 機械感精確移動 - 數據顯示 */
@@ -2678,4 +2686,471 @@ body {
 
 .btn:hover {
     animation: eva-conflict-animation 1s ease-in-out infinite;
+}
+
+/* ========================================
+   角色周邊狀態條系統
+   ======================================== */
+
+/* 狀態條系統容器 */
+.status-bar-container {
+    position: fixed;
+    z-index: 100;
+    pointer-events: none;
+    transform: scale(1.5); /* 放大1.5倍 */
+    transform-origin: center;
+}
+
+/* 左上角血量條 */
+.status-bar-container.top-left {
+    top: 20px;
+    left: 20px;
+    transform: scale(1.5);
+    transform-origin: top left; /* 從左上角縮放 */
+}
+
+/* 右上角魔力條 */
+.status-bar-container.top-right {
+    top: 20px;
+    right: 20px;
+    transform: scale(1.5);
+    transform-origin: top right; /* 從右上角縮放 */
+}
+
+/* 狀態條樣式 */
+.status-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 80px;
+}
+
+/* 標籤樣式 */
+.bar-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: var(--weight-bold);
+    color: var(--eva-gray-light);
+    text-shadow: 0 0 6px rgba(255, 255, 255, 0.3);
+    letter-spacing: var(--letter-spacing-wide);
+}
+
+/* 條狀顯示區域 */
+.bar-display {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* 條狀背景 */
+.bar-background {
+    width: 60px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 條狀填充 */
+.bar-fill {
+    height: 100%;
+    width: 100%;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+    position: relative;
+}
+
+/* 血量條填充 */
+.health-fill {
+    background: linear-gradient(90deg, var(--eva-red-primary), var(--eva-red-light));
+    box-shadow: 0 0 8px rgba(255, 0, 64, 0.6);
+}
+
+/* 魔力條填充 */
+.mana-fill {
+    background: linear-gradient(90deg, var(--eva-purple-primary), var(--eva-purple-light));
+    box-shadow: 0 0 8px rgba(138, 43, 226, 0.6);
+}
+
+/* 數值顯示 */
+.bar-value {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: var(--weight-bold);
+    color: var(--eva-white);
+    text-shadow: 0 0 6px rgba(255, 255, 255, 0.5);
+    min-width: 20px;
+    text-align: center;
+}
+
+/* 低血量警告 */
+.health-bar.low-health .health-fill {
+    background: linear-gradient(90deg, #ff0000, #ff3333);
+    animation: eva-critical-pulse 1s ease-in-out infinite;
+}
+
+.health-bar.low-health .bar-value {
+    color: #ff0000;
+    /* animation: eva-critical-shake 0.2s infinite; */ /* 震動特效已移除，防止血量文字模糊 */
+}
+
+/* 低魔力警告 */
+.mana-bar.low-mana .mana-fill {
+    background: linear-gradient(90deg, var(--eva-orange-primary), var(--eva-orange-light));
+    animation: eva-critical-pulse 1.5s ease-in-out infinite;
+}
+
+/* 時間顯示容器 */
+.timer-container {
+    position: fixed;
+    z-index: 100;
+    pointer-events: none;
+    transform: scale(1.5); /* 放大1.5倍 */
+    transform-origin: center;
+}
+
+/* 頂部中央時間顯示 */
+.timer-container.top-center {
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) scale(1.5); /* 結合位置和縮放 */
+}
+
+/* 時間顯示樣式 */
+.timer-display {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--eva-gray-light);
+    opacity: 0.8;
+}
+
+.timer-value {
+    font-size: 16px;
+    font-weight: var(--weight-bold);
+    color: var(--eva-white);
+    text-shadow: 0 0 6px rgba(255, 255, 255, 0.3);
+}
+
+/* 角色周邊動態統計顯示 */
+.character-stats {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 150;
+}
+
+/* 連擊數顯示 */
+.combo-display {
+    position: absolute;
+    top: -80px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    animation: float-combo 2s ease-in-out infinite;
+}
+
+.combo-label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 8px;
+    color: var(--eva-orange-primary);
+    text-shadow: 0 0 6px rgba(255, 102, 0, 0.6);
+    letter-spacing: var(--letter-spacing-wide);
+}
+
+.combo-value {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 16px;
+    font-weight: var(--weight-bold);
+    color: var(--eva-white);
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    margin-top: 2px;
+}
+
+/* 擊破數顯示 */
+.kill-display {
+    position: absolute;
+    top: -40px;
+    left: 60px;
+    text-align: center;
+    animation: float-kill 1.5s ease-out;
+}
+
+.kill-label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 8px;
+    color: var(--eva-red-primary);
+    text-shadow: 0 0 6px rgba(255, 0, 64, 0.6);
+    letter-spacing: var(--letter-spacing-wide);
+}
+
+.kill-value {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: var(--weight-bold);
+    color: var(--eva-white);
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    margin-top: 2px;
+}
+
+/* 浮動動畫 */
+@keyframes float-combo {
+    0%, 100% { transform: translateX(-50%) translateY(0px); }
+    50% { transform: translateX(-50%) translateY(-5px); }
+}
+
+@keyframes float-kill {
+    0% { opacity: 0; transform: translateY(20px) scale(0.8); }
+    20% { opacity: 1; transform: translateY(0px) scale(1.1); }
+    100% { opacity: 0; transform: translateY(-20px) scale(0.9); }
+}
+
+/* ========================================
+   底部經驗條系統 - 已改為畫布渲染
+   ======================================== */
+
+/* 舊版HTML經驗條系統已移除，現在使用畫布渲染 */
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .status-bar-container.top-left {
+        top: 15px;
+        left: 15px;
+    }
+    
+    .status-bar-container.top-right {
+        top: 15px;
+        right: 15px;
+    }
+    
+    .timer-container.top-center {
+        top: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    .bar-label {
+        font-size: 9px;
+    }
+    
+    .bar-background {
+        width: 50px;
+        height: 5px;
+    }
+    
+    .bar-value {
+        font-size: 11px;
+    }
+    
+    .timer-display {
+        font-size: 11px;
+    }
+    
+    .timer-value {
+        font-size: 14px;
+    }
+    
+    /* 舊版經驗條樣式已移除 */
+    
+    .character-stats {
+        /* 手機上稍微調整位置 */
+        transform: translate(-50%, -60%);
+    }
+    
+    .combo-value {
+        font-size: 14px;
+    }
+    
+    .kill-value {
+        font-size: 12px;
+    }
+    
+    .combo-label, .kill-label {
+        font-size: 7px;
+    }
+}
+
+@media (max-width: 480px) {
+    .status-bar-container.top-left {
+        top: 10px;
+        left: 10px;
+    }
+    
+    .status-bar-container.top-right {
+        top: 10px;
+        right: 10px;
+    }
+    
+    .timer-container.top-center {
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    .bar-label {
+        font-size: 8px;
+    }
+    
+    .bar-background {
+        width: 45px;
+        height: 4px;
+    }
+    
+    .bar-value {
+        font-size: 10px;
+    }
+    
+    .timer-display {
+        font-size: 10px;
+    }
+    
+    .timer-value {
+        font-size: 13px;
+    }
+    
+    .character-stats {
+        transform: translate(-50%, -65%);
+    }
+    
+    .combo-value {
+        font-size: 12px;
+    }
+    
+    .kill-value {
+        font-size: 10px;
+    }
+    
+    .combo-label, .kill-label {
+        font-size: 6px;
+    }
+    
+    /* 舊版經驗條樣式已移除 */
+}
+
+/* ========================================
+   簡化的連擊顯示和版本顯示系統
+   ======================================== */
+
+/* 簡化的連擊顯示 - 固定在計時器附近 */
+.simple-combo-display {
+    position: absolute;
+    top: 55px; /* 固定位置，不受Timer影響 */
+    left: 50%;
+    transform: translateX(-50%) scale(1.5); /* 居中並放大1.5倍 */
+    text-align: center;
+    padding: 2px 8px;
+    background: rgba(255, 102, 0, 0.1);
+    border: 1px solid rgba(255, 102, 0, 0.3);
+    border-radius: 4px;
+    backdrop-filter: blur(2px);
+    z-index: 99; /* 確保顯示在上層 */
+    writing-mode: horizontal-tb;
+    text-orientation: mixed;
+}
+
+.simple-combo-display .combo-label {
+    display: block;
+    font-family: "Microsoft JhengHei", "PingFang TC", "Hiragino Sans GB", var(--font-mono);
+    font-size: 9px;
+    color: var(--eva-orange-primary);
+    text-shadow: 0 0 4px rgba(255, 102, 0, 0.6);
+    letter-spacing: var(--letter-spacing-wide);
+    margin-bottom: 1px;
+    writing-mode: horizontal-tb;
+    direction: ltr;
+    text-orientation: mixed;
+    white-space: nowrap;
+}
+
+.simple-combo-display .combo-value {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: var(--weight-bold);
+    color: var(--eva-white);
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+}
+
+/* 版本顯示 - 左下角 */
+.version-display {
+    position: fixed;
+    bottom: 15px;
+    left: 15px;
+    z-index: 50;
+    pointer-events: none;
+}
+
+.version-text {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.6);
+    text-shadow: 0 0 4px rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px 6px;
+    border-radius: 3px;
+    backdrop-filter: blur(2px);
+}
+
+/* 響應式調整 */
+@media (max-width: 768px) {
+    .simple-combo-display {
+        top: 45px; /* 手機版調整位置 */
+        padding: 1px 6px;
+        transform: translateX(-50%) scale(1.3); /* 略微縮小 */
+    }
+    
+    .simple-combo-display .combo-label {
+        font-size: 7px;
+    }
+    
+    .simple-combo-display .combo-value {
+        font-size: 10px;
+    }
+    
+    .version-display {
+        bottom: 10px;
+        left: 10px;
+    }
+    
+    .version-text {
+        font-size: 9px;
+        padding: 1px 4px;
+    }
+}
+
+@media (max-width: 480px) {
+    .simple-combo-display {
+        top: 40px; /* 小螢幕調整位置 */
+        padding: 1px 4px;
+        transform: translateX(-50%) scale(1.2); /* 進一步縮小 */
+    }
+    
+    .simple-combo-display .combo-label {
+        font-size: 6px;
+    }
+    
+    .simple-combo-display .combo-value {
+        font-size: 9px;
+    }
+    
+    .version-display {
+        bottom: 8px;
+        left: 8px;
+    }
+    
+    .version-text {
+        font-size: 8px;
+        padding: 1px 3px;
+    }
 }

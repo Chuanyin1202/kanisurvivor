@@ -91,18 +91,17 @@ class Game {
         console.log('🎯 遊戲狀態管理器設定完成');
     }
 
+
     // 設定 UI 事件監聽
     setupUIEventListeners() {
-        // 主選單按鈕 - 同時添加 click 和 touchend 事件
+        // 主選單按鈕 - 簡化的觸控事件處理
         const startBtn = document.getElementById('startBtn');
         if (startBtn) {
             startBtn.addEventListener('click', () => {
-                console.log('🎮 開始按鈕被點擊');
                 this.startNewGame();
             });
             startBtn.addEventListener('touchend', (e) => {
                 e.preventDefault();
-                console.log('🎮 開始按鈕被觸控');
                 this.startNewGame();
             });
         }
@@ -148,6 +147,17 @@ class Game {
             settingsBtn.addEventListener('touchend', (e) => {
                 e.preventDefault();
                 this.showSettings();
+            });
+        }
+        
+        const testAudioBtn = document.getElementById('testAudioBtn');
+        if (testAudioBtn) {
+            testAudioBtn.addEventListener('click', () => {
+                this.testAudio();
+            });
+            testAudioBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                this.testAudio();
             });
         }
 
@@ -608,7 +618,9 @@ class Game {
             }
             
             // 更新 UI
-            this.updateGameUI();
+            if (window.uiManager) {
+                uiManager.update(deltaTime);
+            }
         }
         
         // 更新 Debug 管理器（總是更新，不受遊戲狀態影響）
@@ -669,6 +681,11 @@ class Game {
         // 結束渲染幀
         this.renderer.endFrame();
         
+        // 渲染 UI 元素（在世界座標系之外）
+        if (gameStateManager.isCurrentState('gamePlay')) {
+            this.renderCanvasUI();
+        }
+        
         // 渲染 FPS（如果啟用）
         if (gameSettings.get('graphics', 'showFPS')) {
             this.renderFPS();
@@ -693,6 +710,97 @@ class Game {
     // 渲染 FPS
     renderFPS() {
         this.renderer.drawText(`FPS: ${this.fps}`, 10, 10, '#ffffff', '16px monospace');
+    }
+
+    // 渲染 Canvas UI 元素（經驗條等）
+    renderCanvasUI() {
+        if (!this.player) return;
+        
+        const playerInfo = this.player.getInfo();
+        
+        // 渲染經驗條（在畫面底部）
+        this.renderExperienceBar(playerInfo.experience, playerInfo.experienceToNext);
+    }
+
+    // 渲染經驗條
+    renderExperienceBar(experience, experienceToNext) {
+        const barHeight = 8; // 增加高度到8px
+        const barX = 0;
+        
+        // 獲取實際可視區域尺寸
+        let actualWidth, actualHeight;
+        
+        // 手機設備檢測
+        const isMobile = window.innerWidth <= 768 || ('ontouchstart' in window);
+        
+        if (isMobile && window.visualViewport) {
+            // 使用 Visual Viewport API (更準確的手機可視區域)
+            actualWidth = window.visualViewport.width;
+            actualHeight = window.visualViewport.height;
+        } else if (isMobile) {
+            // 備用方案：使用 document 尺寸
+            actualWidth = document.documentElement.clientWidth;
+            actualHeight = document.documentElement.clientHeight;
+        } else {
+            // 桌面版使用原本的渲染器尺寸
+            actualWidth = this.renderer.width;
+            actualHeight = this.renderer.height;
+        }
+        
+        const barWidth = actualWidth;
+        const barY = actualHeight - barHeight;
+        
+        // 計算經驗百分比
+        const percentage = Math.min(experience / experienceToNext, 1.0);
+        
+        // 完全重置 Canvas 變換並繪製
+        this.renderer.ctx.save();
+        
+        // 完全重置所有變換，確保使用絕對螢幕座標
+        this.renderer.ctx.resetTransform();
+        
+        // 考慮 devicePixelRatio 的縮放
+        if (this.renderer.pixelRatio !== 1) {
+            this.renderer.ctx.scale(this.renderer.pixelRatio, this.renderer.pixelRatio);
+        }
+        
+        // 背景陰影
+        this.renderer.ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+        this.renderer.ctx.fillRect(barX, barY, barWidth, barHeight);
+        
+        // 經驗進度條（使用更醒目的橙色）
+        if (percentage > 0) {
+            // 創建漸變效果
+            const gradient = this.renderer.ctx.createLinearGradient(barX, barY, barX + barWidth * percentage, barY);
+            gradient.addColorStop(0, '#ff6b35'); // 橙色
+            gradient.addColorStop(1, '#ffa500'); // 金黃色
+            
+            this.renderer.ctx.fillStyle = gradient;
+            this.renderer.ctx.fillRect(barX, barY, barWidth * percentage, barHeight);
+            
+            // 添加發光效果
+            this.renderer.ctx.shadowColor = '#ff6b35';
+            this.renderer.ctx.shadowBlur = 4;
+            this.renderer.ctx.fillRect(barX, barY, barWidth * percentage, barHeight);
+            this.renderer.ctx.shadowBlur = 0;
+        }
+        
+        // 繪製邊框
+        this.renderer.ctx.strokeStyle = '#ffffff';
+        this.renderer.ctx.lineWidth = 1;
+        this.renderer.ctx.strokeRect(barX, barY, barWidth, barHeight);
+        
+        // 添加等級文字 (可選)
+        if (this.player) {
+            const level = this.player.level;
+            this.renderer.ctx.fillStyle = '#ffffff';
+            this.renderer.ctx.font = '12px Arial';
+            this.renderer.ctx.textAlign = 'right';
+            this.renderer.ctx.fillText(`Lv.${level}`, barWidth - 10, barY - 5);
+            this.renderer.ctx.textAlign = 'left'; // 重置對齊
+        }
+        
+        this.renderer.ctx.restore();
     }
 
     // 開始新遊戲
@@ -768,6 +876,17 @@ class Game {
             console.log('👁️ 遊戲UI已顯示');
         }
         
+        // 通知UIManager切換到遊戲螢幕
+        if (window.uiManager) {
+            uiManager.switchScreen('gameUI');
+        }
+        
+        // 啟動簡化的UI更新器
+        if (window.simpleUIUpdater) {
+            simpleUIUpdater.start();
+            console.log('🔄 SimpleUIUpdater 已啟動');
+        }
+        
         if (pauseMenu) {
             pauseMenu.style.display = 'none';
             pauseMenu.classList.add('hidden');
@@ -789,7 +908,9 @@ class Game {
         
         // 更新 UI
         console.log('🔄 更新遊戲UI');
-        this.updateGameUI();
+        if (window.uiManager) {
+            uiManager.switchScreen('gameUI');
+        }
         
         // 觸發遊戲重新開始事件（通知手機控制系統同步法術選擇器）
         setTimeout(() => {
@@ -904,6 +1025,12 @@ class Game {
             evaFontSystem.onGameStateChange('mainMenu');
         }
         
+        // 停止簡化的UI更新器
+        if (window.simpleUIUpdater) {
+            simpleUIUpdater.stop();
+            console.log('🔄 SimpleUIUpdater 已停止');
+        }
+        
         // 顯示主選單UI
         const mainMenu = document.getElementById('mainMenu');
         const gameUI = document.getElementById('gameUI');
@@ -967,52 +1094,6 @@ class Game {
         console.log('設定選單尚未實作');
     }
 
-    // 更新遊戲 UI
-    updateGameUI() {
-        if (!this.player) return;
-        
-        const playerInfo = this.player.getInfo();
-        
-        // 更新血量條
-        const healthBar = document.getElementById('healthBar');
-        const healthText = document.getElementById('healthText');
-        if (healthBar && healthText) {
-            const healthPercent = (playerInfo.health / playerInfo.maxHealth) * 100;
-            healthBar.style.width = `${healthPercent}%`;
-            healthText.textContent = `${Math.round(playerInfo.health)}/${playerInfo.maxHealth}`;
-        }
-        
-        // 更新魔法條
-        const manaBar = document.getElementById('manaBar');
-        const manaText = document.getElementById('manaText');
-        if (manaBar && manaText) {
-            const manaPercent = (playerInfo.mana / playerInfo.maxMana) * 100;
-            manaBar.style.width = `${manaPercent}%`;
-            manaText.textContent = `${Math.round(playerInfo.mana)}/${playerInfo.maxMana}`;
-        }
-        
-        // 更新經驗條
-        const expBar = document.getElementById('expBar');
-        const levelText = document.getElementById('levelText');
-        if (expBar && levelText) {
-            const expPercent = (playerInfo.experience / playerInfo.experienceToNext) * 100;
-            expBar.style.width = `${expPercent}%`;
-            levelText.textContent = `Lv.${playerInfo.level}`;
-        }
-        
-        // 更新統計
-        const killCount = document.getElementById('killCount');
-        const combo = document.getElementById('combo');
-        const gameTimer = document.getElementById('gameTimer');
-        
-        if (killCount) killCount.textContent = `擊殺: ${playerInfo.stats.kills}`;
-        if (combo) combo.textContent = `連擊: ${playerInfo.stats.currentCombo}`;
-        if (gameTimer) {
-            const minutes = Math.floor(playerInfo.stats.survivalTime / 60);
-            const seconds = Math.floor(playerInfo.stats.survivalTime % 60);
-            gameTimer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-        }
-    }
 
     // 更新主選單 UI
     updateMainMenuUI() {
@@ -1046,6 +1127,34 @@ class Game {
     // 顯示錯誤訊息
     showErrorMessage(message) {
         alert(message); // 暫時使用 alert，之後可以改為自定義對話框
+    }
+
+    // 測試音效系統
+    testAudio() {
+        console.log('🎵 開始音效系統測試');
+        
+        if (!window.audioManager) {
+            alert('❌ 音效管理器未載入');
+            return;
+        }
+        
+        // 顯示設備信息
+        const isMobile = this.isMobileDevice();
+        console.log('📱 設備類型:', isMobile ? '手機' : '桌面');
+        
+        // 顯示音效系統狀態
+        const stats = audioManager.getStats();
+        console.log('🔊 音效系統狀態:', stats);
+        
+        // 執行音效測試
+        audioManager.testAllSounds();
+        
+        // 顯示測試信息
+        const message = isMobile ? 
+            '🎵 手機音效測試已開始！\n請打開控制台查看詳細信息。\n如果沒有聲音，請檢查手機音量設定。' :
+            '🎵 桌面音效測試已開始！\n請打開控制台查看詳細信息。';
+        
+        alert(message);
     }
 
     // 設定目標 FPS
