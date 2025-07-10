@@ -646,28 +646,59 @@ class Enemy {
             return;
         }
         
-        // 根據類型選擇顏色
-        let color = '#ff6b6b'; // 預設紅色
+        // 根據類型選擇 emoji 和顏色
+        let emoji = '👺'; // 預設
+        let color = '#ff6b6b'; // 背景色
+        
         switch (this.type) {
             case 'slime':
+                emoji = '🟢';
                 color = '#4ecdc4';
                 break;
             case 'goblin':
+                emoji = '👹';
                 color = '#45b7d1';
                 break;
+            case 'archer':
+                emoji = '🏹';
+                color = '#ff6b35';
+                break;
+            case 'wolf':
+                emoji = '🐺';
+                color = '#a4b0be';
+                break;
             case 'orc':
+                emoji = '🐗';
                 color = '#f9ca24';
                 break;
+            case 'priest':
+                emoji = '👨‍⚕️';
+                color = '#fab1a0';
+                break;
             case 'boss':
+                emoji = '👑';
                 color = '#6c5ce7';
                 break;
         }
         
-        // 繪製敵人主體
+        // 繪製敵人主體 - 使用 emoji 文字渲染
         if (alpha < 1.0) {
-            renderer.drawCircleWithAlpha(this.position.x, this.position.y, this.radius, color, alpha);
+            renderer.drawTextWithAlpha(
+                emoji, 
+                this.position.x, 
+                this.position.y, 
+                this.radius * 2, // 字體大小與敵人大小對應
+                '#ffffff', 
+                alpha
+            );
         } else {
-            renderer.drawCircle(this.position.x, this.position.y, this.radius, color);
+            renderer.drawText(
+                emoji, 
+                this.position.x, 
+                this.position.y, 
+                '#ffffff', // 純白色讓 emoji 原色顯示
+                `${this.radius * 2}px Arial` // 字體設定
+            );
         }
         
         // 渲染狀態效果視覺

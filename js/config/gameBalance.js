@@ -94,11 +94,11 @@ const GameBalance = {
 
     // 敵人配置
     enemies: {
-        // 史萊姆
+        // 史萊姆 - 基礎敵人 🟢
         slime: {
             health: 20,
-            speed: 50, // +25% 移動速度
-            damage: 12, // +50% 傷害
+            speed: 50,
+            damage: 12,
             experienceReward: 10,
             goldReward: 2,
             size: 16,
@@ -106,11 +106,11 @@ const GameBalance = {
             minWave: 1
         },
         
-        // 哥布林
+        // 哥布林 - 平衡型戰士 👹
         goblin: {
             health: 35,
-            speed: 75, // +25% 移動速度
-            damage: 18, // +50% 傷害
+            speed: 65,
+            damage: 18,
             experienceReward: 15,
             goldReward: 3,
             size: 18,
@@ -118,16 +118,52 @@ const GameBalance = {
             minWave: 2
         },
         
-        // 獸人
+        // 弓箭手 - 遠程攻擊，血少但傷害高 🏹
+        archer: {
+            health: 25,
+            speed: 45,
+            damage: 25,
+            experienceReward: 18,
+            goldReward: 4,
+            size: 16,
+            spawnWeight: 0.6,
+            minWave: 3
+        },
+        
+        // 狼 - 快速但脆弱 🐺
+        wolf: {
+            health: 30,
+            speed: 85,
+            damage: 16,
+            experienceReward: 20,
+            goldReward: 3,
+            size: 18,
+            spawnWeight: 0.7,
+            minWave: 4
+        },
+        
+        // 獸人 - 重型單位 🐗
         orc: {
-            health: 60,
-            speed: 55, // +22% 移動速度
-            damage: 28, // +40% 傷害
+            health: 70,
+            speed: 40,
+            damage: 32,
             experienceReward: 25,
             goldReward: 5,
-            size: 22,
-            spawnWeight: 0.5,
+            size: 24,
+            spawnWeight: 0.4,
             minWave: 5
+        },
+        
+        // 祭司 - 支援型，低攻擊但有特殊能力 👨‍⚕️
+        priest: {
+            health: 50,
+            speed: 35,
+            damage: 8,
+            experienceReward: 35,
+            goldReward: 8,
+            size: 18,
+            spawnWeight: 0.2,
+            minWave: 7
         },
         
         // 首領

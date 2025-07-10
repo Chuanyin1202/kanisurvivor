@@ -383,6 +383,8 @@ class Renderer {
         this.ctx.save();
         this.ctx.fillStyle = color;
         this.ctx.font = font;
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
         this.ctx.fillText(text, x, y);
         this.ctx.restore();
     }
@@ -398,6 +400,18 @@ class Renderer {
         this.ctx.strokeText(text, x, y);
         this.ctx.fillText(text, x, y);
         
+        this.ctx.restore();
+    }
+
+    // 繪製帶透明度的文字
+    drawTextWithAlpha(text, x, y, fontSize, color = '#ffffff', alpha = 1.0) {
+        this.ctx.save();
+        this.ctx.globalAlpha = alpha;
+        this.ctx.fillStyle = color;
+        this.ctx.font = `${fontSize}px Arial`;
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText(text, x, y);
         this.ctx.restore();
     }
 
