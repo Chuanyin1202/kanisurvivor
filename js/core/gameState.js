@@ -226,6 +226,46 @@ class MainMenuState extends BaseGameState {
         document.getElementById('mainMenu').classList.remove('hidden');
         document.getElementById('gameUI').classList.add('hidden');
         document.getElementById('gameCanvas').style.display = 'none';
+        
+        // 更新主選單的統計顯示
+        this.updateMainMenuUI();
+    }
+    
+    // 更新主選單 UI
+    updateMainMenuUI() {
+        console.log('🎮 更新主選單 UI');
+        
+        if (window.gameData) {
+            const playerStats = window.gameData.getPlayerStats();
+            const currentGold = window.gameData.getGold();
+            
+            console.log('📊 載入的統計數據:', playerStats);
+            console.log('💰 當前金幣:', currentGold);
+            
+            // 更新統計顯示
+            const goldDisplay = document.getElementById('goldDisplay');
+            const totalKillsDisplay = document.getElementById('totalKillsDisplay');
+            const bestTimeDisplay = document.getElementById('bestTimeDisplay');
+            
+            if (goldDisplay) {
+                goldDisplay.textContent = currentGold;
+                console.log('💰 金幣顯示已更新:', currentGold);
+            }
+            if (totalKillsDisplay) {
+                totalKillsDisplay.textContent = playerStats.totalKills;
+                console.log('⚔️ 總擊殺顯示已更新:', playerStats.totalKills);
+            }
+            if (bestTimeDisplay) {
+                const bestTime = playerStats.bestSurvivalTime;
+                const minutes = Math.floor(bestTime / 60);
+                const seconds = bestTime % 60;
+                const timeText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                bestTimeDisplay.textContent = timeText;
+                console.log('⏱️ 最佳時間顯示已更新:', timeText);
+            }
+        } else {
+            console.error('❌ gameData 不可用，無法更新主選單 UI');
+        }
     }
 
     exit() {
@@ -276,12 +316,47 @@ class GamePlayState extends BaseGameState {
     update(deltaTime) {
         if (!this.isPaused) {
             // 更新遊戲邏輯
+            if (window.player) {
+                window.player.update(deltaTime);
+            }
+            
+            if (window.enemyManager) {
+                window.enemyManager.update(deltaTime);
+            }
+            
+            if (window.waveManager) {
+                window.waveManager.update(deltaTime);
+            }
+            
+            // 更新其他遊戲系統
+            if (window.effectsManager) {
+                window.effectsManager.update(deltaTime);
+            }
+            
+            if (window.summonManager) {
+                window.summonManager.update(deltaTime);
+            }
         }
     }
 
     render(renderer) {
         if (!this.isPaused) {
             // 渲染遊戲畫面
+            if (window.player) {
+                window.player.render(renderer);
+            }
+            
+            if (window.enemyManager) {
+                window.enemyManager.render(renderer);
+            }
+            
+            if (window.effectsManager) {
+                window.effectsManager.render(renderer);
+            }
+            
+            if (window.summonManager) {
+                window.summonManager.render(renderer);
+            }
         }
     }
 }
@@ -326,6 +401,44 @@ class GameOverState extends BaseGameState {
             document.getElementById('finalKills').textContent = stats.kills;
             document.getElementById('finalCombo').textContent = stats.maxCombo;
             document.getElementById('goldEarned').textContent = stats.goldEarned;
+            
+            // 保存遊戲統計到持久化資料
+            this.saveGameStats(stats);
+        }
+    }
+
+    // 保存遊戲統計數據
+    saveGameStats(stats) {
+        console.log('📊 嘗試保存遊戲統計:', stats);
+        
+        if (window.gameData) {
+            console.log('✅ gameData 可用，開始保存...');
+            const currentStats = window.gameData.getPlayerStats();
+            console.log('📈 當前統計:', currentStats);
+            
+            // 更新統計數據
+            const updatedStats = {
+                totalKills: currentStats.totalKills + (stats.kills || 0),
+                totalPlayTime: currentStats.totalPlayTime + (stats.survivalTime || 0),
+                bestSurvivalTime: Math.max(currentStats.bestSurvivalTime, stats.survivalTime || 0),
+                gamesPlayed: currentStats.gamesPlayed + 1,
+                highestLevel: Math.max(currentStats.highestLevel, stats.level || 1),
+                totalGoldEarned: currentStats.totalGoldEarned + (stats.goldEarned || 0)
+            };
+            
+            // 保存到持久化儲存
+            window.gameData.updatePlayerStats(updatedStats);
+            
+            // 添加獲得的金幣
+            if (stats.goldEarned > 0) {
+                const currentGold = window.gameData.getGold();
+                window.gameData.addGold(stats.goldEarned);
+                console.log(`💰 金幣更新: ${currentGold} -> ${currentGold + stats.goldEarned}`);
+            }
+            
+            console.log('✅ 遊戲統計已保存:', updatedStats);
+        } else {
+            console.error('❌ gameData 不可用，無法保存統計');
         }
     }
 

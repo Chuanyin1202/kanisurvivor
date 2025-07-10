@@ -2,6 +2,7 @@
  * 玩家角色類別 - Kani 靈魂同步體
  * 處理同步體的移動、語式施放、屬性等
  */
+
 class Player {
     constructor(x, y) {
         // 位置和物理屬性
@@ -57,11 +58,14 @@ class Player {
         
         // 視覺效果
         this.animation = {
-            state: 'idle', // idle, cast, dash, hit
+            state: 'idle', // idle, cast, dash, hit, move
             frame: 0,
             time: 0,
             speed: 0.1
         };
+        
+        // 受傷動畫計時器
+        this.hitAnimationTimer = 0;
         
         // 統計資料
         this.stats = {
@@ -260,15 +264,18 @@ class Player {
 
     // 更新動畫
     updateAnimation(deltaTime) {
-        this.animation.time += deltaTime;
-        
-        if (this.animation.time >= this.animation.speed) {
-            this.animation.frame++;
-            this.animation.time = 0;
+        // 更新受傷動畫計時器
+        if (this.hitAnimationTimer > 0) {
+            this.hitAnimationTimer -= deltaTime;
         }
         
-        // 根據狀態設定動畫
-        if (this.isDashing) {
+        // 儲存前一個狀態
+        const previousState = this.animation.state;
+        
+        // 根據狀態設定動畫（優先順序：受傷 > 衝刺 > 施法 > 移動 > 待機）
+        if (this.hitAnimationTimer > 0) {
+            this.animation.state = 'hit';
+        } else if (this.isDashing) {
             this.animation.state = 'dash';
         } else if (this.spellCooldown > 0) {
             this.animation.state = 'cast';
@@ -277,6 +284,60 @@ class Player {
         } else {
             this.animation.state = 'idle';
         }
+        
+        // 如果狀態改變，重置動畫幀
+        if (previousState !== this.animation.state) {
+            this.animation.frame = 0;
+            this.animation.time = 0;
+        }
+        
+        // 更新動畫時間
+        this.animation.time += deltaTime;
+        
+        // 使用新管理器的幀計算
+        if (window.pixelAnimationManager && pixelAnimationManager.isInitialized) {
+            const frameIndex = pixelAnimationManager.calculateFrameIndex(
+                this.animation.time, 
+                'player', 
+                this.animation.state
+            );
+            this.animation.frame = frameIndex;
+        } else {
+            // 如果新管理器未就緒，使用原始的幀速度
+            const frameSpeed = this.getAnimationFrameSpeed();
+            
+            if (this.animation.time >= frameSpeed) {
+                // 預設幀循環
+                this.animation.frame = (this.animation.frame + 1) % 2;
+                this.animation.time = 0;
+            }
+        }
+    }
+
+    // 獲取不同動畫狀態的幀速度
+    getAnimationFrameSpeed() {
+        switch (this.animation.state) {
+            case 'idle':
+                return 1.0; // 1秒切換一幀（慢呼吸）
+            case 'move':
+                return 0.3; // 0.3秒切換一幀（快速移動）
+            case 'cast':
+                return 0.1; // 0.1秒切換一幀（快速施法）
+            case 'dash':
+                return 0.05; // 0.05秒切換一幀（超快衝刺）
+            case 'hit':
+                return 0.1; // 0.1秒切換一幀（快速受傷）
+            default:
+                return 0.5;
+        }
+    }
+
+    // 觸發受傷動畫
+    triggerHitAnimation() {
+        this.animation.state = 'hit';
+        this.animation.frame = 0;
+        this.animation.time = 0;
+        this.hitAnimationTimer = 0.3; // 受傷動畫持續0.3秒
     }
 
     // 更新冷卻時間
@@ -550,6 +611,9 @@ class Player {
         
         this.health -= actualDamage;
         this.stats.damageTaken += actualDamage;
+        
+        // 觸發受傷動畫
+        this.triggerHitAnimation();
         
         // EVA字體系統：根據生命值變化調整同步率和情緒狀態
         if (window.evaFontSystem) {
@@ -919,7 +983,11 @@ class Player {
                 survivalTime: Math.floor(this.stats.survivalTime),
                 kills: this.stats.kills,
                 maxCombo: this.stats.maxCombo,
-                goldEarned: this.calculateGoldEarned()
+                goldEarned: this.calculateGoldEarned(),
+                level: this.level,
+                damageDealt: this.stats.damageDealt,
+                damageTaken: this.stats.damageTaken,
+                spellsCast: this.stats.spellsCast
             });
         }
     }
@@ -1151,19 +1219,111 @@ class Player {
             return;
         }
         
-        // 繪製玩家（暫時用圓形代替）
-        const color = this.isDashing ? '#00ffff' : '#ffffff';
-        renderer.drawCircle(this.position.x, this.position.y, this.radius, color);
-        
-        // 繪製面向指示
-        const faceDirection = Vector2.fromAngle(this.facing, this.radius + 10);
-        const faceEnd = Vector2.add(this.position, faceDirection);
-        renderer.drawLine(this.position.x, this.position.y, faceEnd.x, faceEnd.y, '#ffff00', 2);
+        // 使用像素藝術渲染玩家
+        this.renderPixelArt(renderer);
         
         // 渲染無人機
         this.drones.forEach(drone => {
             drone.render(renderer);
         });
+    }
+
+    // 像素藝術渲染方法
+    renderPixelArt(renderer) {
+        // 嘗試使用新的像素動畫管理器
+        if (window.pixelAnimationManager && pixelAnimationManager.isInitialized) {
+            const direction = this.facing > Math.PI/2 && this.facing < 3*Math.PI/2 ? 'left' : 'right';
+            const stateModifier = this.getCurrentStateModifier();
+            
+            const success = pixelAnimationManager.renderPlayerAnimation(
+                renderer,
+                this.position.x,
+                this.position.y,
+                this.animation.state,
+                this.animation.frame,
+                direction,
+                stateModifier
+            );
+            
+            if (success) {
+                // 渲染狀態特效
+                this.renderStateEffects(renderer);
+                return;
+            }
+        }
+        
+        // 如果新管理器不可用，使用後備渲染
+        this.renderFallback(renderer);
+    }
+
+    // 獲取當前狀態修飾符
+    getCurrentStateModifier() {
+        // 衝刺時使用特殊顏色
+        if (this.isDashing) {
+            return 'dash';
+        }
+        
+        // 施法時使用魔法顏色
+        if (this.animation.state === 'cast') {
+            return 'cast';
+        }
+        
+        // 受傷時使用受傷顏色
+        if (this.animation.state === 'hit') {
+            return 'hit';
+        }
+        
+        return 'normal';
+    }
+
+    // 後備渲染方法（如果新管理器不可用）
+    renderFallback(renderer) {
+        // 簡單的圓形渲染作為後備
+        const color = this.isDashing ? '#00ffff' : 
+                     this.animation.state === 'hit' ? '#ff4444' :
+                     this.animation.state === 'cast' ? '#00ffff' : '#4ecdc4';
+        
+        renderer.drawCircle(this.position.x, this.position.y, this.radius, color);
+        
+        // 渲染狀態特效
+        this.renderStateEffects(renderer);
+    }
+
+    // 渲染狀態特效
+    renderStateEffects(renderer) {
+        // 施法時的法杖光效
+        if (this.animation.state === 'cast') {
+            const glowIntensity = 0.5 + Math.sin(Date.now() * 0.01) * 0.3;
+            const glowColor = this.getSpellGlowColor();
+            
+            // 在法杖位置繪製光效
+            const staffPos = this.getStaffPosition();
+            renderer.drawParticle(staffPos.x, staffPos.y, 8, glowColor, glowIntensity);
+        }
+        
+        // 衝刺時的殘影效果
+        if (this.isDashing) {
+            const trailAlpha = 0.3;
+            const trailColor = '#00ffff';
+            renderer.drawParticle(this.position.x, this.position.y, this.radius * 2, trailColor, trailAlpha);
+        }
+    }
+
+    // 獲取法術光效顏色
+    getSpellGlowColor() {
+        const spellColors = {
+            'fireball': '#ff6b35',
+            'frostbolt': '#4ecdc4',
+            'lightning': '#f1c40f',
+            'arcane': '#a55eea'
+        };
+        return spellColors[this.selectedSpell] || '#ffffff';
+    }
+
+    // 獲取法杖位置
+    getStaffPosition() {
+        const staffOffset = Vector2.fromAngle(this.facing, 20);
+        return Vector2.add(this.position, staffOffset);
     }
 
     // 尋找最近的敵人

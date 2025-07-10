@@ -659,3 +659,11 @@ const AbilityCategories = {
     gambling: '賭博',
     ultimate: '終極'
 };
+
+// 確保變數在全域範圍內可用
+if (typeof window !== 'undefined') {
+    window.AbilityDatabase = AbilityDatabase;
+    window.AbilityRarityWeights = AbilityRarityWeights;
+    window.AbilityCategories = AbilityCategories;
+    console.log('📚 AbilityDatabase 載入完成');
+}

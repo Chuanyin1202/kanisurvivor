@@ -2,6 +2,10 @@
  * 投射物類別
  * 處理玩家法術和其他投射物的行為
  */
+
+// 注意：像素圖案和調色板已移至統一的像素動畫架構 (pixelAnimations.js)
+// 這個檔案現在將使用 pixelAnimationManager 來處理所有的像素渲染
+
 class Projectile {
     constructor(config) {
         // 基本屬性
@@ -44,11 +48,14 @@ class Projectile {
         this.maxTrailLength = 8;
         this.glowIntensity = 1.0;
         
-        // 動畫
+        // 動畫系統
         this.animation = {
             frame: 0,
             time: 0,
-            speed: 0.1
+            speed: 0.1,
+            state: 'normal', // normal, critical, dying
+            lastUpdate: 0,
+            updateInterval: 0.016 // 60fps
         };
         
         // 生命週期
@@ -302,23 +309,14 @@ class Projectile {
                 damage *= this.owner.critDamage || 2.0;
                 isCritical = true;
                 console.log(`💥 爆擊觸發! 隨機值: ${critRoll.toFixed(3)}, 爆擊率: ${(this.owner.critChance * 100).toFixed(1)}%`);
-                
-                // 致命一擊視覺效果已移除
             }
         }
-        
-        // Debug: 追蹤投射物命中時的傷害數據（使用 Debug 面板）
-        // console.log(`💥 投射物命中前 - 投射物傷害: ${this.damage}, 爆擊: ${this.isCritical}`);
         
         // 閃電鏈式傷害遞減
         if (this.type === 'lightning' && this.pierceCount > 0) {
             const oldDamage = damage;
             damage *= Math.pow(this.statusData.damageReduction || 0.8, this.pierceCount);
-            // console.log(`⚡ 閃電鏈傷害遞減: ${oldDamage} -> ${damage}`);
         }
-        
-        // Debug: 最終傷害輸出（使用 Debug 面板）
-        // console.log(`💥 最終命中傷害: ${Math.round(damage)}, 爆擊標記: ${this.isCritical}`);
         
         // 造成傷害（傳遞爆擊信息）
         enemy.takeDamage(Math.round(damage), true, isCritical);
@@ -378,14 +376,31 @@ class Projectile {
     // 更新動畫
     updateAnimation(deltaTime) {
         this.animation.time += deltaTime;
+        this.animation.lastUpdate += deltaTime;
         
-        if (this.animation.time >= this.animation.speed) {
+        // 更新動畫狀態
+        this.updateAnimationState();
+        
+        // 更新動畫幀
+        if (this.animation.lastUpdate >= this.animation.updateInterval) {
             this.animation.frame++;
-            this.animation.time = 0;
+            this.animation.lastUpdate = 0;
         }
         
         // 更新發光強度
         this.glowIntensity = 0.8 + 0.4 * Math.sin(this.age * 8);
+    }
+    
+    // 更新動畫狀態
+    updateAnimationState() {
+        // 根據投射物狀態更新動畫狀態
+        if (this.isCritical) {
+            this.animation.state = 'critical';
+        } else if (this.age > this.lifeTime * 0.8) {
+            this.animation.state = 'dying';
+        } else {
+            this.animation.state = 'normal';
+        }
     }
 
     // 創建命中效果
@@ -546,15 +561,17 @@ class Projectile {
 
     // 渲染軌跡
     renderTrail(renderer) {
+        // 基本軌跡渲染
         for (let i = 1; i < this.trail.length; i++) {
             const alpha = (this.trail.length - i) / this.trail.length;
-            const size = this.radius * alpha * 0.5;
+            const size = Math.max(1, Math.floor(this.radius * alpha * 0.5));
             
-            if (size > 0.5) {
-                renderer.drawCircleWithAlpha(
-                    this.trail[i].x, 
-                    this.trail[i].y, 
-                    size, 
+            if (size >= 1) {
+                renderer.drawPixelRectWithAlpha(
+                    this.trail[i].x - size / 2, 
+                    this.trail[i].y - size / 2, 
+                    size,
+                    size,
                     this.color, 
                     alpha * 0.6
                 );
@@ -564,75 +581,64 @@ class Projectile {
 
     // 渲染投射物主體
     renderProjectile(renderer) {
-        // 根據類型選擇渲染方式
-        switch (this.type) {
-            case 'fireball':
-                this.renderFireball(renderer);
-                break;
-            case 'frostbolt':
-                this.renderFrostbolt(renderer);
-                break;
-            case 'lightning':
-                this.renderLightning(renderer);
-                break;
-            case 'arcane':
-                this.renderArcane(renderer);
-                break;
-            default:
-                renderer.drawCircle(this.position.x, this.position.y, this.radius, this.color);
-        }
-    }
-
-    // 渲染火球
-    renderFireball(renderer) {
-        const coreColor = '#ff6348';
-        const outerColor = '#ff9f43';
-        
-        renderer.drawCircle(this.position.x, this.position.y, this.radius * 1.2, outerColor);
-        renderer.drawCircle(this.position.x, this.position.y, this.radius * 0.8, coreColor);
-    }
-
-    // 渲染冰霜箭
-    renderFrostbolt(renderer) {
-        const coreColor = '#74b9ff';
-        const outerColor = '#a29bfe';
-        
-        renderer.drawCircle(this.position.x, this.position.y, this.radius, outerColor);
-        renderer.drawCircle(this.position.x, this.position.y, this.radius * 0.6, coreColor);
-    }
-
-    // 渲染閃電
-    renderLightning(renderer) {
-        const color = '#feca57';
-        
-        // 閃電效果
-        for (let i = 0; i < 3; i++) {
-            const offset = Vector2.random(2);
-            renderer.drawCircle(
-                this.position.x + offset.x, 
-                this.position.y + offset.y, 
-                this.radius, 
-                color
-            );
-        }
-    }
-
-    // 渲染奧術飛彈
-    renderArcane(renderer) {
-        const color = '#a55eea';
-        
-        // 螺旋效果
-        const spiralPoints = 6;
-        for (let i = 0; i < spiralPoints; i++) {
-            const angle = (this.age * 8 + (Math.PI * 2 / spiralPoints) * i);
-            const spiralRadius = this.radius * 0.8;
-            const spiralPos = Vector2.add(
-                this.position,
-                Vector2.fromAngle(angle, spiralRadius)
+        // 使用新的像素動畫管理器渲染投射物
+        if (window.pixelAnimationManager && pixelAnimationManager.isInitialized) {
+            const frameIndex = pixelAnimationManager.calculateFrameIndex(
+                this.animation.time, 
+                'projectile', 
+                this.type
             );
             
-            renderer.drawCircle(spiralPos.x, spiralPos.y, this.radius * 0.3, color);
+            // 根據投射物狀態選擇圖案
+            let pattern = 'core';
+            if (this.animation.state === 'critical') {
+                pattern = 'enhanced';
+            } else if (this.animation.state === 'dying') {
+                pattern = 'small';
+            }
+            
+            // 映射投射物類型到動畫數據中的類型
+            const typeMapping = {
+                'fireball': 'fire',
+                'frostbolt': 'frost',
+                'lightning': 'lightning',
+                'arcane': 'arcane'
+            };
+            
+            const animationType = typeMapping[this.type] || this.type;
+            
+            const success = pixelAnimationManager.renderProjectileAnimation(
+                renderer,
+                this.position.x,
+                this.position.y,
+                animationType,
+                pattern,
+                frameIndex
+            );
+            
+            if (success) return;
         }
+        
+        // 回退渲染：簡單的圓形
+        const baseColor = this.getProjectileColor();
+        const glowSize = this.animation.state === 'critical' ? this.radius * 1.5 : this.radius;
+        
+        // 繪製發光效果
+        renderer.drawCircleWithAlpha(
+            this.position.x, 
+            this.position.y, 
+            glowSize, 
+            baseColor, 
+            0.6
+        );
+        
+        // 繪製核心
+        renderer.drawCircle(
+            this.position.x, 
+            this.position.y, 
+            this.radius * 0.7, 
+            baseColor
+        );
     }
 
     // 渲染發光效果
@@ -700,9 +706,6 @@ class ProjectileManager {
             const legacyDamageInfo = owner.calculateSpellDamage(spellData.damage);
             baseDamage = legacyDamageInfo.damage;
         }
-        
-        // Debug: 投射物創建傷害追蹤（可通過 Debug 面板查看）
-        // console.log(`🚀 創建投射物 ${type}: 基礎傷害=${spellData.damage}, 計算後傷害=${baseDamage}`);
         
         const config = {
             x: startPos.x,

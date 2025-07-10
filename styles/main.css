@@ -1691,37 +1691,216 @@ body {
     text-align: center;
 }
 
-/* 元素網格 */
+/* EVA 風格裝飾元素 */
+.eva-icon {
+    color: var(--eva-red-primary);
+    text-shadow: var(--eva-glow-red);
+    font-weight: var(--weight-bold);
+}
+
+.eva-marker {
+    color: var(--eva-purple-primary);
+    font-family: var(--font-mono);
+    font-weight: var(--weight-bold);
+    text-shadow: 0 0 5px rgba(138, 43, 226, 0.8);
+}
+
+/* 元素選擇器主容器 - EVA風格 */
+.element-selector {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 15, 15, 0.95);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-primary);
+}
+
+.element-selector.hidden {
+    display: none;
+}
+
+.element-selector-content {
+    background: linear-gradient(135deg, rgba(15, 15, 15, 0.9), rgba(138, 43, 226, 0.1));
+    border: 2px solid rgba(138, 43, 226, 0.6);
+    border-radius: 8px;
+    padding: 2rem;
+    max-width: 80vw;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    animation: eva-modal-appear 0.5s ease-out;
+}
+
+@keyframes eva-modal-appear {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* 選擇器標題 */
+.selector-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid rgba(138, 43, 226, 0.3);
+    padding-bottom: 1rem;
+}
+
+.selector-header h3 {
+    font-size: 1.8rem;
+    color: var(--eva-white);
+    margin: 0;
+    font-weight: var(--weight-bold);
+    letter-spacing: var(--letter-spacing-wide);
+    text-shadow: 0 0 10px rgba(138, 43, 226, 0.8);
+}
+
+.close-btn {
+    background: none;
+    border: 2px solid var(--eva-red-primary);
+    color: var(--eva-red-primary);
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: var(--font-mono);
+}
+
+.close-btn:hover {
+    background: var(--eva-red-primary);
+    color: var(--eva-white);
+    box-shadow: var(--eva-glow-red);
+    transform: scale(1.1);
+}
+
+/* 元素選擇區標題 */
+.element-selection h4 {
+    font-size: 1.3rem;
+    color: var(--eva-white);
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-weight: var(--weight-bold);
+    letter-spacing: var(--letter-spacing-wide);
+    font-family: var(--font-primary);
+}
+
+/* 操作按鈕區域 */
+.selector-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.btn {
+    padding: 0.8rem 2rem;
+    border: 2px solid;
+    border-radius: 4px;
+    background: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: var(--font-mono);
+    font-weight: var(--weight-bold);
+    letter-spacing: var(--letter-spacing-normal);
+    text-transform: uppercase;
+}
+
+.btn-success {
+    border-color: var(--eva-green-primary);
+    color: var(--eva-green-primary);
+}
+
+.btn-success:hover:not(:disabled) {
+    background: var(--eva-green-primary);
+    color: var(--eva-black-primary);
+    box-shadow: var(--eva-glow-green);
+    transform: translateY(-2px);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* 預覽佔位符 */
+.preview-placeholder {
+    text-align: center;
+    color: var(--eva-gray-dark);
+    font-style: italic;
+    font-family: var(--font-mixed);
+    padding: 2rem;
+    border: 2px dashed rgba(138, 43, 226, 0.3);
+    border-radius: 8px;
+    background: rgba(15, 15, 15, 0.5);
+}
+
+/* 元素網格 - EVA風格 */
 .element-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 1rem;
     margin-bottom: 1.5rem;
+    animation: eva-grid-appear 0.5s ease-out;
 }
 
-/* 元素選項 */
+@keyframes eva-grid-appear {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 元素選項 - EVA風格 */
 .element-option {
-    background: linear-gradient(135deg, rgba(74, 144, 226, 0.1), rgba(80, 201, 195, 0.1));
-    border: 2px solid rgba(74, 144, 226, 0.3);
-    border-radius: 15px;
+    background: linear-gradient(135deg, rgba(138, 43, 226, 0.1), rgba(255, 0, 64, 0.05));
+    border: 2px solid rgba(138, 43, 226, 0.4);
+    border-radius: 8px;
     padding: 1rem;
     text-align: center;
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    font-family: var(--font-primary);
+    letter-spacing: var(--letter-spacing-wide);
+    backdrop-filter: blur(5px);
 }
 
 .element-option:hover {
     transform: translateY(-5px);
-    border-color: #4a90e2;
-    box-shadow: 0 10px 30px rgba(74, 144, 226, 0.3);
+    border-color: var(--eva-purple-primary);
+    box-shadow: var(--eva-glow-purple);
+    background: linear-gradient(135deg, rgba(138, 43, 226, 0.2), rgba(255, 0, 64, 0.1));
 }
 
 .element-option.selected {
-    background: linear-gradient(135deg, rgba(74, 144, 226, 0.3), rgba(80, 201, 195, 0.3));
-    border-color: #50c9c3;
-    box-shadow: 0 0 20px rgba(80, 201, 195, 0.5);
+    background: linear-gradient(135deg, rgba(138, 43, 226, 0.3), rgba(255, 0, 64, 0.2));
+    border-color: var(--eva-red-primary);
+    box-shadow: var(--eva-glow-red);
+    animation: eva-pulse 2s infinite;
+}
+
+@keyframes eva-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
 }
 
 .element-option.selected::before {
@@ -1729,16 +1908,30 @@ body {
     position: absolute;
     top: 10px;
     right: 10px;
-    background: #50c9c3;
-    color: white;
+    background: var(--eva-red-primary);
+    color: var(--eva-white);
     width: 24px;
     height: 24px;
-    border-radius: 50%;
+    border-radius: 2px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 14px;
-    font-weight: bold;
+    font-weight: var(--weight-bold);
+    font-family: var(--font-mono);
+    box-shadow: var(--eva-glow-red);
+    animation: eva-check-appear 0.3s ease-out;
+}
+
+@keyframes eva-check-appear {
+    from {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 /* 元素圖標 */
@@ -1748,145 +1941,224 @@ body {
     line-height: 1;
 }
 
-/* 元素名稱 */
+/* 元素名稱 - EVA風格 */
 .element-name {
     font-size: 1.1rem;
-    font-weight: bold;
+    font-weight: var(--weight-bold);
     margin-bottom: 1rem;
-    color: #ffffff;
+    color: var(--eva-white);
+    font-family: var(--font-primary);
+    letter-spacing: var(--letter-spacing-wide);
+    text-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
 }
 
-/* 元素等級控制 */
+/* 元素等級控制 - EVA風格 */
 .element-level {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    font-family: var(--font-mono);
 }
 
 .element-level label {
     font-size: 0.9rem;
-    color: #b8b8b8;
+    color: var(--eva-gray-light);
+    font-weight: var(--weight-bold);
+    letter-spacing: var(--letter-spacing-normal);
 }
 
-/* 等級滑桿 */
+/* 等級滑桿 - EVA風格 */
 .level-slider {
     width: 100%;
-    height: 6px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 3px;
+    height: 8px;
+    background: linear-gradient(90deg, var(--eva-black-light), rgba(138, 43, 226, 0.2));
+    border: 1px solid rgba(138, 43, 226, 0.4);
+    border-radius: 4px;
     outline: none;
     -webkit-appearance: none;
     appearance: none;
+    transition: all 0.3s ease;
+}
+
+.level-slider:hover {
+    box-shadow: var(--eva-glow-purple);
 }
 
 .level-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 18px;
-    height: 18px;
-    background: #4a90e2;
-    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(45deg, var(--eva-purple-primary), var(--eva-red-primary));
+    border: 2px solid var(--eva-white);
+    border-radius: 2px;
     cursor: pointer;
     transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
 }
 
 .level-slider::-webkit-slider-thumb:hover {
-    background: #50c9c3;
-    transform: scale(1.2);
+    background: linear-gradient(45deg, var(--eva-red-primary), var(--eva-purple-primary));
+    transform: scale(1.1);
+    box-shadow: var(--eva-glow-red);
 }
 
 .level-slider::-moz-range-thumb {
-    width: 18px;
-    height: 18px;
-    background: #4a90e2;
-    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(45deg, var(--eva-purple-primary), var(--eva-red-primary));
+    border: 2px solid var(--eva-white);
+    border-radius: 2px;
     cursor: pointer;
-    border: none;
     transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
 }
 
 .level-slider::-moz-range-thumb:hover {
-    background: #50c9c3;
-    transform: scale(1.2);
+    background: linear-gradient(45deg, var(--eva-red-primary), var(--eva-purple-primary));
+    transform: scale(1.1);
+    box-shadow: var(--eva-glow-red);
 }
 
-/* 等級顯示 */
+/* 等級顯示 - EVA風格 */
 .level-display {
-    font-size: 1.1rem;
-    font-weight: bold;
-    color: #50c9c3;
+    font-size: 1.2rem;
+    font-weight: var(--weight-bold);
+    color: var(--eva-red-primary);
     text-align: center;
     min-width: 20px;
+    font-family: var(--font-mono);
+    letter-spacing: var(--letter-spacing-normal);
+    text-shadow: 0 0 10px rgba(255, 0, 64, 0.5);
 }
 
-/* 法術預覽區域 */
+/* 法術預覽區域 - EVA風格 */
 .spell-preview {
     margin-bottom: 2rem;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 15px;
+    background: linear-gradient(135deg, rgba(15, 15, 15, 0.9), rgba(138, 43, 226, 0.1));
+    border: 2px solid rgba(138, 43, 226, 0.4);
+    border-radius: 8px;
     padding: 1.5rem;
-    border: 1px solid rgba(74, 144, 226, 0.2);
+    backdrop-filter: blur(10px);
+    font-family: var(--font-primary);
+    animation: eva-preview-glow 3s ease-in-out infinite;
+}
+
+@keyframes eva-preview-glow {
+    0%, 100% { border-color: rgba(138, 43, 226, 0.4); }
+    50% { border-color: rgba(255, 0, 64, 0.6); }
 }
 
 .spell-preview h4 {
-    font-size: 1.3rem;
+    font-size: 1.4rem;
     margin-bottom: 1rem;
-    color: #50c9c3;
+    color: var(--eva-red-primary);
     text-align: center;
+    font-weight: var(--weight-bold);
+    letter-spacing: var(--letter-spacing-wide);
+    text-shadow: var(--eva-glow-red);
+    font-family: var(--font-primary);
 }
 
-/* 法術預覽卡片 */
+/* 法術預覽卡片 - EVA風格 */
 .spell-preview-card {
-    background: linear-gradient(135deg, rgba(74, 144, 226, 0.1), rgba(80, 201, 195, 0.1));
-    border: 1px solid rgba(74, 144, 226, 0.3);
-    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(138, 43, 226, 0.15), rgba(255, 0, 64, 0.1));
+    border: 2px solid rgba(138, 43, 226, 0.5);
+    border-radius: 6px;
     padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    font-family: var(--font-primary);
 }
 
-/* 法術頭部 */
+.spell-preview-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 0, 64, 0.1), transparent);
+    animation: eva-scan 3s ease-in-out infinite;
+}
+
+@keyframes eva-scan {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* 法術頭部 - EVA風格 */
 .spell-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
 }
 
 .spell-header h5 {
-    font-size: 1.4rem;
-    font-weight: bold;
-    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: var(--weight-bold);
+    color: var(--eva-white);
     margin: 0;
+    font-family: var(--font-primary);
+    letter-spacing: var(--letter-spacing-wide);
+    text-shadow: 0 0 10px rgba(138, 43, 226, 0.8);
 }
 
 .spell-cost {
-    font-size: 1.1rem;
-    color: #ffd700;
-    font-weight: bold;
+    font-size: 1.2rem;
+    color: var(--eva-orange-primary);
+    font-weight: var(--weight-bold);
+    font-family: var(--font-mono);
+    letter-spacing: var(--letter-spacing-normal);
+    text-shadow: var(--eva-glow-orange);
+    background: rgba(255, 102, 0, 0.1);
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 102, 0, 0.3);
 }
 
-/* 法術描述 */
+/* 法術描述 - EVA風格 */
 .spell-description {
-    color: #b8b8b8;
+    color: var(--eva-gray-light);
     font-size: 1rem;
-    line-height: 1.5;
+    line-height: 1.6;
     margin-bottom: 1rem;
     font-style: italic;
+    font-family: var(--font-mixed);
+    letter-spacing: var(--letter-spacing-normal);
+    position: relative;
+    z-index: 1;
 }
 
-/* 法術屬性 */
+/* 法術屬性 - EVA風格 */
 .spell-stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 0.5rem;
+    gap: 0.8rem;
     margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
 }
 
 .stat-item {
-    background: rgba(0, 0, 0, 0.3);
-    padding: 0.5rem;
-    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(15, 15, 15, 0.8), rgba(138, 43, 226, 0.1));
+    padding: 0.8rem;
+    border-radius: 4px;
     font-size: 0.9rem;
-    border: 1px solid rgba(74, 144, 226, 0.2);
+    border: 1px solid rgba(138, 43, 226, 0.3);
+    font-family: var(--font-mono);
+    letter-spacing: var(--letter-spacing-normal);
+    color: var(--eva-white);
+    transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+    border-color: var(--eva-red-primary);
+    box-shadow: 0 0 10px rgba(255, 0, 64, 0.3);
+    transform: translateY(-2px);
 }
 
 /* 元素組合顯示 */

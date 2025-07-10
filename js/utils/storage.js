@@ -368,3 +368,4 @@ class GameDataManager {
 
 // 全域遊戲資料管理器實例
 const gameData = new GameDataManager();
+window.gameData = gameData;

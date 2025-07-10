@@ -6,8 +6,10 @@ class EffectsManager {
     constructor() {
         this.particles = [];
         this.damageNumbers = [];
+        this.explosions = [];
         this.maxParticles = 200;
         this.maxDamageNumbers = 50;
+        this.maxExplosions = 10;
         // 致命一擊效果已移除
         // 同步鏈結效果已移除
     }
@@ -215,6 +217,7 @@ class EffectsManager {
     update(deltaTime) {
         this.updateParticles(deltaTime);
         this.updateDamageNumbers(deltaTime);
+        this.updateExplosions(deltaTime);
         // 致命一擊效果已移除
         // 同步鏈結效果更新已移除
     }
@@ -284,11 +287,25 @@ class EffectsManager {
         // 此功能已移除
     }
 
+    // 更新爆炸效果
+    updateExplosions(deltaTime) {
+        for (let i = this.explosions.length - 1; i >= 0; i--) {
+            const explosion = this.explosions[i];
+            
+            explosion.update(deltaTime);
+            
+            if (!explosion.isActive) {
+                this.explosions.splice(i, 1);
+            }
+        }
+    }
+
 
     // 渲染所有特效
     render(renderer) {
         this.renderParticles(renderer);
         this.renderDamageNumbers(renderer);
+        this.renderExplosions(renderer);
         // 致命一擊效果渲染已移除
         // 同步鏈結效果渲染已移除
     }
@@ -366,11 +383,19 @@ class EffectsManager {
         // 此功能已移除
     }
 
+    // 渲染爆炸效果
+    renderExplosions(renderer) {
+        this.explosions.forEach(explosion => {
+            explosion.render(renderer);
+        });
+    }
+
 
     // 清除所有特效
     clearAll() {
         this.particles = [];
         this.damageNumbers = [];
+        this.explosions = [];
         // 致命一擊效果已移除
         // 同步鏈結效果已移除
     }
@@ -384,20 +409,27 @@ class EffectsManager {
         this.damageNumbers = [];
     }
 
+    clearExplosions() {
+        this.explosions = [];
+    }
+
     // 設定品質等級
     setQuality(quality) {
         switch (quality) {
             case 'low':
                 this.maxParticles = 50;
                 this.maxDamageNumbers = 20;
+                this.maxExplosions = 5;
                 break;
             case 'medium':
                 this.maxParticles = 100;
                 this.maxDamageNumbers = 30;
+                this.maxExplosions = 8;
                 break;
             case 'high':
                 this.maxParticles = 200;
                 this.maxDamageNumbers = 50;
+                this.maxExplosions = 12;
                 break;
         }
     }
@@ -407,8 +439,10 @@ class EffectsManager {
         return {
             particleCount: this.particles.length,
             damageNumberCount: this.damageNumbers.length,
+            explosionCount: this.explosions.length,
             maxParticles: this.maxParticles,
-            maxDamageNumbers: this.maxDamageNumbers
+            maxDamageNumbers: this.maxDamageNumbers,
+            maxExplosions: this.maxExplosions
         };
     }
 

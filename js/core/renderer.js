@@ -103,6 +103,249 @@ class Renderer {
         this.ctx.restore();
     }
 
+    // 繪製像素化矩形（對齊像素格子）
+    drawPixelRect(x, y, width, height, color = '#ffffff') {
+        this.ctx.save();
+        
+        // 將座標對齊到像素格子
+        const pixelX = Math.floor(x);
+        const pixelY = Math.floor(y);
+        const pixelW = Math.max(1, Math.floor(width));
+        const pixelH = Math.max(1, Math.floor(height));
+        
+        this.ctx.fillStyle = color;
+        this.ctx.fillRect(pixelX, pixelY, pixelW, pixelH);
+        
+        this.ctx.restore();
+    }
+
+    // 繪製像素化圓形（用小方塊組成）
+    drawPixelCircle(centerX, centerY, radius, color = '#ffffff') {
+        this.ctx.save();
+        this.ctx.fillStyle = color;
+        
+        const pixelRadius = Math.floor(radius);
+        const centerPixelX = Math.floor(centerX);
+        const centerPixelY = Math.floor(centerY);
+        
+        // 使用簡化的圓形演算法
+        for (let x = -pixelRadius; x <= pixelRadius; x++) {
+            for (let y = -pixelRadius; y <= pixelRadius; y++) {
+                const distance = Math.sqrt(x * x + y * y);
+                if (distance <= pixelRadius) {
+                    this.ctx.fillRect(centerPixelX + x, centerPixelY + y, 1, 1);
+                }
+            }
+        }
+        
+        this.ctx.restore();
+    }
+
+    // 繪製帶透明度的像素化矩形
+    drawPixelRectWithAlpha(x, y, width, height, color, alpha) {
+        this.ctx.save();
+        this.ctx.globalAlpha = alpha;
+        
+        // 將座標對齊到像素格子
+        const pixelX = Math.floor(x);
+        const pixelY = Math.floor(y);
+        const pixelW = Math.max(1, Math.floor(width));
+        const pixelH = Math.max(1, Math.floor(height));
+        
+        this.ctx.fillStyle = color;
+        this.ctx.fillRect(pixelX, pixelY, pixelW, pixelH);
+        
+        this.ctx.restore();
+    }
+
+    // 繪製像素圖案（基於二維陣列）
+    drawPixelPattern(x, y, pattern, colorPalette, pixelSize = 1) {
+        this.ctx.save();
+        
+        const centerX = Math.floor(x);
+        const centerY = Math.floor(y);
+        const patternHeight = pattern.length;
+        const patternWidth = pattern[0] ? pattern[0].length : 0;
+        
+        // 計算圖案左上角位置（居中）
+        const startX = centerX - Math.floor((patternWidth * pixelSize) / 2);
+        const startY = centerY - Math.floor((patternHeight * pixelSize) / 2);
+        
+        for (let row = 0; row < patternHeight; row++) {
+            for (let col = 0; col < patternWidth; col++) {
+                const colorIndex = pattern[row][col];
+                if (colorIndex > 0 && colorPalette[colorIndex]) {
+                    this.ctx.fillStyle = colorPalette[colorIndex];
+                    this.ctx.fillRect(
+                        startX + col * pixelSize,
+                        startY + row * pixelSize,
+                        pixelSize,
+                        pixelSize
+                    );
+                }
+            }
+        }
+        
+        this.ctx.restore();
+    }
+
+    // 生成對稱圖案
+    generateSymmetricPattern(basePattern) {
+        const height = basePattern.length;
+        const width = basePattern[0] ? basePattern[0].length : 0;
+        
+        // 創建鏡像對稱圖案
+        const symmetricPattern = [];
+        
+        for (let row = 0; row < height; row++) {
+            const newRow = [...basePattern[row]];
+            // 水平鏡像（右側）
+            for (let col = width - 2; col >= 0; col--) {
+                newRow.push(basePattern[row][col]);
+            }
+            symmetricPattern.push(newRow);
+        }
+        
+        // 垂直鏡像（下側）
+        for (let row = height - 2; row >= 0; row--) {
+            symmetricPattern.push([...symmetricPattern[row]]);
+        }
+        
+        return symmetricPattern;
+    }
+
+    // 套用調色板到圖案
+    applyColorPalette(pattern, paletteMap) {
+        return pattern.map(row => 
+            row.map(value => paletteMap[value] || value)
+        );
+    }
+
+    // 旋轉像素圖案
+    rotatePixelPattern(pattern, degrees) {
+        const radians = (degrees * Math.PI) / 180;
+        const cos = Math.cos(radians);
+        const sin = Math.sin(radians);
+        
+        const height = pattern.length;
+        const width = pattern[0] ? pattern[0].length : 0;
+        const centerX = width / 2;
+        const centerY = height / 2;
+        
+        // 計算旋轉後的邊界
+        const corners = [
+            {x: 0, y: 0}, {x: width, y: 0},
+            {x: width, y: height}, {x: 0, y: height}
+        ];
+        
+        let minX = Infinity, maxX = -Infinity;
+        let minY = Infinity, maxY = -Infinity;
+        
+        corners.forEach(corner => {
+            const x = (corner.x - centerX) * cos - (corner.y - centerY) * sin + centerX;
+            const y = (corner.x - centerX) * sin + (corner.y - centerY) * cos + centerY;
+            minX = Math.min(minX, x);
+            maxX = Math.max(maxX, x);
+            minY = Math.min(minY, y);
+            maxY = Math.max(maxY, y);
+        });
+        
+        const newWidth = Math.ceil(maxX - minX);
+        const newHeight = Math.ceil(maxY - minY);
+        const newPattern = Array(newHeight).fill().map(() => Array(newWidth).fill(0));
+        
+        // 填充旋轉後的圖案
+        for (let y = 0; y < newHeight; y++) {
+            for (let x = 0; x < newWidth; x++) {
+                const sourceX = (x + minX - centerX) * cos + (y + minY - centerY) * sin + centerX;
+                const sourceY = -(x + minX - centerX) * sin + (y + minY - centerY) * cos + centerY;
+                
+                const srcX = Math.round(sourceX);
+                const srcY = Math.round(sourceY);
+                
+                if (srcX >= 0 && srcX < width && srcY >= 0 && srcY < height) {
+                    newPattern[y][x] = pattern[srcY][srcX];
+                }
+            }
+        }
+        
+        return newPattern;
+    }
+
+    // 播放像素動畫序列
+    playPixelAnimation(x, y, animationData, currentTime, pixelSize = 1) {
+        const { frames, frameDuration, loop = true } = animationData;
+        if (!frames || frames.length === 0) return;
+        
+        const totalDuration = frames.length * frameDuration;
+        const animationTime = loop ? (currentTime % totalDuration) : Math.min(currentTime, totalDuration);
+        const frameIndex = Math.floor(animationTime / frameDuration);
+        const clampedIndex = Math.min(frameIndex, frames.length - 1);
+        
+        const currentFrame = frames[clampedIndex];
+        this.drawPixelPattern(x, y, currentFrame.pattern, currentFrame.colorPalette, pixelSize);
+    }
+
+    // 繪製變形動畫（旋轉、縮放、變色）
+    drawPixelPatternTransformed(x, y, pattern, colorPalette, pixelSize = 1, transform = {}) {
+        const {
+            rotation = 0,
+            scale = 1,
+            alpha = 1,
+            colorShift = null
+        } = transform;
+        
+        this.ctx.save();
+        
+        // 設定透明度
+        if (alpha !== 1) {
+            this.ctx.globalAlpha = alpha;
+        }
+        
+        let finalPattern = pattern;
+        let finalColorPalette = colorPalette;
+        
+        // 應用旋轉
+        if (rotation !== 0) {
+            finalPattern = this.rotatePixelPattern(pattern, rotation);
+        }
+        
+        // 應用顏色變化
+        if (colorShift) {
+            finalColorPalette = { ...colorPalette };
+            Object.keys(finalColorPalette).forEach(key => {
+                if (colorShift[key]) {
+                    finalColorPalette[key] = colorShift[key];
+                }
+            });
+        }
+        
+        // 應用縮放
+        const finalPixelSize = pixelSize * scale;
+        
+        this.drawPixelPattern(x, y, finalPattern, finalColorPalette, finalPixelSize);
+        
+        this.ctx.restore();
+    }
+
+    // 創建閃爍效果
+    drawPixelPatternFlicker(x, y, pattern, colorPalette, pixelSize, flickerIntensity = 0.5) {
+        const flickerAlpha = 0.5 + Math.random() * flickerIntensity;
+        this.drawPixelPatternTransformed(x, y, pattern, colorPalette, pixelSize, { alpha: flickerAlpha });
+    }
+
+    // 創建脈衝效果
+    drawPixelPatternPulse(x, y, pattern, colorPalette, pixelSize, pulseTime, pulseSpeed = 5) {
+        const pulseScale = 1 + Math.sin(pulseTime * pulseSpeed) * 0.3;
+        this.drawPixelPatternTransformed(x, y, pattern, colorPalette, pixelSize, { scale: pulseScale });
+    }
+
+    // 創建旋轉效果
+    drawPixelPatternRotating(x, y, pattern, colorPalette, pixelSize, rotationTime, rotationSpeed = 60) {
+        const rotation = (rotationTime * rotationSpeed) % 360;
+        this.drawPixelPatternTransformed(x, y, pattern, colorPalette, pixelSize, { rotation });
+    }
+
     // 繪製圓形
     drawCircle(x, y, radius, color = '#ffffff', filled = true) {
         this.ctx.save();

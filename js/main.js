@@ -899,6 +899,14 @@ class Game {
             window.waveManager.setupSpawnPoints();
             console.log('🌊 開始第一波');
             window.waveManager.startWave(1);
+            
+            // 確保敵人有正確的目標
+            if (window.enemyManager && this.player) {
+                console.log('🎯 設定敵人目標為玩家');
+                window.enemyManager.enemies.forEach(enemy => {
+                    enemy.target = this.player;
+                });
+            }
         }
         
         // 顯示手機控制器法術選擇器（僅在遊戲中）

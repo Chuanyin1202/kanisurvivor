@@ -24,7 +24,7 @@ const GameBalance = {
         },
         
         // 技能冷卻
-        spellCooldown: 0.5, // 秒
+        spellCooldown: 0.8, // 秒 (調整以修復發射頻率過高問題)
         dashCooldown: 2.0, // 秒
         dashDistance: 80, // 像素
         dashInvincibilityTime: 0.3, // 秒

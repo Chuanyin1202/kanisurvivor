@@ -24,18 +24,18 @@ class ElementSelector {
         container.innerHTML = `
             <div class="element-selector-content">
                 <div class="selector-header">
-                    <h3>⚡ 語式片段合成</h3>
+                    <h3><span class="eva-icon">⚡</span> 語式片段合成</h3>
                     <button id="closeSelectorBtn" class="close-btn">×</button>
                 </div>
                 
                 <div class="element-selection">
-                    <h4>選擇兩種元素組合</h4>
+                    <h4><span class="eva-marker">[</span>選擇兩種元素組合<span class="eva-marker">]</span></h4>
                     <div class="element-grid">
                         <div class="element-option" data-element="F">
                             <div class="element-icon">🔥</div>
-                            <div class="element-name">火焰 (F)</div>
+                            <div class="element-name">FIRE 火焰 (F)</div>
                             <div class="element-level">
-                                <label>等級:</label>
+                                <label>LVL:</label>
                                 <input type="range" min="1" max="5" value="1" class="level-slider" data-element="F">
                                 <span class="level-display">1</span>
                             </div>
@@ -43,9 +43,9 @@ class ElementSelector {
                         
                         <div class="element-option" data-element="I">
                             <div class="element-icon">❄️</div>
-                            <div class="element-name">冰霜 (I)</div>
+                            <div class="element-name">ICE 冰霜 (I)</div>
                             <div class="element-level">
-                                <label>等級:</label>
+                                <label>LVL:</label>
                                 <input type="range" min="1" max="5" value="1" class="level-slider" data-element="I">
                                 <span class="level-display">1</span>
                             </div>
@@ -53,9 +53,9 @@ class ElementSelector {
                         
                         <div class="element-option" data-element="L">
                             <div class="element-icon">⚡</div>
-                            <div class="element-name">閃電 (L)</div>
+                            <div class="element-name">LIGHTNING 閃電 (L)</div>
                             <div class="element-level">
-                                <label>等級:</label>
+                                <label>LVL:</label>
                                 <input type="range" min="1" max="5" value="1" class="level-slider" data-element="L">
                                 <span class="level-display">1</span>
                             </div>
@@ -63,9 +63,9 @@ class ElementSelector {
                         
                         <div class="element-option" data-element="A">
                             <div class="element-icon">🔮</div>
-                            <div class="element-name">奧術 (A)</div>
+                            <div class="element-name">ARCANE 奧術 (A)</div>
                             <div class="element-level">
-                                <label>等級:</label>
+                                <label>LVL:</label>
                                 <input type="range" min="1" max="5" value="1" class="level-slider" data-element="A">
                                 <span class="level-display">1</span>
                             </div>
@@ -74,7 +74,7 @@ class ElementSelector {
                 </div>
                 
                 <div class="spell-preview">
-                    <h4>合成預覽</h4>
+                    <h4><span class="eva-marker">[</span>合成預覽<span class="eva-marker">]</span></h4>
                     <div id="spellPreviewContent">
                         <div class="preview-placeholder">選擇兩種元素查看合成結果</div>
                     </div>

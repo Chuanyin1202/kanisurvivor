@@ -36,8 +36,8 @@ class UIManager {
             'goldDisplay', 'bestTimeDisplay', 'totalKillsDisplay',
             
             // 遊戲中 UI
-            'gameUI', 'healthBar', 'healthText', 'expBar', 'levelText',
-            'gameTimer', 'killCount', 'combo', 'pauseBtn', 'simpleComboDisplay', 'versionDisplay',
+            'gameUI', 'healthBarFill', 'healthValue', 'manaBarFill', 'manaValue',
+            'gameTimer', 'simpleComboDisplay', 'simpleComboValue', 'versionDisplay',
             
             // 選單和對話框
             'pauseMenu', 'resumeBtn', 'restartBtn', 'mainMenuBtn',

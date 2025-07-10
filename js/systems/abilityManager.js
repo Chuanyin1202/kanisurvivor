@@ -404,38 +404,69 @@ function initializeAbilityManager() {
         
         // 檢查依賴
         if (typeof AbilityDatabase === 'undefined') {
+            console.error('❌ AbilityDatabase 未定義');
             throw new Error('AbilityDatabase 未加載');
         }
         
         if (typeof AbilityRarityWeights === 'undefined') {
+            console.error('❌ AbilityRarityWeights 未定義');
             throw new Error('AbilityRarityWeights 未加載');
         }
+        
+        console.log('✓ 依賴檢查通過');
+        console.log('📊 AbilityDatabase 包含', Object.keys(AbilityDatabase).length, '個類別');
+        console.log('⚖️ AbilityRarityWeights:', Object.keys(AbilityRarityWeights));
         
         const manager = new AbilityManager();
         window.abilityManager = manager;
         
         console.log('✅ AbilityManager 初始化成功');
+        console.log('🎯 AbilityManager 可用方法:', Object.getOwnPropertyNames(Object.getPrototypeOf(manager)));
+        
         return manager;
         
     } catch (error) {
         console.error('❌ AbilityManager 初始化失敗:', error);
+        console.error('📊 可用全域變數:', Object.keys(window).filter(k => k.includes('Ability')));
         
         // 創建一個最小的備用版本
         window.abilityManager = {
-            generateAbilityChoices: () => [],
-            selectAbility: () => false,
-            reset: () => {},
-            checkAbilityTrigger: () => []
+            generateAbilityChoices: () => {
+                console.warn('⚠️ 使用備用 AbilityManager - generateAbilityChoices');
+                return [];
+            },
+            selectAbility: () => {
+                console.warn('⚠️ 使用備用 AbilityManager - selectAbility');
+                return false;
+            },
+            reset: () => {
+                console.warn('⚠️ 使用備用 AbilityManager - reset');
+            },
+            checkAbilityTrigger: () => {
+                console.warn('⚠️ 使用備用 AbilityManager - checkAbilityTrigger');
+                return [];
+            }
         };
         
+        console.log('🔄 已創建備用 AbilityManager');
         return null;
     }
 }
 
 // 立即嘗試初始化
-setTimeout(() => {
+document.addEventListener('DOMContentLoaded', () => {
     initializeAbilityManager();
-}, 100); // 延遲100ms確保其他腳本已加載
+});
+
+// 如果 DOM 已經載入，立即執行
+if (document.readyState === 'loading') {
+    // DOM 還在載入中，等待 DOMContentLoaded
+} else {
+    // DOM 已經載入完成，立即執行
+    setTimeout(() => {
+        initializeAbilityManager();
+    }, 50); // 短暫延遲確保其他腳本已載入
+}
 
 // 導出初始化函數供其他地方調用
 window.initializeAbilityManager = initializeAbilityManager;
