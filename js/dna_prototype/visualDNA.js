@@ -104,7 +104,7 @@ class VisualDNA {
     generateFromChaos() {
         const seed = this.entropy.chaosSeed;
         
-        return {
+        const genes = {
             // 元素主題基因組 (新增)
             elementalGenes: this.generateElementalGenes(seed),
             
@@ -138,6 +138,21 @@ class VisualDNA {
             // 混沌基因
             chaosGenes: this.generateChaosGenes(seed * 1.618)
         };
+        
+        // 性能保護：防止 distortion 和 quantumEffects 同時啟用
+        if (genes.fxGenes.hasDistortion && genes.chaosGenes.hasQuantumEffects) {
+            console.log('⚠️ 檢測到性能問題組合：Distortion + QuantumEffects，自動關閉其中一個');
+            // 隨機選擇關閉其中一個
+            if (Math.random() > 0.5) {
+                genes.fxGenes.hasDistortion = false;
+                console.log('  → 已關閉 Distortion 效果');
+            } else {
+                genes.chaosGenes.hasQuantumEffects = false;
+                console.log('  → 已關閉 QuantumEffects 效果');
+            }
+        }
+        
+        return genes;
     }
     
     // 生成顏色基因
@@ -585,6 +600,19 @@ class VisualDNA {
         // 應用突變
         this.applyMutations(mutatedDNA, mutationRate);
         
+        // 性能保護：防止 distortion 和 quantumEffects 同時啟用
+        if (mutatedDNA.genes.fxGenes?.hasDistortion && mutatedDNA.genes.chaosGenes?.hasQuantumEffects) {
+            console.log('⚠️ 突變後檢測到性能問題組合：Distortion + QuantumEffects，自動關閉其中一個');
+            // 隨機選擇關閉其中一個
+            if (Math.random() > 0.5) {
+                mutatedDNA.genes.fxGenes.hasDistortion = false;
+                console.log('  → 已關閉 Distortion 效果');
+            } else {
+                mutatedDNA.genes.chaosGenes.hasQuantumEffects = false;
+                console.log('  → 已關閉 QuantumEffects 效果');
+            }
+        }
+        
         // 簡化突變歷史 - 只保留最後 3 筆記錄
         const recentHistory = this.mutationHistory.slice(-2); // 只保留最近2筆
         mutatedDNA.mutationHistory = [...recentHistory, {
@@ -684,6 +712,19 @@ class VisualDNA {
                 }
             });
         });
+        
+        // 性能保護：防止 distortion 和 quantumEffects 同時啟用
+        if (childDNA.genes.fxGenes?.hasDistortion && childDNA.genes.chaosGenes?.hasQuantumEffects) {
+            console.log('⚠️ 交配後檢測到性能問題組合：Distortion + QuantumEffects，自動關閉其中一個');
+            // 隨機選擇關閉其中一個
+            if (Math.random() > 0.5) {
+                childDNA.genes.fxGenes.hasDistortion = false;
+                console.log('  → 已關閉 Distortion 效果');
+            } else {
+                childDNA.genes.chaosGenes.hasQuantumEffects = false;
+                console.log('  → 已關閉 QuantumEffects 效果');
+            }
+        }
         
         // 簡化雜交歷史 - 只保留當前交配記錄，不繼承父本歷史
         childDNA.mutationHistory = [{
