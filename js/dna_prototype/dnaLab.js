@@ -1348,7 +1348,6 @@ DNALab.prototype.convertImportedDataToDNA = function(dna, spellData) {
     
     console.log('🔄 DNA 轉換完成:', dna.getSequenceString());
 };
-});
 
 // 頁面卸載前清理
 window.addEventListener('beforeunload', () => {
