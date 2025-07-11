@@ -141,7 +141,7 @@ class VisualDNA {
         
         // 性能保護：防止 distortion 和 quantumEffects 同時啟用
         if (genes.fxGenes.hasDistortion && genes.chaosGenes.hasQuantumEffects) {
-            console.log('⚠️ 檢測到性能問題組合：Distortion + QuantumEffects，自動關閉其中一個');
+            console.log('⚠️ [generateFromChaos] 檢測到性能問題組合：Distortion + QuantumEffects，自動關閉其中一個');
             // 隨機選擇關閉其中一個
             if (Math.random() > 0.5) {
                 genes.fxGenes.hasDistortion = false;
@@ -150,6 +150,8 @@ class VisualDNA {
                 genes.chaosGenes.hasQuantumEffects = false;
                 console.log('  → 已關閉 QuantumEffects 效果');
             }
+        } else {
+            console.log('✅ [generateFromChaos] 性能檢查通過 - Distortion:', genes.fxGenes.hasDistortion, 'QuantumEffects:', genes.chaosGenes.hasQuantumEffects);
         }
         
         return genes;

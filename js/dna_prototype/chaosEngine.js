@@ -392,6 +392,14 @@ class ChaosEngine {
             centerY = this.canvas.height / 2;
         }
         
+        // 性能保護：檢查是否同時有 distortion 和 quantumEffects
+        const hasQuantum = this.currentDNA?.genes?.chaosGenes?.hasQuantumEffects;
+        const shouldSkipDistortion = fxGenes.hasDistortion && hasQuantum;
+        
+        if (shouldSkipDistortion) {
+            console.warn('⚠️ 渲染層檢測到性能問題組合，跳過 Distortion 渲染');
+        }
+        
         // 光暈效果
         if (fxGenes.hasGlow) {
             const glowColor = this.getCurrentColor(this.currentDNA.genes.colorGenes, time);
@@ -403,8 +411,8 @@ class ChaosEngine {
             this.applyBlurEffect(ctx, fxGenes.blurAmount, time);
         }
         
-        // 失真效果
-        if (fxGenes.hasDistortion) {
+        // 失真效果（性能保護：與量子效果互斥）
+        if (fxGenes.hasDistortion && !shouldSkipDistortion) {
             this.applyEnhancedDistortion(ctx, fxGenes.distortionType, fxGenes.distortionIntensity, time);
         }
         

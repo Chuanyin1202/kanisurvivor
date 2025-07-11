@@ -872,10 +872,11 @@ class DNALab {
                     dna.genes.elementalGenes.dominantElement = 'shadow';
                     break;
                 case 'quantum':
-                    // 強化量子效果
+                    // 強化量子效果（性能優化：不同時啟用 distortion）
                     dna.genes.chaosGenes.hasQuantumEffects = true;
                     dna.genes.chaosGenes.quantumCoherence = Math.min(1, level * 0.5);
-                    dna.genes.fxGenes.hasDistortion = true;
+                    // 移除 distortion 避免性能問題
+                    // dna.genes.fxGenes.hasDistortion = true;
                     dna.genes.elementalGenes.dominantElement = 'holy';
                     break;
             }
