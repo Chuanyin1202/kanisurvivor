@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧬 視覺DNA實驗室 - CHAOS ENGINE</title>
+    <link rel="stylesheet" href="styles/dna_lab.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=M+PLUS+1+Code:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="dnaLab" class="experimental-interface">
+        <!-- 實驗室標題 -->
+        <header class="lab-header">
+            <h1 class="lab-title">
+                <span class="dna-icon">🧬</span>
+                <span class="title-text">視覺DNA實驗室</span>
+                <span class="chaos-badge">CHAOS ENGINE</span>
+            </h1>
+            
+            <!-- 混沌等級顯示 -->
+            <div class="chaos-meter-container">
+                <span class="meter-label">混沌等級:</span>
+                <div class="chaos-meter">
+                    <div id="chaosLevel" class="chaos-bar"></div>
+                    <span id="chaosValue" class="chaos-value">0%</span>
+                </div>
+            </div>
+            
+            <!-- 狀態指示器 -->
+            <div class="status-indicators">
+                <div class="status-item">
+                    <span class="status-label">實驗次數:</span>
+                    <span id="experimentCount" class="status-value">0</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">驚喜發現:</span>
+                    <span id="surpriseCount" class="status-value">0</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">DNA變異:</span>
+                    <span id="mutationCount" class="status-value">0</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="lab-workspace">
+            <!-- 左側控制面板 -->
+            <div class="control-panel">
+                <h3 class="panel-title">🎛️ 實驗控制台</h3>
+                
+                <!-- 主要實驗按鈕 (更緊湊的2x3佈局) -->
+                <div class="chaos-controls compact-grid">
+                    <button id="randomChaos" class="chaos-btn primary">
+                        <span class="btn-icon">🌀</span>
+                        <span class="btn-text">隨機</span>
+                    </button>
+                    
+                    <button id="evolveBtn" class="chaos-btn secondary">
+                        <span class="btn-icon">🧬</span>
+                        <span class="btn-text">進化</span>
+                    </button>
+                    
+                    <button id="crossoverBtn" class="chaos-btn secondary">
+                        <span class="btn-icon">💏</span>
+                        <span class="btn-text">交配</span>
+                    </button>
+                    
+                    <button id="surpriseBtn" class="chaos-btn special">
+                        <span class="btn-icon">❓</span>
+                        <span class="btn-text">驚喜</span>
+                    </button>
+                    
+                    <button id="lifecycleBtn" class="chaos-btn lifecycle">
+                        <span class="btn-icon">🚀</span>
+                        <span class="btn-text">週期</span>
+                    </button>
+                    
+                </div>
+                
+                <!-- 隱藏的實驗控制按鈕 -->
+                <div class="experiment-controls" style="display: none;">
+                    <button id="pauseBtn" class="control-btn">⏸️ 暫停</button>
+                    <button id="resumeBtn" class="control-btn">▶️ 繼續</button>
+                    <button id="stopBtn" class="control-btn">⏹️ 停止</button>
+                    <button id="historyBtn" class="control-btn">📚 歷史</button>
+                </div>
+                
+                <!-- 元素注入器 (緊湊3x2佈局) -->
+                <div class="element-mixer">
+                    <h4 class="mixer-title">⚗️ 元素注入器</h4>
+                    <div class="element-grid compact">
+                        <div class="element-slot" data-element="fire">
+                            <div class="element-icon">🔥</div>
+                            <div class="element-name">火焰</div>
+                        </div>
+                        <div class="element-slot" data-element="ice">
+                            <div class="element-icon">❄️</div>
+                            <div class="element-name">冰霜</div>
+                        </div>
+                        <div class="element-slot" data-element="lightning">
+                            <div class="element-icon">⚡</div>
+                            <div class="element-name">閃電</div>
+                        </div>
+                        <div class="element-slot" data-element="chaos">
+                            <div class="element-icon">🌀</div>
+                            <div class="element-name">混沌</div>
+                        </div>
+                        <div class="element-slot" data-element="void">
+                            <div class="element-icon">⚫</div>
+                            <div class="element-name">虛無</div>
+                        </div>
+                        <div class="element-slot" data-element="quantum">
+                            <div class="element-icon">🌈</div>
+                            <div class="element-name">量子</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 高級設定 (縮略顯示) -->
+                <div class="advanced-settings compact">
+                    <h4 class="settings-title">⚙️ 參數調節</h4>
+                    <div class="settings-grid">
+                        <div class="setting-compact">
+                            <label for="complexitySlider">複雜度</label>
+                            <input type="range" id="complexitySlider" min="1" max="10" value="5">
+                            <span id="complexityValue">5</span>
+                        </div>
+                        <div class="setting-compact">
+                            <label for="chaosSlider">混沌度</label>
+                            <input type="range" id="chaosSlider" min="0" max="100" value="50">
+                            <span id="chaosSettingDisplay">50%</span>
+                        </div>
+                        <div class="setting-compact">
+                            <label for="mutationRate">突變率</label>
+                            <input type="range" id="mutationRate" min="0" max="100" value="30">
+                            <span id="mutationValue">30%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 中央實驗區域 -->
+            <div class="experiment-area">
+                <div class="canvas-container">
+                    <canvas id="chaosCanvas" width="400" height="300"></canvas>
+                    
+                    <!-- 實驗狀態覆蓋層 -->
+                    <div id="experimentOverlay" class="experiment-overlay hidden">
+                        <div class="overlay-content">
+                            <div class="loading-spinner"></div>
+                            <p class="overlay-text">正在生成視覺DNA...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 實驗信息顯示 -->
+                <div class="experiment-info">
+                    <div class="info-section">
+                        <h4>🧬 當前DNA序列</h4>
+                        <div id="currentDNA" class="dna-display">
+                            <div class="dna-placeholder">尚未生成DNA序列</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h4>⚡ 即時數據</h4>
+                        <div id="realtimeData" class="realtime-data">
+                            <div class="data-item">
+                                <span class="data-label">粒子數量:</span>
+                                <span id="particleCount" class="data-value">0</span>
+                            </div>
+                            <div class="data-item">
+                                <span class="data-label">渲染FPS:</span>
+                                <span id="renderFPS" class="data-value">--</span>
+                            </div>
+                            <div class="data-item">
+                                <span class="data-label">複雜度:</span>
+                                <span id="currentComplexity" class="data-value">--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 中央操作按鈕區域 -->
+                <div class="center-actions">
+                    <button id="exportData" class="center-btn">📤 導出法術</button>
+                    <button id="resetLab" class="center-btn">🔄 重置實驗室</button>
+                </div>
+            </div>
+
+            <!-- 右側反饋和記錄面板 -->
+            <div class="feedback-panel">
+                <h3 class="panel-title">📊 實驗記錄</h3>
+                
+                <!-- 緊湊的驚喜發現 -->
+                <div class="feedback-section compact">
+                    <h4>🎉 驚喜發現</h4>
+                    <div id="surpriseLog" class="surprise-log compact">
+                        <div class="log-placeholder">尚無驚喜發現...</div>
+                    </div>
+                </div>
+                
+                <!-- 緊湊的實驗歷史 -->
+                <div class="feedback-section compact">
+                    <h4>📋 實驗歷史</h4>
+                    <div id="experimentHistory" class="experiment-history compact">
+                        <div class="history-placeholder">開始你的第一個實驗！</div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript 模組 -->
+    <script src="js/dna_prototype/visualDNA.js"></script>
+    <script src="js/dna_prototype/particleRenderer.js"></script>
+    <script src="js/dna_prototype/chaosEngine.js"></script>
+    <script src="js/dna_prototype/surpriseLogger.js"></script>
+    <script src="js/dna_prototype/dnaLab.js"></script>
+</body>
+</html>
