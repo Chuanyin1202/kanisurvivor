@@ -186,7 +186,30 @@
                 <!-- 中央操作按鈕區域 -->
                 <div class="center-actions">
                     <button id="exportData" class="center-btn">📤 導出法術</button>
+                    <button id="importData" class="center-btn">📥 導入法術</button>
                     <button id="resetLab" class="center-btn">🔄 重置實驗室</button>
+                </div>
+                
+                <!-- 隱藏的檔案輸入元素 -->
+                <input type="file" id="fileInput" accept=".json" style="display: none;">
+                
+                <!-- 導入對話框 -->
+                <div id="importDialog" class="import-dialog hidden">
+                    <div class="dialog-content">
+                        <h3>📥 導入法術數據</h3>
+                        <div class="import-options">
+                            <button id="importFile" class="import-btn">📁 選擇檔案</button>
+                            <button id="importPaste" class="import-btn">📋 貼上JSON</button>
+                        </div>
+                        <div id="pasteArea" class="paste-area hidden">
+                            <textarea id="jsonTextarea" placeholder="請貼上法術的JSON數據..."></textarea>
+                            <div class="paste-actions">
+                                <button id="confirmPaste" class="confirm-btn">✅ 確認導入</button>
+                                <button id="cancelPaste" class="cancel-btn">❌ 取消</button>
+                            </div>
+                        </div>
+                        <button id="closeImport" class="close-btn">✕</button>
+                    </div>
                 </div>
             </div>
 

@@ -252,6 +252,35 @@ class DNALab {
             this.handleSurpriseDiscovered(e.detail);
         });
         
+        // 導入功能事件監聽
+        document.getElementById('importData')?.addEventListener('click', () => {
+            this.showImportDialog();
+        });
+        
+        document.getElementById('importFile')?.addEventListener('click', () => {
+            document.getElementById('fileInput').click();
+        });
+        
+        document.getElementById('importPaste')?.addEventListener('click', () => {
+            this.showPasteArea();
+        });
+        
+        document.getElementById('confirmPaste')?.addEventListener('click', () => {
+            this.confirmPasteImport();
+        });
+        
+        document.getElementById('cancelPaste')?.addEventListener('click', () => {
+            this.hidePasteArea();
+        });
+        
+        document.getElementById('closeImport')?.addEventListener('click', () => {
+            this.hideImportDialog();
+        });
+        
+        document.getElementById('fileInput')?.addEventListener('change', (e) => {
+            this.handleFileImport(e);
+        });
+        
         console.log('⚙️ UI事件設置完成');
     }
     
@@ -1188,6 +1217,137 @@ document.addEventListener('DOMContentLoaded', async () => {
     await window.dnaLab.init();
     
     console.log('✅ DNA實驗室已就緒');
+});
+
+// 導入功能
+DNALab.prototype.showImportDialog = function() {
+    document.getElementById('importDialog').classList.remove('hidden');
+};
+
+DNALab.prototype.hideImportDialog = function() {
+    document.getElementById('importDialog').classList.add('hidden');
+    this.hidePasteArea();
+};
+
+DNALab.prototype.showPasteArea = function() {
+    document.getElementById('pasteArea').classList.remove('hidden');
+};
+
+DNALab.prototype.hidePasteArea = function() {
+    document.getElementById('pasteArea').classList.add('hidden');
+    document.getElementById('jsonTextarea').value = '';
+};
+
+DNALab.prototype.handleFileImport = function(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const jsonData = JSON.parse(e.target.result);
+            this.importSpellData(jsonData);
+            this.hideImportDialog();
+        } catch (error) {
+            this.showMessage('❌ 檔案格式錯誤：' + error.message);
+        }
+    };
+    reader.readAsText(file);
+};
+
+DNALab.prototype.confirmPasteImport = function() {
+    const jsonText = document.getElementById('jsonTextarea').value.trim();
+    if (!jsonText) {
+        this.showMessage('❌ 請輸入 JSON 數據');
+        return;
+    }
+    
+    try {
+        const jsonData = JSON.parse(jsonText);
+        this.importSpellData(jsonData);
+        this.hideImportDialog();
+    } catch (error) {
+        this.showMessage('❌ JSON 格式錯誤：' + error.message);
+    }
+};
+
+DNALab.prototype.importSpellData = function(spellData) {
+    try {
+        console.log('📥 開始導入法術數據:', spellData);
+        
+        // 驗證數據格式
+        if (!spellData.dnaComponents) {
+            throw new Error('缺少 dnaComponents 數據');
+        }
+        
+        // 創建新的 DNA 物件
+        const dna = new VisualDNA();
+        
+        // 將導入的數據轉換為內部 DNA 格式
+        this.convertImportedDataToDNA(dna, spellData);
+        
+        // 開始實驗
+        this.startExperiment(dna, 'imported');
+        
+        this.showMessage('✅ 法術導入成功！');
+        console.log('✅ 法術導入完成');
+        
+    } catch (error) {
+        console.error('❌ 導入失敗:', error);
+        this.showMessage('❌ 導入失敗：' + error.message);
+    }
+};
+
+DNALab.prototype.convertImportedDataToDNA = function(dna, spellData) {
+    const components = spellData.dnaComponents;
+    
+    // 重新生成基因結構
+    dna.genes = dna.generateFromChaos();
+    
+    // 設置基因數據
+    if (components.element?.colors) {
+        dna.genes.colorGenes.primary = components.element.colors.primary;
+        dna.genes.colorGenes.secondary = components.element.colors.secondary;
+        dna.genes.colorGenes.accent = components.element.colors.accent;
+    }
+    
+    if (components.element) {
+        dna.genes.elementalGenes.primaryElement = components.element.primary;
+        dna.genes.elementalGenes.secondaryElement = components.element.secondary;
+        dna.genes.elementalGenes.intensity = components.element.intensity;
+        dna.genes.elementalGenes.purity = components.element.purity;
+    }
+    
+    if (components.effects) {
+        dna.genes.fxGenes.hasGlow = components.effects.glow?.enabled || false;
+        dna.genes.fxGenes.glowIntensity = components.effects.glow?.intensity || 0;
+        dna.genes.fxGenes.hasBlur = components.effects.blur?.enabled || false;
+        dna.genes.fxGenes.blurAmount = components.effects.blur?.amount || 0;
+        dna.genes.fxGenes.hasDistortion = components.effects.distortion?.enabled || false;
+        dna.genes.fxGenes.distortionIntensity = components.effects.distortion?.amount || 0;
+    }
+    
+    if (components.effects?.chaos) {
+        dna.genes.chaosGenes.chaosLevel = components.effects.chaos.level || 0;
+        dna.genes.chaosGenes.unpredictability = components.effects.chaos.unpredictability || 0;
+        dna.genes.chaosGenes.hasQuantumEffects = components.effects.chaos.hasQuantumEffects || false;
+    }
+    
+    if (components.shape) {
+        dna.genes.shapeGenes.complexity = components.shape.complexity || 1;
+        dna.genes.shapeGenes.symmetry = components.shape.symmetry || 1;
+        dna.genes.shapeGenes.vertices = components.shape.vertices || 6;
+        dna.genes.shapeGenes.morphing = components.shape.morphing || false;
+    }
+    
+    // 性能保護：確保不會有問題組合
+    if (dna.genes.fxGenes.hasDistortion && dna.genes.chaosGenes.hasQuantumEffects) {
+        console.log('⚠️ [導入] 檢測到性能問題組合，自動關閉 Distortion');
+        dna.genes.fxGenes.hasDistortion = false;
+    }
+    
+    console.log('🔄 DNA 轉換完成:', dna.getSequenceString());
+};
 });
 
 // 頁面卸載前清理
