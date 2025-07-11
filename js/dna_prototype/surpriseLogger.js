@@ -766,7 +766,9 @@ class SurpriseLogger {
             },
             technicalData: {
                 rawDNA: currentDNA.getSequenceString ? currentDNA.getSequenceString() : 'N/A',
-                timestamp: Date.now()
+                timestamp: Date.now(),
+                // 完整的基因資料用於導入還原
+                fullGenes: currentDNA.genes
             }
         };
         

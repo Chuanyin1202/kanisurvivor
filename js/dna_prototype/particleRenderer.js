@@ -52,6 +52,38 @@ class ParticleRenderer {
         return this.precomputedCos[index] || 0;
     }
     
+    // 安全創建徑向漸變的輔助函數
+    createSafeRadialGradient(ctx, x0, y0, r0, x1, y1, r1) {
+        // 確保所有參數都是有效的數值
+        const safeX0 = isFinite(x0) ? x0 : 0;
+        const safeY0 = isFinite(y0) ? y0 : 0;
+        const safeR0 = isFinite(r0) && r0 >= 0 ? r0 : 0;
+        const safeX1 = isFinite(x1) ? x1 : 0;
+        const safeY1 = isFinite(y1) ? y1 : 0;
+        const safeR1 = isFinite(r1) && r1 > 0 ? r1 : 1;
+        
+        // 只在debug模式下記錄警告，並且節流輸出
+        if ((x0 !== safeX0 || y0 !== safeY0 || r0 !== safeR0 || x1 !== safeX1 || y1 !== safeY1 || r1 !== safeR1) && 
+            window.dnaLab?.settings?.debugMode && 
+            Math.random() < 0.01) { // 只有1%的機率輸出警告
+            console.warn('⚠️ ParticleRenderer createRadialGradient: 修正了無效參數', {
+                original: { x0, y0, r0, x1, y1, r1 },
+                safe: { x0: safeX0, y0: safeY0, r0: safeR0, x1: safeX1, y1: safeY1, r1: safeR1 }
+            });
+        }
+        
+        try {
+            return ctx.createRadialGradient(safeX0, safeY0, safeR0, safeX1, safeY1, safeR1);
+        } catch (error) {
+            // 只在debug模式下記錄錯誤
+            if (window.dnaLab?.settings?.debugMode) {
+                console.error('❌ ParticleRenderer createRadialGradient 失敗:', error);
+            }
+            // 返回一個簡單的線性漸變作為備用
+            return ctx.createLinearGradient(safeX0, safeY0, safeX1, safeY1);
+        }
+    }
+    
     // 創建粒子
     createParticle(x, y, particleGenes) {
         let particle = this.particlePool.pop();
@@ -541,7 +573,7 @@ class ParticleRenderer {
     // 渲染基本粒子
     renderBasicParticle(ctx, particle) {
         // 添加發光效果使粒子更明顯
-        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, particle.size * 2);
+        const gradient = this.createSafeRadialGradient(ctx, 0, 0, 0, 0, 0, particle.size * 2);
         gradient.addColorStop(0, `rgba(${particle.color.r}, ${particle.color.g}, ${particle.color.b}, ${particle.alpha})`);
         gradient.addColorStop(0.5, `rgba(${particle.color.r}, ${particle.color.g}, ${particle.color.b}, ${particle.alpha * 0.5})`);
         gradient.addColorStop(1, `rgba(${particle.color.r}, ${particle.color.g}, ${particle.color.b}, 0)`);
@@ -561,7 +593,7 @@ class ParticleRenderer {
     // 渲染電子粒子
     renderElectricParticle(ctx, particle) {
         // 電子光環
-        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, particle.size * 2);
+        const gradient = this.createSafeRadialGradient(ctx, 0, 0, 0, 0, 0, particle.size * 2);
         gradient.addColorStop(0, `rgba(${particle.color.r}, ${particle.color.g}, ${particle.color.b}, 0.8)`);
         gradient.addColorStop(1, `rgba(${particle.color.r}, ${particle.color.g}, ${particle.color.b}, 0)`);
         

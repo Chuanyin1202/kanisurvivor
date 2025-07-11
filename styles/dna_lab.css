@@ -797,10 +797,12 @@ body {
     border: 2px solid var(--border-primary);
     border-radius: 12px;
     padding: 1.5rem;
-    height: fit-content;
+    min-height: 600px;
     position: sticky;
     top: 120px;
     box-shadow: var(--shadow-secondary);
+    display: flex;
+    flex-direction: column;
 }
 
 .feedback-section {
@@ -809,6 +811,9 @@ body {
 
 .feedback-section:last-child {
     margin-bottom: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .feedback-section h4 {
@@ -1014,7 +1019,7 @@ body {
 /* 日誌區域 */
 .surprise-log,
 .experiment-history {
-    max-height: 200px;
+    max-height: 280px;
     overflow-y: auto;
     font-family: var(--font-code);
     font-size: 0.8rem;
@@ -1297,8 +1302,15 @@ body {
 
 .surprise-log.compact,
 .experiment-history.compact {
-    max-height: 150px;
+    max-height: 280px;
     font-size: 0.75rem;
+}
+
+/* 實驗歷史區域自動填充剩餘空間 */
+.feedback-section:last-child .experiment-history.compact {
+    max-height: none;
+    height: 100%;
+    flex: 1;
 }
 
 .surprise-log.compact .surprise-item,

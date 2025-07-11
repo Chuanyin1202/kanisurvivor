@@ -281,6 +281,11 @@ class DNALab {
             this.handleFileImport(e);
         });
         
+        // 性能優化按鈕
+        document.getElementById('optimizePerformance')?.addEventListener('click', () => {
+            this.optimizeCurrentSpellPerformance();
+        });
+        
         console.log('⚙️ UI事件設置完成');
     }
     
@@ -503,6 +508,9 @@ class DNALab {
             clearTimeout(this.lifecycleTimer);
             this.lifecycleTimer = null;
         }
+        
+        // 強制資源清理以防止記憶體洩漏
+        this.forceResourceCleanup();
         
         // 重置所有狀態
         this.isExperimentRunning = false;
@@ -1106,23 +1114,12 @@ class DNALab {
     
     // 顯示歡迎信息
     showWelcomeMessage() {
-        this.showMessage('歡迎來到視覺DNA實驗室！\n按空白鍵開始你的第一個實驗', 'info');
+        this.showMessage('歡迎來到視覺DNA實驗室！\n點擊「隨機」按鈕開始你的第一個實驗', 'info');
     }
     
-    // 顯示消息
-    showMessage(message, type = 'info') {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `lab-message ${type}`;
-        messageDiv.textContent = message;
-        
-        document.body.appendChild(messageDiv);
-        
-        setTimeout(() => {
-            messageDiv.remove();
-        }, 3000);
-    }
+    // 重複的 showMessage 函數已在上方定義，移除此處的重複定義
     
-    // 顯示錯誤
+    // 顯示錯誤（保留這個函數）
     showError(message) {
         this.showMessage(message, 'error');
     }
@@ -1286,8 +1283,8 @@ DNALab.prototype.importSpellData = function(spellData) {
         // 將導入的數據轉換為內部 DNA 格式
         this.convertImportedDataToDNA(dna, spellData);
         
-        // 開始實驗
-        this.startExperiment(dna, 'imported');
+        // 使用專用的導入方法（不保存到歷史）
+        this.startImportedSpell(dna);
         
         this.showMessage('✅ 法術導入成功！');
         console.log('✅ 法術導入完成');
@@ -1299,46 +1296,20 @@ DNALab.prototype.importSpellData = function(spellData) {
 };
 
 DNALab.prototype.convertImportedDataToDNA = function(dna, spellData) {
-    const components = spellData.dnaComponents;
-    
-    // 重新生成基因結構
-    dna.genes = dna.generateFromChaos();
-    
-    // 設置基因數據
-    if (components.element?.colors) {
-        dna.genes.colorGenes.primary = components.element.colors.primary;
-        dna.genes.colorGenes.secondary = components.element.colors.secondary;
-        dna.genes.colorGenes.accent = components.element.colors.accent;
+    // 檢查是否包含完整的基因資料
+    if (!spellData.technicalData?.fullGenes) {
+        throw new Error('無效的法術數據格式：缺少完整的基因資料。請使用新版本導出的法術數據。');
     }
     
-    if (components.element) {
-        dna.genes.elementalGenes.primaryElement = components.element.primary;
-        dna.genes.elementalGenes.secondaryElement = components.element.secondary;
-        dna.genes.elementalGenes.intensity = components.element.intensity;
-        dna.genes.elementalGenes.purity = components.element.purity;
-    }
+    console.log('🔄 使用完整基因資料還原');
     
-    if (components.effects) {
-        dna.genes.fxGenes.hasGlow = components.effects.glow?.enabled || false;
-        dna.genes.fxGenes.glowIntensity = components.effects.glow?.intensity || 0;
-        dna.genes.fxGenes.hasBlur = components.effects.blur?.enabled || false;
-        dna.genes.fxGenes.blurAmount = components.effects.blur?.amount || 0;
-        dna.genes.fxGenes.hasDistortion = components.effects.distortion?.enabled || false;
-        dna.genes.fxGenes.distortionIntensity = components.effects.distortion?.amount || 0;
-    }
+    // 深度複製完整的基因資料
+    dna.genes = JSON.parse(JSON.stringify(spellData.technicalData.fullGenes));
     
-    if (components.effects?.chaos) {
-        dna.genes.chaosGenes.chaosLevel = components.effects.chaos.level || 0;
-        dna.genes.chaosGenes.unpredictability = components.effects.chaos.unpredictability || 0;
-        dna.genes.chaosGenes.hasQuantumEffects = components.effects.chaos.hasQuantumEffects || false;
-    }
-    
-    if (components.shape) {
-        dna.genes.shapeGenes.complexity = components.shape.complexity || 1;
-        dna.genes.shapeGenes.symmetry = components.shape.symmetry || 1;
-        dna.genes.shapeGenes.vertices = components.shape.vertices || 6;
-        dna.genes.shapeGenes.morphing = components.shape.morphing || false;
-    }
+    // 設置DNA的其他屬性
+    dna.generation = spellData.gameplayData?.generation || 0;
+    dna.qualityScore = spellData.gameplayData?.qualityScore || 0;
+    dna.isUsable = true;
     
     // 性能保護：確保不會有問題組合
     if (dna.genes.fxGenes.hasDistortion && dna.genes.chaosGenes.hasQuantumEffects) {
@@ -1346,7 +1317,134 @@ DNALab.prototype.convertImportedDataToDNA = function(dna, spellData) {
         dna.genes.fxGenes.hasDistortion = false;
     }
     
+    // 性能保護：限制形狀複雜度
+    if (dna.genes.shapeGenes?.complexity > 5) {
+        console.log(`⚠️ [導入] 檢測到過高的形狀複雜度 (${dna.genes.shapeGenes.complexity})，自動調整為 5 以保護性能`);
+        dna.genes.shapeGenes.complexity = 5;
+    }
+    
     console.log('🔄 DNA 轉換完成:', dna.getSequenceString());
+    
+    // 顯示性能提示
+    if (dna.genes.shapeGenes?.complexity > 4) {
+        console.warn(`⚠️ 性能提示：當前形狀複雜度為 ${dna.genes.shapeGenes.complexity}，可能影響渲染性能`);
+    }
+};
+
+// 性能優化功能
+DNALab.prototype.optimizeCurrentSpellPerformance = function() {
+    if (!this.currentDNA) {
+        this.showMessage('⚠️ 請先進行一個實驗再優化性能');
+        return;
+    }
+    
+    let optimized = false;
+    const originalComplexity = this.currentDNA.genes.shapeGenes?.complexity;
+    
+    // 優化形狀複雜度
+    if (this.currentDNA.genes.shapeGenes?.complexity > 5) {
+        this.currentDNA.genes.shapeGenes.complexity = 5;
+        optimized = true;
+        console.log(`⚡ 形狀複雜度已從 ${originalComplexity} 優化為 5`);
+    }
+    
+    // 優化其他性能殺手參數
+    if (this.currentDNA.genes.chaosGenes?.hasQuantumEffects) {
+        this.currentDNA.genes.chaosGenes.hasQuantumEffects = false;
+        optimized = true;
+        console.log('⚡ 已關閉量子效果');
+    }
+    
+    if (this.currentDNA.genes.fxGenes?.hasDistortion) {
+        this.currentDNA.genes.fxGenes.hasDistortion = false;
+        optimized = true;
+        console.log('⚡ 已關閉失真效果');
+    }
+    
+    if (optimized) {
+        // 重新開始渲染
+        this.chaosEngine.stopRendering();
+        this.chaosEngine.startRendering(this.currentDNA);
+        
+        this.showMessage('⚡ 性能優化完成！已調整性能殺手參數');
+    } else {
+        this.showMessage('✅ 當前法術性能已經優化，無需調整');
+    }
+};
+
+// 顯示消息的輔助函數
+DNALab.prototype.showMessage = function(message, type = 'info') {
+    console.log('💬', message);
+    
+    // 創建消息元素
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `lab-message ${type}`;
+    messageDiv.textContent = message;
+    
+    // 添加到頁面
+    document.body.appendChild(messageDiv);
+    
+    // 3秒後自動移除
+    setTimeout(() => {
+        if (messageDiv.parentNode) {
+            messageDiv.remove();
+        }
+    }, 3000);
+};
+
+// 顯示錯誤消息
+DNALab.prototype.showError = function(message) {
+    this.showMessage(message, 'error');
+};
+
+// 強制資源清理方法
+DNALab.prototype.forceResourceCleanup = function() {
+    // 清理對粒子系統的引用
+    if (this.particleRenderer) {
+        this.particleRenderer.clear();
+    }
+    
+    // 清理對混沌引擎的引用
+    if (this.chaosEngine) {
+        this.chaosEngine.visualElements = [];
+    }
+    
+    // 清理當前實驗引用
+    this.currentExperiment = null;
+    
+    // 強制垃圾回收
+    if (typeof window !== 'undefined' && window.gc) {
+        window.gc();
+    }
+    
+    console.log('🗑️ 強制資源清理完成');
+};
+
+// 導入法術方法（不保存到歷史）
+DNALab.prototype.startImportedSpell = function(dna) {
+    if (!dna) {
+        console.error('❌ 無效的DNA序列');
+        return;
+    }
+    
+    // 停止當前實驗
+    this.stopCurrentExperiment(false);
+    
+    // 設置當前DNA
+    this.currentDNA = dna;
+    
+    // 設置為觀賞模式（不是實驗模式）
+    this.isViewingMode = true;
+    this.isExperimentRunning = false;
+    
+    // 開始渲染
+    this.chaosEngine.startRendering(dna);
+    
+    // 更新顯示
+    this.updateUI();
+    
+    // 不保存到歷史
+    console.log('📺 導入法術開始播放（不保存到歷史）');
 };
 
 // 頁面卸載前清理

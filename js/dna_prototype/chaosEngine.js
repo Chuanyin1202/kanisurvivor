@@ -44,6 +44,11 @@ class ChaosEngine {
             return;
         }
         
+        // 性能檢查：警告高複雜度
+        if (dna.genes?.shapeGenes?.complexity > 5) {
+            console.warn(`⚠️ 性能警告：形狀複雜度為 ${dna.genes.shapeGenes.complexity}，可能導致渲染性能問題！`);
+        }
+        
         this.currentDNA = dna;
         this.isActive = true;
         this.startTime = performance.now();
@@ -57,6 +62,9 @@ class ChaosEngine {
         console.log('🎨 開始渲染DNA:', dna.getSequenceString());
         console.log('📊 視覺元素數量:', this.visualElements.length);
         console.log('🎯 Canvas尺寸:', this.canvas.width, 'x', this.canvas.height);
+        if (dna.genes?.shapeGenes?.complexity) {
+            console.log('🔶 形狀複雜度:', dna.genes.shapeGenes.complexity);
+        }
     }
     
     // 開始生命週期渲染
@@ -83,6 +91,22 @@ class ChaosEngine {
             cancelAnimationFrame(this.animationId);
             this.animationId = null;
         }
+        
+        // 清理所有視覺元素以防止記憶體洩漏
+        this.visualElements = [];
+        
+        // 重置性能統計
+        this.frameCount = 0;
+        this.lastFPSTime = 0;
+        this.currentFPS = 0;
+        
+        // 重置混沌狀態
+        this.chaosState = {
+            time: 0,
+            entropy: 0,
+            complexity: 0,
+            mutationProbability: 0
+        };
         
         // 只有明確要求時才清空畫面
         if (clearCanvas) {
@@ -397,7 +421,9 @@ class ChaosEngine {
         const shouldSkipDistortion = fxGenes.hasDistortion && hasQuantum;
         
         if (shouldSkipDistortion) {
-            console.warn('⚠️ 渲染層檢測到性能問題組合，跳過 Distortion 渲染');
+            if (window.dnaLab?.settings?.debugMode) {
+                console.warn('⚠️ 渲染層檢測到性能問題組合，跳過 Distortion 渲染');
+            }
         }
         
         // 光暈效果
@@ -633,14 +659,51 @@ class ChaosEngine {
         ctx.fill();
     }
     
+    // 安全創建徑向漸變的輔助函數
+    createSafeRadialGradient(ctx, x0, y0, r0, x1, y1, r1) {
+        // 確保所有參數都是有效的數值
+        const safeX0 = isFinite(x0) ? x0 : 0;
+        const safeY0 = isFinite(y0) ? y0 : 0;
+        const safeR0 = isFinite(r0) && r0 >= 0 ? r0 : 0;
+        const safeX1 = isFinite(x1) ? x1 : 0;
+        const safeY1 = isFinite(y1) ? y1 : 0;
+        const safeR1 = isFinite(r1) && r1 > 0 ? r1 : 1;
+        
+        // 只在debug模式下記錄警告，並且節流輸出
+        if ((x0 !== safeX0 || y0 !== safeY0 || r0 !== safeR0 || x1 !== safeX1 || y1 !== safeY1 || r1 !== safeR1) && 
+            window.dnaLab?.settings?.debugMode && 
+            Math.random() < 0.01) { // 只有1%的機率輸出警告
+            console.warn('⚠️ createRadialGradient: 修正了無效參數', {
+                original: { x0, y0, r0, x1, y1, r1 },
+                safe: { x0: safeX0, y0: safeY0, r0: safeR0, x1: safeX1, y1: safeY1, r1: safeR1 }
+            });
+        }
+        
+        try {
+            return ctx.createRadialGradient(safeX0, safeY0, safeR0, safeX1, safeY1, safeR1);
+        } catch (error) {
+            // 只在debug模式下記錄錯誤
+            if (window.dnaLab?.settings?.debugMode) {
+                console.error('❌ createRadialGradient 失敗:', error);
+            }
+            // 返回一個簡單的線性漸變作為備用
+            return ctx.createLinearGradient(safeX0, safeY0, safeX1, safeY1);
+        }
+    }
+    
     // 繪製光暈
     drawGlow(ctx, x, y, radius, color) {
-        const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+        // 確保所有參數都是有效的數值
+        const safeX = isFinite(x) ? x : 0;
+        const safeY = isFinite(y) ? y : 0;
+        const safeRadius = isFinite(radius) && radius > 0 ? radius : 1;
+        
+        const gradient = ctx.createRadialGradient(safeX, safeY, 0, safeX, safeY, safeRadius);
         gradient.addColorStop(0, color);
         gradient.addColorStop(1, 'transparent');
         
         ctx.fillStyle = gradient;
-        ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+        ctx.fillRect(safeX - safeRadius, safeY - safeRadius, safeRadius * 2, safeRadius * 2);
     }
     
     // 應用失真
@@ -1753,16 +1816,30 @@ class ChaosEngine {
         const glowLayers = 3;
         const pulseFactor = 1 + Math.sin(time * 0.003) * 0.3;
         
+        // 確保所有參數都是有效的數值
+        const safeX = isFinite(x) ? x : 0;
+        const safeY = isFinite(y) ? y : 0;
+        const safeRadius = isFinite(radius) && radius > 0 ? radius : 1;
+        const safeTime = isFinite(time) ? time : 0;
+        
         for (let i = 0; i < glowLayers; i++) {
-            const layerRadius = radius * (1 + i * 0.3) * pulseFactor;
+            const layerRadius = safeRadius * (1 + i * 0.3) * pulseFactor;
             const layerAlpha = 0.8 / (i + 1);
             
-            const gradient = ctx.createRadialGradient(x, y, 0, x, y, layerRadius);
+            // 確保 layerRadius 是有效數值
+            if (!isFinite(layerRadius) || layerRadius <= 0) {
+                if (window.dnaLab?.settings?.debugMode && Math.random() < 0.1) {
+                    console.warn('⚠️ 跳過無效的光暈層:', { layerRadius, safeRadius, pulseFactor, i });
+                }
+                continue;
+            }
+            
+            const gradient = ctx.createRadialGradient(safeX, safeY, 0, safeX, safeY, layerRadius);
             gradient.addColorStop(0, color.replace(/[\d\.]+(?=\))/, String(layerAlpha)));
             gradient.addColorStop(1, 'transparent');
             
             ctx.fillStyle = gradient;
-            ctx.fillRect(x - layerRadius, y - layerRadius, layerRadius * 2, layerRadius * 2);
+            ctx.fillRect(safeX - layerRadius, safeY - layerRadius, layerRadius * 2, layerRadius * 2);
         }
     }
     
@@ -1906,16 +1983,30 @@ class ChaosEngine {
     
     // 點光源
     applyPointLight(ctx, x, y, intensity, time) {
-        const lightRadius = 100 * intensity;
-        const lightIntensity = intensity * (1 + Math.sin(time * 0.004) * 0.2);
+        // 確保所有參數都是有效的數值
+        const safeX = isFinite(x) ? x : 0;
+        const safeY = isFinite(y) ? y : 0;
+        const safeIntensity = isFinite(intensity) && intensity > 0 ? intensity : 0.1;
+        const safeTime = isFinite(time) ? time : 0;
         
-        const gradient = ctx.createRadialGradient(x, y, 0, x, y, lightRadius);
+        const lightRadius = 100 * safeIntensity;
+        const lightIntensity = safeIntensity * (1 + Math.sin(safeTime * 0.004) * 0.2);
+        
+        // 確保 lightRadius是有效數值
+        if (!isFinite(lightRadius) || lightRadius <= 0) {
+            if (window.dnaLab?.settings?.debugMode && Math.random() < 0.1) {
+                console.warn('⚠️ 跳過無效的點光源:', { lightRadius, safeIntensity });
+            }
+            return;
+        }
+        
+        const gradient = ctx.createRadialGradient(safeX, safeY, 0, safeX, safeY, lightRadius);
         gradient.addColorStop(0, `rgba(255, 255, 255, ${lightIntensity * 0.5})`);
         gradient.addColorStop(1, 'transparent');
         
         ctx.globalCompositeOperation = 'screen';
         ctx.fillStyle = gradient;
-        ctx.fillRect(x - lightRadius, y - lightRadius, lightRadius * 2, lightRadius * 2);
+        ctx.fillRect(safeX - lightRadius, safeY - lightRadius, lightRadius * 2, lightRadius * 2);
         ctx.globalCompositeOperation = 'source-over';
     }
     
@@ -2163,8 +2254,8 @@ class ChaosEngine {
             const layerRadius = radius * pulsation * (1 + i * 0.3);
             const layerAlpha = intensity * 0.3 / (i + 1);
             
-            const gradient = ctx.createRadialGradient(
-                position.x, position.y, 0,
+            const gradient = this.createSafeRadialGradient(
+                ctx, position.x, position.y, 0,
                 position.x, position.y, layerRadius
             );
             
@@ -2281,8 +2372,8 @@ class ChaosEngine {
         const flameHeight = size * (1 + Math.sin(performance.now() * 0.01) * 0.3);
         
         // 火焰核心
-        const gradient = ctx.createRadialGradient(
-            position.x, position.y, 0,
+        const gradient = this.createSafeRadialGradient(
+            ctx, position.x, position.y, 0,
             position.x, position.y, size
         );
         gradient.addColorStop(0, 'rgba(255, 255, 200, 1)');
@@ -2350,8 +2441,8 @@ class ChaosEngine {
         const coreColor = `rgba(255, 255, 150, ${intensity})`;
         
         // 電場核心
-        const gradient = ctx.createRadialGradient(
-            position.x, position.y, 0,
+        const gradient = this.createSafeRadialGradient(
+            ctx, position.x, position.y, 0,
             position.x, position.y, size
         );
         gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
@@ -2396,8 +2487,8 @@ class ChaosEngine {
         // 暗影核心：虛空效果 + 扭曲
         ctx.globalCompositeOperation = 'multiply';
         
-        const gradient = ctx.createRadialGradient(
-            position.x, position.y, 0,
+        const gradient = this.createSafeRadialGradient(
+            ctx, position.x, position.y, 0,
             position.x, position.y, size
         );
         gradient.addColorStop(0, 'rgba(0, 0, 0, 1)');
@@ -2437,8 +2528,8 @@ class ChaosEngine {
         // 光明核心：聖光效果 + 光線
         ctx.globalCompositeOperation = 'screen';
         
-        const gradient = ctx.createRadialGradient(
-            position.x, position.y, 0,
+        const gradient = this.createSafeRadialGradient(
+            ctx, position.x, position.y, 0,
             position.x, position.y, size
         );
         gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
@@ -2471,8 +2562,8 @@ class ChaosEngine {
     
     renderEnergyCore(ctx, position, size, intensity, stage) {
         // 通用能量核心
-        const gradient = ctx.createRadialGradient(
-            position.x, position.y, 0,
+        const gradient = this.createSafeRadialGradient(
+            ctx, position.x, position.y, 0,
             position.x, position.y, size
         );
         gradient.addColorStop(0, `rgba(255, 255, 255, ${intensity})`);
@@ -2779,8 +2870,8 @@ class ChaosEngine {
         const pulsation = 1 + Math.sin(performance.now() * 0.003 * materialGenes.emissionPulsation) * 0.4;
         const color = materialGenes.emissionColor;
         
-        const gradient = ctx.createRadialGradient(
-            position.x, position.y, 0,
+        const gradient = this.createSafeRadialGradient(
+            ctx, position.x, position.y, 0,
             position.x, position.y, 30 * pulsation
         );
         
@@ -3407,7 +3498,7 @@ class ChaosEngine {
         const pulse = Math.sin(deltaTime * 0.008) * 0.5 + 0.5;
         
         // 內核
-        const gradient = this.ctx.createRadialGradient(x, y, 0, x, y, 25 + pulse * 10);
+        const gradient = this.createSafeRadialGradient(this.ctx, x, y, 0, x, y, 25 + pulse * 10);
         gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
         gradient.addColorStop(0.3, currentColor);
         gradient.addColorStop(1, 'transparent');
@@ -3638,7 +3729,7 @@ class ChaosEngine {
         this.ctx.rotate(rotation);
         
         // 內層核心
-        const gradient = this.ctx.createRadialGradient(0, 0, 0, 0, 0, 30);
+        const gradient = this.createSafeRadialGradient(this.ctx, 0, 0, 0, 0, 0, 30);
         gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
         gradient.addColorStop(0.5, currentColor);
         gradient.addColorStop(1, currentColor.replace(/[\d\.]+(?=\))/, '0.3'));
@@ -3992,7 +4083,7 @@ class ChaosEngine {
             this.ctx.rotate(rotation * (i % 2 === 0 ? 1 : -1));
             
             // 環形漸變
-            const gradient = this.ctx.createRadialGradient(0, 0, radius - 10, 0, 0, radius + 10);
+            const gradient = this.createSafeRadialGradient(this.ctx, 0, 0, radius - 10, 0, 0, radius + 10);
             gradient.addColorStop(0, `rgba(${elementalGenes.primaryColor.r}, ${elementalGenes.primaryColor.g}, ${elementalGenes.primaryColor.b}, 0)`);
             gradient.addColorStop(0.5, `rgba(${elementalGenes.primaryColor.r}, ${elementalGenes.primaryColor.g}, ${elementalGenes.primaryColor.b}, ${alpha})`);
             gradient.addColorStop(1, `rgba(${elementalGenes.primaryColor.r}, ${elementalGenes.primaryColor.g}, ${elementalGenes.primaryColor.b}, 0)`);
@@ -4083,7 +4174,7 @@ class ChaosEngine {
             const outerRadius = barrierRadius + 5;
             
             // 漸變填充
-            const gradient = this.ctx.createRadialGradient(0, 0, innerRadius, 0, 0, outerRadius);
+            const gradient = this.createSafeRadialGradient(this.ctx, 0, 0, innerRadius, 0, 0, outerRadius);
             gradient.addColorStop(0, `rgba(${elementalGenes.primaryColor.r}, ${elementalGenes.primaryColor.g}, ${elementalGenes.primaryColor.b}, 0)`);
             gradient.addColorStop(0.5, `rgba(${elementalGenes.primaryColor.r}, ${elementalGenes.primaryColor.g}, ${elementalGenes.primaryColor.b}, ${strength})`);
             gradient.addColorStop(1, `rgba(${elementalGenes.primaryColor.r}, ${elementalGenes.primaryColor.g}, ${elementalGenes.primaryColor.b}, 0)`);
@@ -4282,7 +4373,7 @@ class ChaosEngine {
         
         // 神聖光環
         const haloRadius = 110;
-        const gradient = this.ctx.createRadialGradient(0, 0, haloRadius - 10, 0, 0, haloRadius + 10);
+        const gradient = this.createSafeRadialGradient(this.ctx, 0, 0, haloRadius - 10, 0, 0, haloRadius + 10);
         gradient.addColorStop(0, 'rgba(255, 255, 200, 0)');
         gradient.addColorStop(0.5, 'rgba(255, 255, 200, 0.4)');
         gradient.addColorStop(1, 'rgba(255, 255, 200, 0)');
@@ -4544,7 +4635,7 @@ class ChaosEngine {
             
             // 火焰效果
             const flameSize = 10 + Math.sin(time * 0.02 + i) * 5;
-            const gradient = this.ctx.createRadialGradient(x, y, 0, x, y, flameSize);
+            const gradient = this.createSafeRadialGradient(this.ctx, x, y, 0, x, y, flameSize);
             gradient.addColorStop(0, 'rgba(255, 100, 0, 0.8)');
             gradient.addColorStop(0.5, 'rgba(255, 150, 0, 0.5)');
             gradient.addColorStop(1, 'rgba(255, 200, 0, 0.1)');

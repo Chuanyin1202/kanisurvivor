@@ -408,7 +408,7 @@ class VisualDNA {
         return {
             coreShape: coreShape,
             coreSize: 30 + ((seed % 50)), // 增加基礎大小從10-40到30-80
-            complexity: 1 + ((seed % 9)),
+            complexity: 1 + ((seed % 4)), // 性能保護：限制複雜度在1-5範圍內
             symmetry: (seed % 8) + 1,
             
             // 變形屬性
@@ -675,6 +675,12 @@ class VisualDNA {
                 variance = Math.abs(oldValue) * 0.6 + 25;
                 newValue = oldValue + (Math.random() - 0.5) * variance;
                 group[geneKey] = newValue;
+            }
+            
+            // 性能保護：限制形狀複雜度
+            if (geneKey === 'complexity' && group[geneKey] > 5) {
+                console.log(`⚠️ [突變] 形狀複雜度過高 (${group[geneKey]})，自動調整為 5`);
+                group[geneKey] = 5;
             }
         } else if (typeof oldValue === 'boolean') {
             // 布爾突變 - 增加變化機率
